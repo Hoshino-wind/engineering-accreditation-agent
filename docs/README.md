@@ -8,6 +8,7 @@
 4. [数据、评价与 AI 架构](architecture/data-and-ai-architecture.md)：核心数据模型、确定性评价、检索增强和模型适配。
 5. [数据安全与合规基线](security/data-security.md)：学生数据、权限、审计、模型调用和文件安全。
 6. [MVP 范围与实施路线](implementation/mvp-roadmap.md)：试点范围、阶段计划、验收指标和风险控制。
+7. [本地开发与验证](implementation/development-setup.md)：基础工程、启动方式、契约生成和质量门槛。
 
 ## 已确认的架构决策
 

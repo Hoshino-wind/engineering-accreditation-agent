@@ -1,0 +1,120 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "工程认证智能体 API",
+    "summary": "实验教学证据治理与持续改进平台",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/system/status": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "获取系统状态",
+        "operationId": "get_system_status_api_v1_system_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ComponentStatus": {
+        "type": "string",
+        "enum": [
+          "operational",
+          "configured",
+          "not_configured"
+        ],
+        "title": "ComponentStatus"
+      },
+      "OverallStatus": {
+        "type": "string",
+        "enum": [
+          "operational",
+          "needs_configuration"
+        ],
+        "title": "OverallStatus"
+      },
+      "SystemComponentResponse": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ComponentStatus"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "name",
+          "status",
+          "detail"
+        ],
+        "title": "SystemComponentResponse"
+      },
+      "SystemStatusResponse": {
+        "properties": {
+          "service": {
+            "type": "string",
+            "title": "Service"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "environment": {
+            "type": "string",
+            "title": "Environment"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OverallStatus"
+          },
+          "checked_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Checked At"
+          },
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/SystemComponentResponse"
+            },
+            "type": "array",
+            "title": "Components"
+          }
+        },
+        "type": "object",
+        "required": [
+          "service",
+          "version",
+          "environment",
+          "status",
+          "checked_at",
+          "components"
+        ],
+        "title": "SystemStatusResponse"
+      }
+    }
+  }
+}

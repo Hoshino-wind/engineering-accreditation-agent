@@ -1,0 +1,12 @@
+.work-queue-filters {
+  display: flex;
+  margin-bottom: 12px;
+}
+
+.work-queue-filters .ant-input-affix-wrapper {
+  width: 280px;
+}
+
+.work-queue-filters .ant-select {
+  width: 120px;
+}

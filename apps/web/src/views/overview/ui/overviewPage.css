@@ -1,0 +1,38 @@
+.overview-page {
+  width: 100%;
+  max-width: 1660px;
+  margin: 0 auto;
+}
+
+.overview-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.overview-page-header .ant-typography {
+  margin-bottom: 0;
+}
+
+.overview-page-header h2.ant-typography {
+  margin-top: 0;
+}
+
+.overview-notice {
+  margin-bottom: 16px;
+}
+
+.overview-metric-card {
+  min-height: 96px;
+}
+
+.overview-metric-card .ant-card-body {
+  display: flex;
+  min-height: 94px;
+  align-items: center;
+}
+
+.overview-section {
+  margin-top: 16px;
+}

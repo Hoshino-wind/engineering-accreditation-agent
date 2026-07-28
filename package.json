@@ -1,0 +1,17 @@
+{
+  "name": "engineering-accreditation-agent",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.24.0",
+  "scripts": {
+    "build": "pnpm --filter @engineering-accreditation/web build",
+    "dev": "pnpm --filter @engineering-accreditation/web dev",
+    "generate:client": "openapi-typescript openapi/openapi.json -o packages/api-client-generated/src/schema.d.ts",
+    "lint": "pnpm --filter @engineering-accreditation/web lint",
+    "test": "pnpm --filter @engineering-accreditation/web test",
+    "typecheck": "pnpm --filter @engineering-accreditation/web typecheck"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.13.0"
+  }
+}

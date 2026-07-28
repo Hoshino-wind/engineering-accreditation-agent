@@ -1,0 +1,44 @@
+.app-shell {
+  min-height: 100vh;
+}
+
+.app-sider {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: auto;
+}
+
+.app-brand {
+  display: flex;
+  height: 56px;
+  align-items: center;
+  gap: 10px;
+  padding: 0 20px;
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.app-brand .anticon {
+  color: #69b1ff;
+  font-size: 22px;
+}
+
+.app-header {
+  position: sticky;
+  z-index: 10;
+  top: 0;
+  display: flex;
+  height: 56px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.app-content {
+  min-width: 0;
+  padding: 20px 32px;
+}

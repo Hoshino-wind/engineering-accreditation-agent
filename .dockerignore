@@ -1,0 +1,15 @@
+.git
+.DS_Store
+.env
+.env.*
+!.env.example
+**/.venv
+**/__pycache__
+**/.pytest_cache
+**/.ruff_cache
+**/node_modules
+**/dist
+**/coverage
+data-private
+storage
+uploads

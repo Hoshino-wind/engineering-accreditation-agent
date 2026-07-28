@@ -27,4 +27,36 @@
 
 ## 当前状态
 
-项目处于需求与架构基线阶段。本仓库只保存代码、配置模板和脱敏文档，不保存学生报告、成绩表、培养方案原件等私有教学材料。
+项目已进入基础工程阶段，当前已建立：
+
+- React + TypeScript + Vite + Ant Design 桌面管理端。
+- FastAPI 模块化 API 和版本化 OpenAPI 契约。
+- 从 OpenAPI 自动生成的 TypeScript 类型客户端。
+- Celery Worker 基础进程和任务注册测试。
+- PostgreSQL + pgvector、Redis、MinIO 的 Docker Compose 试点拓扑。
+- API、Worker 和前端的 lint、类型检查、测试与构建命令。
+
+总览页中的业务数量是显式标记的试点示例数据；系统状态来自真实 API。材料上传、OIDC、持久化、解析和评价引擎仍按 MVP 路线逐步接入。
+
+本仓库只保存代码、配置模板和脱敏文档，不保存学生报告、成绩表、培养方案原件等私有教学材料。
+
+## 本地开发
+
+环境要求：Node.js 24、pnpm 10、Python 3.13、uv。
+
+```bash
+make bootstrap
+make generate-contracts
+```
+
+分别启动 API 和前端：
+
+```bash
+make api
+pnpm dev
+```
+
+- 管理端：`http://127.0.0.1:5173`
+- API 文档：`http://127.0.0.1:8000/api/docs`
+
+完整说明见 [本地开发与验证](docs/implementation/development-setup.md)。

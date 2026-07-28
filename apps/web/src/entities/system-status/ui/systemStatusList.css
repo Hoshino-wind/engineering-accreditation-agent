@@ -1,0 +1,11 @@
+.system-status-row {
+  display: flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.system-status-row:last-child {
+  border-bottom: 0;
+}
