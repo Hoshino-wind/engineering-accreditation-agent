@@ -23,16 +23,6 @@
   margin-bottom: 16px;
 }
 
-.overview-metric-card {
-  min-height: 96px;
-}
-
-.overview-metric-card .ant-card-body {
-  display: flex;
-  min-height: 94px;
-  align-items: center;
-}
-
 .overview-section {
   margin-top: 16px;
 }

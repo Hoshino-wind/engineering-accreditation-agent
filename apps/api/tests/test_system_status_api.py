@@ -1,5 +1,5 @@
+from app.core.config import get_settings
 from app.main import create_app
-from app.platform.config import get_settings
 from fastapi.testclient import TestClient
 
 

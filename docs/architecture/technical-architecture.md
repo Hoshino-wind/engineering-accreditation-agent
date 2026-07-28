@@ -55,7 +55,7 @@ flowchart LR
 
 ### 3.3 数据与文件
 
-- PostgreSQL 保存权威关系、版本、任务状态、评价结果和审计记录。
+- PostgreSQL 保存正式图谱节点/关系、版本、任务状态、诊断结果、评价结果和审计记录。
 - pgvector 保存经过授权的脱敏片段向量，用于语义召回。
 - 原始文件、解析产物和导出包保存在 S3 兼容对象存储。
 - MinIO 仅作为试点环境的默认实现；生产环境优先适配学校已有对象存储，并完成许可证与运维评审。
@@ -88,8 +88,9 @@ apps/
   api/
     app/
       main.py
-      modules/      # 按领域模块组织
-      platform/     # 数据库、对象存储、身份、观测性
+      core/         # 环境配置和应用级横切能力
+      infrastructure/ # 跨模块基础设施适配器
+      modules/      # 按领域模块组织；内部含 routes/contracts/application/domain/infra
   worker/
     app/
       tasks/        # 异步任务入口
@@ -106,22 +107,26 @@ docs/
 
 ## 5. 后端领域模块
 
-| 模块 | 职责 |
-| --- | --- |
-| `identity_access` | 用户、角色、组织范围和 OIDC 会话 |
-| `standards` | 认证标准、毕业要求、指标点及版本 |
-| `curriculum` | 专业、培养方案、课程体系 |
-| `courses` | 课程、课程目标、学期和教学班 |
-| `experiments` | 实验项目、环节、知识点和能力点 |
-| `assessments` | Rubric、评分项、权重、评价策略 |
-| `evidence` | 文件、片段、学生证据和来源定位 |
-| `evaluations` | 确定性达成度计算、快照和复核 |
-| `improvements` | 问题、措施、责任人、复评和闭环 |
-| `intelligence` | 抽取、检索、关系建议和模型适配 |
-| `reporting` | 报表、认证支撑包和导出 |
-| `audit` | 操作、下载、审批和模型调用审计 |
+以下是代码一致性边界，不与产品菜单机械地一一对应。产品模块、状态机和交接关系以[功能模块产品总图](../product/modules/README.md)和[端到端业务闭环](../product/end-to-end-closed-loop.md)为准。
 
-每个模块内部按边界层、应用层、领域层和基础设施层组织。路由只处理协议和鉴权；领域规则不放在路由、ORM 模型或 Celery 任务入口中。
+| 代码模块 | 对应产品模块 | 职责 |
+| --- | --- | --- |
+| `identity_access` | M9 | 用户、角色、组织范围和 OIDC 会话 |
+| `workspaces` | M1 | 工作空间、评价周期、范围快照、进度聚合和业务待办索引 |
+| `teaching_resources` | M3 | 材料、资源版本、解析片段、敏感内容和来源定位 |
+| `teaching_graph` | M2 | 图谱 Schema、正式节点/关系、版本、来源和影响链 |
+| `recognition` | M4 | 识别运行、节点/关系候选、冲突和人工审核 |
+| `graph_analysis` | M5 | 分析规则、覆盖/一致性运行、诊断发现和豁免 |
+| `evaluations` | M6 | 评分输入、评价策略、确定性计算、快照和复核 |
+| `improvements` | M7 | 问题、原因、措施、实际变更、复评和闭环 |
+| `reporting` | M8 | 固定模板、认证支撑包、引用校验和导出 |
+| `processing` | M1～M8 共用 | 异步任务、执行尝试、重试和任务事件 |
+| `intelligence` | M3～M7 共用 | 解析、检索、模型适配、输出校验和质量评测 |
+| `audit` | M9 | 操作、下载、审批和模型调用审计 |
+
+每个模块内部按 `routes`、`contracts`、`application`、`domain` 和 `infra` 组织。`main.py` 是组合根；路由只处理协议和鉴权，应用层通过 ports 依赖外部能力，领域规则不放在路由、ORM 模型或 Celery 任务入口中。详细依赖方向见[代码架构约定](code-architecture.md)。
+
+首期把课程、课程目标、实验、知识、技能、能力、Rubric 和评分项作为 `teaching_graph` 的正式节点管理，避免同一正式事实被多个模块同时拥有。若后续教务主数据接入形成独立生命周期，再通过明确 ADR 拆出教学目录模块。
 
 ## 6. API 契约
 
@@ -153,7 +158,7 @@ FastAPI 的 Pydantic 请求/响应模型是 API 契约源。CI 导出固定版�
 
 ## 7. 异步任务
 
-适合异步执行的任务包括文件解析、OCR、表格识别、个人信息检测、向量化、批量评价、模型分析和报表导出。
+适合异步执行的任务包括文件解析、OCR、表格识别、个人信息检测、向量化、候选识别、图谱分析、批量评价、模型分析和支撑包导出。
 
 任务规则：
 

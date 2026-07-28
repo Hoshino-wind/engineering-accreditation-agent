@@ -1,17 +1,20 @@
-from datetime import UTC, datetime
-
+from app.modules.system.application.ports import Clock, SystemRuntimeConfiguration
 from app.modules.system.domain.status import (
     ComponentStatus,
     OverallStatus,
     SystemComponent,
     SystemStatusSnapshot,
 )
-from app.platform.config import Settings
 
 
 class GetSystemStatus:
-    def __init__(self, settings: Settings) -> None:
-        self._settings = settings
+    def __init__(
+        self,
+        configuration: SystemRuntimeConfiguration,
+        clock: Clock,
+    ) -> None:
+        self._configuration = configuration
+        self._clock = clock
 
     async def execute(self) -> SystemStatusSnapshot:
         components = (
@@ -24,17 +27,17 @@ class GetSystemStatus:
             self._configured_component(
                 key="database",
                 name="数据库",
-                value=self._settings.database_url,
+                is_configured=self._configuration.database_configured,
             ),
             self._configured_component(
                 key="task_queue",
                 name="任务队列",
-                value=self._settings.redis_url,
+                is_configured=self._configuration.task_queue_configured,
             ),
             self._configured_component(
                 key="object_storage",
                 name="对象存储",
-                value=self._settings.object_storage_endpoint,
+                is_configured=self._configuration.object_storage_configured,
             ),
         )
         overall = (
@@ -43,11 +46,11 @@ class GetSystemStatus:
             else OverallStatus.NEEDS_CONFIGURATION
         )
         return SystemStatusSnapshot(
-            service="engineering-accreditation-api",
-            version=self._settings.app_version,
-            environment=self._settings.environment,
+            service=self._configuration.service,
+            version=self._configuration.version,
+            environment=self._configuration.environment,
             status=overall,
-            checked_at=datetime.now(UTC),
+            checked_at=self._clock.now(),
             components=components,
         )
 
@@ -56,9 +59,9 @@ class GetSystemStatus:
         *,
         key: str,
         name: str,
-        value: str | None,
+        is_configured: bool,
     ) -> SystemComponent:
-        if value:
+        if is_configured:
             return SystemComponent(
                 key=key,
                 name=name,

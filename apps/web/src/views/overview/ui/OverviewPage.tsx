@@ -2,24 +2,19 @@ import { CloudUploadOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import {
   Alert,
   Button,
-  Card,
   Col,
   Row,
   Space,
-  Statistic,
-  Steps,
   Tag,
   Tooltip,
   Typography,
 } from 'antd';
 
+import { EvidenceProgress } from '../../../widgets/evidence-progress';
+import { OverviewMetrics } from '../../../widgets/overview-metrics';
 import { PilotReadiness } from '../../../widgets/pilot-readiness';
 import { RecentActivity } from '../../../widgets/recent-activity';
 import { WorkQueue } from '../../../widgets/work-queue';
-import {
-  prototypeOnlyEvidenceSteps,
-  prototypeOnlySummary,
-} from '../model/prototypeOnlyOverview';
 import './overviewPage.css';
 
 const { Paragraph, Title } = Typography;
@@ -53,32 +48,11 @@ export function OverviewPage() {
         type="info"
       />
 
-      <Row className="overview-metrics" gutter={20}>
-        {prototypeOnlySummary.map((item) => (
-          <Col key={item.key} span={6}>
-            <Card className="overview-metric-card">
-              <Statistic
-                prefix={item.icon}
-                suffix={item.suffix}
-                title={item.title}
-                value={item.value}
-              />
-            </Card>
-          </Col>
-        ))}
-      </Row>
+      <OverviewMetrics />
 
-      <Card
-        className="overview-section"
-        size="small"
-        title="证据链建设进度"
-      >
-        <Steps
-          current={2}
-          items={prototypeOnlyEvidenceSteps.map((item) => ({ ...item }))}
-          responsive={false}
-        />
-      </Card>
+      <section className="overview-section">
+        <EvidenceProgress />
+      </section>
 
       <Row className="overview-section" gutter={[20, 20]} align="top">
         <Col xl={16} xxl={14}>

@@ -10,9 +10,3 @@ export interface WorkItem {
   owner: string;
   updatedAt: string;
 }
-
-export interface WorkQueueFilters {
-  keyword: string;
-  status: WorkItemStatus | 'all';
-  type: WorkItemType | 'all';
-}

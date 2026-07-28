@@ -1,1 +1,3 @@
-"""系统状态 HTTP 适配器。"""
+from app.modules.system.routes.status import create_system_router
+
+__all__ = ["create_system_router"]

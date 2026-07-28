@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import { prototypeOnlyWorkItems } from '../../../entities/work-item';
 import { filterWorkItems } from './filterWorkItems';
-import { prototypeOnlyWorkItems } from './prototypeOnlyWorkItems';
 
 describe('filterWorkItems', () => {
   it('按课程关键字和状态筛选试点事项', () => {

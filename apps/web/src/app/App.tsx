@@ -1,10 +1,7 @@
-import { OverviewPage } from '../views/overview';
-import { AppShell } from '../widgets/app-shell';
+import { RouterProvider } from 'react-router/dom';
+
+import { appRouter } from './router/appRouter';
 
 export function App() {
-  return (
-    <AppShell>
-      <OverviewPage />
-    </AppShell>
-  );
+  return <RouterProvider router={appRouter} />;
 }

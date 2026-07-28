@@ -1,0 +1,9 @@
+{
+  "boundary_files": [
+    "apps/web/eslint.config.js",
+    "apps/api/tests/test_architecture_boundaries.py"
+  ],
+  "ignore": [
+    "packages/api-client-generated/**"
+  ]
+}

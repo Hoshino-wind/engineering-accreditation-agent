@@ -11,7 +11,7 @@ import {
 } from '@ant-design/icons';
 import { Avatar, Breadcrumb, Layout, Menu, Space, Typography } from 'antd';
 import type { MenuProps } from 'antd';
-import type { PropsWithChildren } from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router';
 
 import './appShell.css';
 
@@ -19,55 +19,58 @@ const { Header, Content, Sider } = Layout;
 
 const navigationItems: MenuProps['items'] = [
   {
-    key: 'overview',
+    key: '/',
     icon: <DashboardOutlined />,
     label: '总览',
   },
   {
-    key: 'materials',
+    key: '/materials',
     icon: <FileSearchOutlined />,
     label: '材料工作台',
     disabled: true,
   },
   {
-    key: 'standards',
+    key: '/standards',
     icon: <BookOutlined />,
     label: '标准与培养体系',
     disabled: true,
   },
   {
-    key: 'experiments',
+    key: '/experiments',
     icon: <ExperimentOutlined />,
     label: '实验项目',
     disabled: true,
   },
   {
-    key: 'mappings',
+    key: '/mappings',
     icon: <SafetyCertificateOutlined />,
     label: '支撑关系',
     disabled: true,
   },
   {
-    key: 'evaluations',
+    key: '/evaluations',
     icon: <BarChartOutlined />,
     label: '达成度评价',
     disabled: true,
   },
   {
-    key: 'improvements',
+    key: '/improvements',
     icon: <SyncOutlined />,
     label: '持续改进',
     disabled: true,
   },
   {
-    key: 'audit',
+    key: '/audit',
     icon: <AuditOutlined />,
     label: '审计日志',
     disabled: true,
   },
 ];
 
-export function AppShell({ children }: PropsWithChildren) {
+export function AppShell() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
   return (
     <Layout className="app-shell">
       <Sider className="app-sider" width={232}>
@@ -78,7 +81,8 @@ export function AppShell({ children }: PropsWithChildren) {
         <Menu
           items={navigationItems}
           mode="inline"
-          selectedKeys={['overview']}
+          onClick={({ key }) => navigate(key)}
+          selectedKeys={[location.pathname]}
           theme="dark"
         />
       </Sider>
@@ -100,7 +104,9 @@ export function AppShell({ children }: PropsWithChildren) {
             <Typography.Text strong>专业负责人</Typography.Text>
           </Space>
         </Header>
-        <Content className="app-content">{children}</Content>
+        <Content className="app-content">
+          <Outlet />
+        </Content>
       </Layout>
     </Layout>
   );

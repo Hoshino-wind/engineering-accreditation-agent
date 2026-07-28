@@ -1,8 +1,18 @@
-import type { WorkItem, WorkQueueFilters } from './workItem';
+import type {
+  WorkItem,
+  WorkItemStatus,
+  WorkItemType,
+} from '../../../entities/work-item';
+
+export interface WorkItemFilters {
+  keyword: string;
+  status: WorkItemStatus | 'all';
+  type: WorkItemType | 'all';
+}
 
 export function filterWorkItems(
   items: WorkItem[],
-  filters: WorkQueueFilters,
+  filters: WorkItemFilters,
 ): WorkItem[] {
   const keyword = filters.keyword.trim().toLocaleLowerCase('zh-CN');
 

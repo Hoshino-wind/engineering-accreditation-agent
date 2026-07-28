@@ -1,24 +1,18 @@
-import { SearchOutlined } from '@ant-design/icons';
-import { Card, Input, Select, Space, Table, Tag, Typography } from 'antd';
+import type { Key } from 'react';
+import { useState } from 'react';
+
+import { Card, Table, Typography } from 'antd';
 import type { TableProps } from 'antd';
 
-import type { WorkItem } from '../model/workItem';
-import { useWorkQueue } from '../model/useWorkQueue';
-
-const statusPresentation = {
-  pending: {
-    color: 'orange',
-    label: '待处理',
-  },
-  processing: {
-    color: 'blue',
-    label: '处理中',
-  },
-  blocked: {
-    color: 'red',
-    label: '待补充',
-  },
-} as const;
+import {
+  prototypeOnlyWorkItems,
+  type WorkItem,
+  WorkItemStatusTag,
+} from '../../../entities/work-item';
+import {
+  useWorkItemFilters,
+  WorkItemFiltersControl,
+} from '../../../features/filter-work-items';
 
 const columns: TableProps<WorkItem>['columns'] = [
   {
@@ -45,10 +39,9 @@ const columns: TableProps<WorkItem>['columns'] = [
     dataIndex: 'status',
     key: 'status',
     width: 100,
-    render: (value: WorkItem['status']) => {
-      const presentation = statusPresentation[value];
-      return <Tag color={presentation.color}>{presentation.label}</Tag>;
-    },
+    render: (value: WorkItem['status']) => (
+      <WorkItemStatusTag status={value} />
+    ),
   },
   {
     title: '负责人',
@@ -65,7 +58,10 @@ const columns: TableProps<WorkItem>['columns'] = [
 ];
 
 export function WorkQueue() {
-  const queue = useWorkQueue();
+  const filters = useWorkItemFilters(prototypeOnlyWorkItems);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([
+    prototypeOnlyWorkItems[0]?.key ?? '',
+  ]);
 
   return (
     <Card
@@ -73,53 +69,29 @@ export function WorkQueue() {
       title="待处理事项"
       extra={
         <Typography.Text type="secondary">
-          共 {queue.items.length} 项
+          共 {filters.items.length} 项
         </Typography.Text>
       }
     >
-      <Space className="work-queue-filters" size={8}>
-        <Select
-          aria-label="按类型筛选"
-          onChange={queue.setType}
-          options={[
-            { value: 'all', label: '全部类型' },
-            { value: '证据缺口', label: '证据缺口' },
-            { value: '关系审核', label: '关系审核' },
-            { value: '评价准备', label: '评价准备' },
-          ]}
-          value={queue.type}
-        />
-        <Select
-          aria-label="按状态筛选"
-          onChange={queue.setStatus}
-          options={[
-            { value: 'all', label: '全部状态' },
-            { value: 'pending', label: '待处理' },
-            { value: 'processing', label: '处理中' },
-            { value: 'blocked', label: '待补充' },
-          ]}
-          value={queue.status}
-        />
-        <Input
-          allowClear
-          aria-label="搜索待处理事项"
-          onChange={(event) => queue.setKeyword(event.target.value)}
-          placeholder="搜索事项、课程或负责人"
-          prefix={<SearchOutlined />}
-          value={queue.keyword}
-        />
-      </Space>
+      <WorkItemFiltersControl
+        keyword={filters.keyword}
+        onKeywordChange={filters.setKeyword}
+        onStatusChange={filters.setStatus}
+        onTypeChange={filters.setType}
+        status={filters.status}
+        type={filters.type}
+      />
 
       <Table<WorkItem>
         columns={columns}
-        dataSource={queue.items}
+        dataSource={filters.items}
         locale={{ emptyText: '没有符合条件的事项' }}
         pagination={false}
         rowKey="key"
         rowSelection={{
           type: 'radio',
-          selectedRowKeys: queue.selectedRowKeys,
-          onChange: queue.setSelectedRowKeys,
+          selectedRowKeys,
+          onChange: setSelectedRowKeys,
         }}
         scroll={{ x: 840 }}
         size="small"

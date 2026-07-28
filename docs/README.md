@@ -3,12 +3,15 @@
 ## 阅读顺序
 
 1. [项目分析与产品边界](product/project-analysis.md)：为什么做、解决什么问题、哪些内容不做。
-2. [现有实验资料盘点](product/material-inventory.md)：真实资料的类型、规模和对产品设计的影响。
-3. [总体技术架构](architecture/technical-architecture.md)：技术选型、模块边界、部署和 API 契约。
-4. [数据、评价与 AI 架构](architecture/data-and-ai-architecture.md)：核心数据模型、确定性评价、检索增强和模型适配。
-5. [数据安全与合规基线](security/data-security.md)：学生数据、权限、审计、模型调用和文件安全。
-6. [MVP 范围与实施路线](implementation/mvp-roadmap.md)：试点范围、阶段计划、验收指标和风险控制。
-7. [本地开发与验证](implementation/development-setup.md)：基础工程、启动方式、契约生成和质量门槛。
+2. [功能模块产品总图](product/modules/README.md)：8 个业务模块、1 个系统治理模块及各模块产品文档。
+3. [端到端业务闭环](product/end-to-end-closed-loop.md)：模块交接、状态回退、追溯链和首个闭环验收。
+4. [现有实验资料盘点](product/material-inventory.md)：真实资料的类型、规模和对产品设计的影响。
+5. [总体技术架构](architecture/technical-architecture.md)：技术选型、代码模块边界、部署和 API 契约。
+6. [代码架构约定](architecture/code-architecture.md)：前后端分层、依赖方向、状态所有权和架构门槛。
+7. [数据、评价与 AI 架构](architecture/data-and-ai-architecture.md)：核心数据模型、确定性评价、检索增强和模型适配。
+8. [数据安全与合规基线](security/data-security.md)：学生数据、权限、审计、模型调用和文件安全。
+9. [MVP 范围与实施路线](implementation/mvp-roadmap.md)：按垂直切片打通产品模块和退出条件。
+10. [本地开发与验证](implementation/development-setup.md)：基础工程、启动方式、契约生成和质量门槛。
 
 ## 已确认的架构决策
 

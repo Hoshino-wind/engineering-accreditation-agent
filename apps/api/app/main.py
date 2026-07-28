@@ -1,12 +1,25 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.modules.system.routes.status import router as system_router
-from app.platform.config import get_settings
+from app.core.config import get_settings
+from app.modules.system.application import GetSystemStatus
+from app.modules.system.infra import (
+    UtcClock,
+    build_system_runtime_configuration,
+)
+from app.modules.system.routes import create_system_router
 
 
 def create_app() -> FastAPI:
     settings = get_settings()
+    system_status_use_case = GetSystemStatus(
+        configuration=build_system_runtime_configuration(settings),
+        clock=UtcClock(),
+    )
+
+    def provide_system_status_use_case() -> GetSystemStatus:
+        return system_status_use_case
+
     application = FastAPI(
         title="工程认证智能体 API",
         summary="实验教学证据治理与持续改进平台",
@@ -21,7 +34,10 @@ def create_app() -> FastAPI:
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["*"],
     )
-    application.include_router(system_router, prefix=settings.api_v1_prefix)
+    application.include_router(
+        create_system_router(provide_system_status_use_case),
+        prefix=settings.api_v1_prefix,
+    )
     return application
 
 
