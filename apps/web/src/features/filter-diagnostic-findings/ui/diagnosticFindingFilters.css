@@ -1,0 +1,22 @@
+.diagnostic-finding-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.diagnostic-finding-filter-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.diagnostic-finding-filters .ant-select {
+  width: 100%;
+}
+
+.diagnostic-finding-filters .ant-select-selector,
+.diagnostic-finding-filters .ant-input-affix-wrapper {
+  font-size: 12px;
+}

@@ -1,0 +1,37 @@
+.finding-decision-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.finding-decision-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.finding-decision-heading .ant-typography-secondary {
+  font-size: 11px;
+}
+
+.finding-decision-controls .ant-radio-group {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.finding-decision-controls .ant-radio-button-wrapper {
+  height: 32px;
+  padding-inline: 6px;
+  font-size: 12px;
+  text-align: center;
+}
+
+.finding-decision-controls .ant-radio-button-wrapper .anticon {
+  margin-right: 3px;
+}
+
+.finding-decision-controls .ant-alert {
+  padding-block: 7px;
+}

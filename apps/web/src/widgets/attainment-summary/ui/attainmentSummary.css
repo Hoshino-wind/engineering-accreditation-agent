@@ -1,0 +1,56 @@
+.attainment-summary {
+  margin-top: 16px;
+}
+
+.attainment-summary .ant-card {
+  height: 96px;
+}
+
+.attainment-summary .ant-card-body {
+  padding: 14px 16px;
+}
+
+.attainment-summary-icon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+  border-radius: 6px;
+  font-size: 19px;
+}
+
+.attainment-summary-icon--blue {
+  color: #1677ff;
+  background: #e6f4ff;
+}
+
+.attainment-summary-icon--green {
+  color: #389e0d;
+  background: #f6ffed;
+}
+
+.attainment-summary-icon--red {
+  color: #cf1322;
+  background: #fff1f0;
+}
+
+.attainment-summary .ant-statistic-title {
+  margin-bottom: 1px;
+  color: #8c8c8c;
+  font-size: 13px;
+}
+
+.attainment-summary .ant-statistic-content {
+  font-size: 25px;
+  line-height: 30px;
+}
+
+.attainment-summary .ant-statistic-content-suffix {
+  margin-left: 4px;
+  font-size: 14px;
+}
+
+.attainment-summary .ant-typography-secondary {
+  font-size: 11px;
+}

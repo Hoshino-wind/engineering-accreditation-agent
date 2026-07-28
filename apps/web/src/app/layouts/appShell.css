@@ -11,19 +11,72 @@
 
 .app-brand {
   display: flex;
-  height: 56px;
+  height: 72px;
   align-items: center;
   gap: 10px;
-  padding: 0 20px;
+  padding: 0 18px;
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
   color: #ffffff;
-  font-size: 17px;
-  font-weight: 600;
   white-space: nowrap;
 }
 
 .app-brand .anticon {
-  color: #69b1ff;
-  font-size: 22px;
+  color: #91caff;
+  font-size: 24px;
+}
+
+.app-brand-title {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 22px;
+}
+
+.app-brand-subtitle {
+  color: rgb(255 255 255 / 55%);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.app-sider .ant-menu {
+  padding-top: 8px;
+}
+
+.app-sider .ant-menu-item-group-title {
+  padding-top: 14px;
+  padding-bottom: 6px;
+  color: rgb(255 255 255 / 38%);
+  font-size: 12px;
+}
+
+.app-sider-footer {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  left: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 6px;
+  background: rgb(255 255 255 / 5%);
+}
+
+.app-sider-footer > .anticon {
+  margin-top: 3px;
+  color: #91caff;
+}
+
+.app-sider-footer .ant-typography {
+  display: block;
+  margin: 0;
+  color: rgb(255 255 255 / 88%);
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.app-sider-footer .ant-typography-secondary {
+  color: rgb(255 255 255 / 45%);
 }
 
 .app-header {
@@ -34,11 +87,23 @@
   height: 56px;
   align-items: center;
   justify-content: space-between;
-  padding: 0 32px;
+  padding: 0 28px;
   border-bottom: 1px solid #f0f0f0;
+}
+
+.app-user {
+  display: flex;
+  min-width: 72px;
+  flex-direction: column;
+}
+
+.app-user .ant-typography {
+  margin: 0;
+  font-size: 12px;
+  line-height: 17px;
 }
 
 .app-content {
   min-width: 0;
-  padding: 20px 32px;
+  padding: 20px 28px 28px;
 }

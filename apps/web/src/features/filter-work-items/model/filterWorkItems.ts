@@ -19,8 +19,9 @@ export function filterWorkItems(
   return items.filter((item) => {
     const matchesKeyword =
       keyword.length === 0 ||
-      [item.title, item.course, item.owner].some((value) =>
-        value.toLocaleLowerCase('zh-CN').includes(keyword),
+      [item.action, item.course, item.module, item.owner, item.title].some(
+        (value) =>
+          value.toLocaleLowerCase('zh-CN').includes(keyword),
       );
     const matchesStatus =
       filters.status === 'all' || item.status === filters.status;

@@ -1,0 +1,31 @@
+.graph-diagnostics-page {
+  width: 100%;
+  max-width: 1680px;
+  margin: 0 auto;
+}
+
+.graph-diagnostics-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.graph-diagnostics-page-header .ant-typography {
+  margin-bottom: 0;
+}
+
+.graph-diagnostics-page-header h2.ant-typography {
+  margin-top: 0;
+  font-size: 24px;
+  line-height: 32px;
+}
+
+.graph-diagnostics-page-header .ant-typography-secondary {
+  margin-top: 4px;
+  font-size: 13px;
+}
+
+.graph-diagnostics-notice {
+  margin-bottom: 16px;
+}

@@ -1,12 +1,10 @@
-import type { Key } from 'react';
-import { useState } from 'react';
-
-import { Card, Table, Typography } from 'antd';
+import { Card, Table, Tag, Typography } from 'antd';
 import type { TableProps } from 'antd';
 
 import {
   prototypeOnlyWorkItems,
   type WorkItem,
+  WorkItemPriorityTag,
   WorkItemStatusTag,
 } from '../../../entities/work-item';
 import {
@@ -16,10 +14,26 @@ import {
 
 const columns: TableProps<WorkItem>['columns'] = [
   {
+    title: '优先级',
+    dataIndex: 'priority',
+    key: 'priority',
+    width: 72,
+    render: (value: WorkItem['priority']) => (
+      <WorkItemPriorityTag priority={value} />
+    ),
+  },
+  {
+    title: '模块',
+    dataIndex: 'module',
+    key: 'module',
+    width: 64,
+    render: (value: string) => <Tag color="geekblue">{value}</Tag>,
+  },
+  {
     title: '事项',
     dataIndex: 'title',
     key: 'title',
-    minWidth: 240,
+    minWidth: 280,
     render: (value: string) => <Typography.Text strong>{value}</Typography.Text>,
   },
   {
@@ -32,7 +46,7 @@ const columns: TableProps<WorkItem>['columns'] = [
     title: '类型',
     dataIndex: 'type',
     key: 'type',
-    width: 100,
+    width: 92,
   },
   {
     title: '状态',
@@ -47,26 +61,35 @@ const columns: TableProps<WorkItem>['columns'] = [
     title: '负责人',
     dataIndex: 'owner',
     key: 'owner',
-    width: 90,
+    width: 76,
   },
   {
-    title: '更新时间',
-    dataIndex: 'updatedAt',
-    key: 'updatedAt',
-    width: 156,
+    title: '截止时间',
+    dataIndex: 'dueAt',
+    key: 'dueAt',
+    width: 110,
+  },
+  {
+    title: '下一步',
+    dataIndex: 'action',
+    key: 'action',
+    width: 132,
+    render: (value: string) => (
+      <Typography.Text className="work-queue-action">
+        {value}
+      </Typography.Text>
+    ),
   },
 ];
 
 export function WorkQueue() {
   const filters = useWorkItemFilters(prototypeOnlyWorkItems);
-  const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([
-    prototypeOnlyWorkItems[0]?.key ?? '',
-  ]);
 
   return (
     <Card
+      className="work-queue"
       size="small"
-      title="待处理事项"
+      title="我的优先任务"
       extra={
         <Typography.Text type="secondary">
           共 {filters.items.length} 项
@@ -88,12 +111,10 @@ export function WorkQueue() {
         locale={{ emptyText: '没有符合条件的事项' }}
         pagination={false}
         rowKey="key"
-        rowSelection={{
-          type: 'radio',
-          selectedRowKeys,
-          onChange: setSelectedRowKeys,
-        }}
-        scroll={{ x: 840 }}
+        rowClassName={(record) =>
+          record.priority === 'high' ? 'work-queue-row--high' : ''
+        }
+        scroll={{ x: 1040 }}
         size="small"
       />
     </Card>

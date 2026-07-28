@@ -1,0 +1,13 @@
+.recognition-candidate-filters {
+  width: 100%;
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.recognition-candidate-filters .ant-select {
+  width: 112px;
+}
+
+.recognition-candidate-filters .ant-input-affix-wrapper {
+  width: 100%;
+}

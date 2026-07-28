@@ -1,0 +1,32 @@
+.source-fragment-drawer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.source-fragment-drawer .ant-alert {
+  padding-block: 8px;
+}
+
+.source-fragment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.source-fragment-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.source-fragment-item > .anticon {
+  margin-top: 4px;
+  color: #1677ff;
+}
+
+.source-fragment-item .ant-typography {
+  margin: 8px 0 4px;
+}

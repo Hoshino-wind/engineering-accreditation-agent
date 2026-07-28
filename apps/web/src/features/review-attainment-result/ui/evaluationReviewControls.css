@@ -1,0 +1,39 @@
+.evaluation-review-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding-top: 10px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.evaluation-review-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.evaluation-review-heading .ant-typography-secondary {
+  font-size: 11px;
+}
+
+.evaluation-review-controls .ant-radio-group {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.evaluation-review-controls .ant-radio-button-wrapper {
+  text-align: center;
+}
+
+.evaluation-review-controls .ant-alert {
+  padding: 8px 10px;
+}
+
+.evaluation-review-controls .ant-alert-description {
+  font-size: 11px;
+}
+
+.evaluation-review-controls textarea {
+  font-size: 12px;
+  line-height: 18px;
+}

@@ -38,12 +38,12 @@ app → views → widgets → features → entities → shared
 | --- | --- | --- |
 | `/` | M1 `OverviewPage`：总览与任务工作台 | 当前原型可用 |
 | `/graph` | M2 实验教学能力图谱 | 计划 |
-| `/resources` | M3 教学资源与材料 | 计划 |
-| `/recognition` | M4 智能识别与映射审核 | 计划 |
-| `/diagnostics` | M5 图谱分析与一致性诊断 | 计划 |
-| `/evaluations` | M6 达成度评价与统计 | 计划 |
-| `/improvements` | M7 教学优化与持续改进 | 计划 |
-| `/support` | M8 工程认证支撑 | 计划 |
+| `/resources` | M3 `TeachingResourcesPage`：材料治理与来源工作台 | 当前原型可用 |
+| `/recognition` | M4 `RecognitionReviewPage`：候选识别与人工审核工作台 | 当前原型可用 |
+| `/diagnostics` | M5 `GraphDiagnosticsPage`：图谱分析与一致性诊断工作台 | 当前原型可用 |
+| `/evaluations` | M6 `AttainmentEvaluationPage`：输入校验、确定性计算与结果复核工作台 | 当前原型可用 |
+| `/improvements` | M7 `TeachingImprovementPage`：问题、实际变更、复评与关闭门槛工作台 | 当前原型可用 |
+| `/support` | M8 `AccreditationSupportPage`：版本快照、章节预览、校验和导出准备工作台 | 当前原型可用 |
 | `/governance/users` | M9 用户、角色与数据范围 | 计划 |
 | `/governance/audit` | M9 审计、风险与模型调用记录 | 计划 |
 
@@ -68,7 +68,44 @@ app → views → widgets → features → entities → shared
 - 不伪装成持久化数据；
 - 对应 API 可用后由 TanStack Query 替换。
 
-当前原型数据包括总览指标、证据进度、试点准备度、最近活动和待处理事项。
+当前原型数据包括图谱总览指标、图谱建设与应用主线、图谱质量门槛、试点发布门槛、最近业务活动、待处理事项，教学资源、处理流水线、来源片段、材料治理指标，识别候选、来源证据、影响范围和审核草稿，诊断发现、规则判定、覆盖路径、版本引用、影响范围和处置草稿，评价对象、评分输入、版本快照、就绪检查、证据引用和复核草稿，改进问题、来源事实、根因、措施、实际教学对象版本、图谱版本、复评运行和有效性草稿，以及认证支撑包、模板、来源快照、章节、正式结论引用、校验结果、审批快照和导出配置草稿。
+
+M6 前端切片按以下所有权拆分：
+
+- `entities/attainment-evaluation`：评价对象、输入、快照、就绪检查和展示状态；
+- `features/calculate-attainment`：无副作用的确定性加权计算与阻断规则；
+- `features/filter-attainment-evaluations`：课程、状态和关键词筛选；
+- `features/inspect-calculation-trace`：输入快照、程序版本、中间值和证据追溯；
+- `features/review-attainment-result`：结果确认或申请重算的本地草稿；
+- `widgets/attainment-summary`、`widgets/attainment-workbench`：页面区块编排；
+- `views/evaluations`：路由页面组合。
+
+正式运行、审批和持久化仍归后端 `evaluations` 模块；前端禁用动作不得被理解为已接入 API。
+
+M7 前端切片按以下所有权拆分：
+
+- `entities/improvement-case`：改进问题聚合、来源、根因、措施、变更引用、图谱版本、复评和展示状态；
+- `features/filter-improvement-cases`：来源、状态和关键词筛选；
+- `features/assess-improvement-closure`：无副作用的关闭门槛判定；
+- `features/decide-improvement-effectiveness`：人工有效性结论的本地草稿；
+- `features/inspect-improvement-trace`：来源对象、证据哈希、实际变更和复评运行追溯；
+- `widgets/improvement-summary`、`widgets/improvement-workbench`：页面区块编排；
+- `views/improvements`：路由页面组合。
+
+正式问题创建、措施审批、变更关联、复评待办、关闭审批和持久化仍归后端 `improvements` 模块。关闭门槛必须由服务端再次执行，不能依赖前端状态。
+
+M8 前端切片按以下所有权拆分：
+
+- `entities/support-package`：支撑包聚合、模板、来源快照、章节、正式结论引用、审批快照和展示状态；
+- `features/filter-support-packages`：模板、状态和关键词筛选；
+- `features/validate-support-package`：无副作用的 8 项复核/导出门槛及审批快照一致性判定；
+- `features/configure-support-export`：导出格式和用途的本地草稿；
+- `features/resolve-support-package-blocker`：返回事实所属 M2/M3/M5/M6/M7 模块；
+- `features/inspect-support-evidence`：来源对象、冻结版本、内容哈希和章节结论引用追溯；
+- `widgets/support-summary`、`widgets/support-workbench`：页面区块编排；
+- `views/support`：路由页面组合。
+
+正式创建、异步生成、服务端校验、审批、导出产物、下载审计和归档仍归后端 `reporting` 模块。复核和导出门槛必须由服务端再次执行，批准后的内容变化必须创建新版本。
 
 ## 3. API 模块边界
 

@@ -1,6 +1,6 @@
 .overview-page {
   width: 100%;
-  max-width: 1660px;
+  max-width: 1680px;
   margin: 0 auto;
 }
 
@@ -8,7 +8,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .overview-page-header .ant-typography {
@@ -17,6 +17,13 @@
 
 .overview-page-header h2.ant-typography {
   margin-top: 0;
+  font-size: 24px;
+  line-height: 32px;
+}
+
+.overview-page-header .ant-typography-secondary {
+  margin-top: 4px;
+  font-size: 13px;
 }
 
 .overview-notice {

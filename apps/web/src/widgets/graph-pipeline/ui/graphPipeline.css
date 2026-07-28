@@ -1,0 +1,85 @@
+.graph-pipeline .ant-card-body {
+  padding: 18px 20px 16px;
+}
+
+.graph-pipeline-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.graph-pipeline-stage {
+  position: relative;
+  min-width: 0;
+  padding: 0 16px;
+  border-right: 1px solid #f0f0f0;
+}
+
+.graph-pipeline-stage:first-child {
+  padding-left: 0;
+}
+
+.graph-pipeline-stage:last-child {
+  padding-right: 0;
+  border-right: 0;
+}
+
+.graph-pipeline-stage-header {
+  display: flex;
+  min-height: 24px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.graph-pipeline-stage-header .ant-tag {
+  margin-inline-end: 0;
+}
+
+.graph-pipeline-stage-header .ant-typography {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.graph-pipeline-stage-title,
+.graph-pipeline-stage-description {
+  display: block;
+}
+
+.graph-pipeline-stage-title {
+  margin-top: 10px;
+  font-size: 15px;
+}
+
+.graph-pipeline-stage-description {
+  min-height: 42px;
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.graph-pipeline-stage .ant-progress {
+  margin-top: 6px;
+  margin-bottom: 0;
+}
+
+.graph-pipeline-percent {
+  display: block;
+  margin-top: 2px;
+  color: #595959;
+  font-size: 12px;
+  text-align: right;
+}
+
+.graph-pipeline-blocker {
+  width: 100%;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 4px;
+  background: #fff7e6;
+  color: #ad6800;
+}
+
+.graph-pipeline-blocker .ant-typography {
+  color: inherit;
+  font-size: 13px;
+}

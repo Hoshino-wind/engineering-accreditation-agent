@@ -1,0 +1,34 @@
+.support-export-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.support-export-controls .ant-radio-group {
+  display: flex;
+  justify-content: space-between;
+}
+
+.support-export-controls textarea.ant-input {
+  resize: none;
+}
+
+.support-export-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.support-export-action .ant-typography {
+  flex: none;
+  font-size: 11px;
+}
+
+.support-export-controls .ant-alert {
+  padding: 8px 10px;
+}
+
+.support-export-controls .ant-alert-title {
+  font-size: 11px;
+  line-height: 17px;
+}

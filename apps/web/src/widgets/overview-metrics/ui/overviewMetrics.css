@@ -1,9 +1,41 @@
 .overview-metric-card {
-  min-height: 96px;
+  min-height: 112px;
+  border-top: 3px solid #91caff;
 }
 
 .overview-metric-card .ant-card-body {
-  display: flex;
-  min-height: 94px;
-  align-items: center;
+  min-height: 106px;
+  padding: 14px 16px 12px;
+}
+
+.overview-metric-card--warning {
+  border-top-color: #ffc53d;
+}
+
+.overview-metric-card--danger {
+  border-top-color: #ff7875;
+}
+
+.overview-metric-card .ant-statistic-title {
+  margin-bottom: 2px;
+}
+
+.overview-metric-card .ant-statistic-content-prefix {
+  margin-inline-end: 8px;
+  color: #1677ff;
+  font-size: 18px;
+}
+
+.overview-metric-card--warning .ant-statistic-content-prefix {
+  color: #d89614;
+}
+
+.overview-metric-card--danger .ant-statistic-content-prefix {
+  color: #cf1322;
+}
+
+.overview-metric-detail {
+  margin-top: 6px;
+  color: #8c8c8c;
+  font-size: 12px;
 }

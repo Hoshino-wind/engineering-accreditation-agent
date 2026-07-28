@@ -1,5 +1,5 @@
 .readiness-row {
-  padding: 8px 0;
+  padding: 9px 0;
   border-bottom: 1px solid #f0f0f0;
 }
 
@@ -10,4 +10,14 @@
 .readiness-row:last-child {
   padding-bottom: 0;
   border-bottom: 0;
+}
+
+.readiness-row .ant-tag {
+  min-width: 34px;
+  margin-inline-end: 0;
+  text-align: center;
+}
+
+.readiness-row .ant-typography-secondary {
+  font-size: 12px;
 }

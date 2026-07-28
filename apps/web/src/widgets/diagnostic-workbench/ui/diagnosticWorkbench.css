@@ -1,0 +1,249 @@
+.diagnostic-workbench {
+  display: grid;
+  grid-template-columns: 460px minmax(0, 1fr) 420px;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.diagnostic-workbench > .ant-card {
+  height: 570px;
+}
+
+.diagnostic-workbench > .ant-card > .ant-card-body {
+  height: calc(100% - 39px);
+  overflow: auto;
+}
+
+.diagnostic-finding-queue > .ant-card-body {
+  padding: 0;
+  overflow: hidden;
+}
+
+.diagnostic-finding-queue .ant-table-row {
+  cursor: pointer;
+}
+
+.diagnostic-finding-queue .ant-table-cell {
+  font-size: 12px;
+}
+
+.diagnostic-finding-queue
+  .diagnostic-finding-row--selected
+  > td {
+  background: #e6f4ff;
+}
+
+.diagnostic-finding-queue
+  .diagnostic-finding-row--selected:hover
+  > td {
+  background: #d9eeff;
+}
+
+.diagnostic-finding-queue .ant-tag {
+  margin-inline-end: 0;
+  font-size: 11px;
+}
+
+.diagnostic-finding-analysis > .ant-card-body,
+.diagnostic-finding-disposition > .ant-card-body {
+  padding: 14px 16px;
+}
+
+.diagnostic-broken-relation {
+  display: grid;
+  grid-template-columns: 1fr 112px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.diagnostic-relation-node {
+  display: flex;
+  min-height: 76px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  padding: 10px 12px;
+  border: 1px solid #91caff;
+  border-radius: 6px;
+  background: #f5faff;
+  text-align: center;
+}
+
+.diagnostic-relation-node--target {
+  border-color: #b7eb8f;
+  background: #f6ffed;
+}
+
+.diagnostic-broken-edge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  color: #ff4d4f;
+  text-align: center;
+}
+
+.diagnostic-broken-edge::before,
+.diagnostic-broken-edge::after {
+  width: 100%;
+  border-top: 1px dashed #ff4d4f;
+  content: '';
+}
+
+.diagnostic-broken-edge .anticon {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border-radius: 50%;
+  color: #ffffff;
+  background: #ff4d4f;
+}
+
+.diagnostic-broken-edge .ant-typography {
+  font-size: 11px;
+}
+
+.diagnostic-rule {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+}
+
+.diagnostic-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.diagnostic-section-heading .ant-typography-secondary {
+  font-size: 11px;
+}
+
+.diagnostic-rule-id {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.diagnostic-rule .ant-typography {
+  margin: 0;
+  font-size: 12px;
+}
+
+.diagnostic-rule > .ant-typography-secondary:last-child {
+  font-size: 11px;
+}
+
+.diagnostic-impact {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+}
+
+.diagnostic-impact > .ant-typography {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.diagnostic-impact-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.diagnostic-impact-item > .anticon {
+  color: #1677ff;
+  font-size: 18px;
+}
+
+.diagnostic-impact-item .ant-typography {
+  display: block;
+  font-size: 12px;
+}
+
+.diagnostic-path {
+  margin-top: 12px;
+}
+
+.diagnostic-path-flow {
+  display: flex;
+  align-items: stretch;
+  margin-top: 8px;
+}
+
+.diagnostic-path-segment {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+}
+
+.diagnostic-path-node {
+  display: flex;
+  min-width: 0;
+  min-height: 66px;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 7px;
+  border: 1px solid #91caff;
+  border-radius: 5px;
+  background: #f5faff;
+  text-align: center;
+}
+
+.diagnostic-path-node--danger {
+  border-color: #ff7875;
+  border-style: dashed;
+  background: #fff2f0;
+}
+
+.diagnostic-path-node--target {
+  border-color: #b7eb8f;
+  background: #f6ffed;
+}
+
+.diagnostic-path-node .ant-typography {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 11px;
+  text-overflow: ellipsis;
+}
+
+.diagnostic-path-edge {
+  flex: none;
+  margin: 0 5px;
+  color: #8c8c8c;
+}
+
+.diagnostic-path-edge--broken {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  margin: 0 4px;
+  border-radius: 50%;
+  color: #ffffff;
+  background: #ff4d4f;
+}
+
+.diagnostic-source-version {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 14px;
+}
+
+.diagnostic-source-version .ant-descriptions-item-label,
+.diagnostic-source-version .ant-descriptions-item-content {
+  padding: 7px 9px;
+  font-size: 12px;
+}

@@ -1,0 +1,34 @@
+.support-evidence-drawer .ant-descriptions-item-label,
+.support-evidence-drawer .ant-descriptions-item-content {
+  font-size: 12px;
+}
+
+.support-evidence-drawer .ant-timeline-item-content {
+  min-height: 48px;
+}
+
+.support-evidence-drawer .ant-typography {
+  font-size: 12px;
+}
+
+.support-evidence-claim {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+}
+
+.support-evidence-claim + .support-evidence-claim {
+  margin-top: 8px;
+}
+
+.support-evidence-claim > .anticon {
+  margin-top: 3px;
+  color: #1677ff;
+}
+
+.support-evidence-claim .ant-typography {
+  margin-bottom: 6px;
+}

@@ -1,0 +1,33 @@
+.graph-quality,
+.graph-quality .ant-card-body {
+  height: 100%;
+}
+
+.graph-quality .ant-space {
+  width: 100%;
+}
+
+.graph-quality-item {
+  width: 100%;
+}
+
+.graph-quality-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.graph-quality-header .ant-typography:last-child {
+  color: #595959;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.graph-quality-item .ant-progress {
+  margin: 4px 0 1px;
+}
+
+.graph-quality-item > .ant-typography {
+  font-size: 12px;
+}

@@ -1,0 +1,34 @@
+.improvement-effectiveness-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.improvement-effectiveness-controls .ant-radio-group {
+  display: flex;
+  justify-content: space-between;
+}
+
+.improvement-effectiveness-controls textarea.ant-input {
+  resize: none;
+}
+
+.improvement-effectiveness-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.improvement-effectiveness-action .ant-typography {
+  flex: none;
+  font-size: 11px;
+}
+
+.improvement-effectiveness-controls .ant-alert {
+  padding: 8px 10px;
+}
+
+.improvement-effectiveness-controls .ant-alert-title {
+  font-size: 11px;
+  line-height: 17px;
+}

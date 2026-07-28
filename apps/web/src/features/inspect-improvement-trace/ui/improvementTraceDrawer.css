@@ -1,0 +1,12 @@
+.improvement-trace-drawer .ant-descriptions-item-label,
+.improvement-trace-drawer .ant-descriptions-item-content {
+  font-size: 12px;
+}
+
+.improvement-trace-drawer .ant-timeline-item-content {
+  min-height: 50px;
+}
+
+.improvement-trace-drawer .ant-typography {
+  font-size: 12px;
+}

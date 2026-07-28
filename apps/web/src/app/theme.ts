@@ -4,20 +4,21 @@ export const antdTheme: ThemeConfig = {
   token: {
     colorPrimary: '#1677ff',
     borderRadius: 6,
-    colorBgLayout: '#f5f5f5',
+    colorBgLayout: '#f3f5f8',
     colorText: 'rgba(0, 0, 0, 0.88)',
     fontFamily:
       '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif',
   },
   components: {
     Layout: {
-      bodyBg: '#f5f5f5',
+      bodyBg: '#f3f5f8',
       headerBg: '#ffffff',
-      siderBg: '#001529',
+      siderBg: '#102a43',
     },
     Menu: {
-      darkItemBg: '#001529',
-      darkSubMenuItemBg: '#000c17',
+      darkItemBg: '#102a43',
+      darkSubMenuItemBg: '#102a43',
+      darkItemSelectedBg: '#1677ff',
     },
     Table: {
       headerBg: '#fafafa',

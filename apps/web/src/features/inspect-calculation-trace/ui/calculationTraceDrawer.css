@@ -1,0 +1,52 @@
+.calculation-trace-drawer {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.calculation-trace-drawer .ant-descriptions-item-label,
+.calculation-trace-drawer .ant-descriptions-item-content,
+.calculation-trace-drawer .ant-table-cell {
+  font-size: 12px;
+}
+
+.calculation-trace-drawer h5.ant-typography {
+  margin: 0 0 10px;
+}
+
+.calculation-trace-formula {
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  background: #fafafa;
+  color: #262626;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.calculation-trace-evidence {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.calculation-trace-evidence article {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+}
+
+.calculation-trace-evidence article > .anticon {
+  margin-top: 2px;
+  color: #1677ff;
+}
+
+.calculation-trace-evidence article > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+}

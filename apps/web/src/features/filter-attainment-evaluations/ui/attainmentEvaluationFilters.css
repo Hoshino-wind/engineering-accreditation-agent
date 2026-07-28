@@ -1,0 +1,17 @@
+.attainment-evaluation-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.attainment-evaluation-filter-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.attainment-evaluation-filters .ant-select {
+  width: 100%;
+}

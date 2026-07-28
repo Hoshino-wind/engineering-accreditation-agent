@@ -1,0 +1,21 @@
+.teaching-resource-filters {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.teaching-resource-filters .ant-select {
+  width: 142px;
+}
+
+.teaching-resource-filters .ant-select:nth-of-type(2) {
+  width: 154px;
+}
+
+.teaching-resource-filters .ant-select:nth-of-type(3) {
+  width: 144px;
+}
+
+.teaching-resource-filters .ant-input-affix-wrapper {
+  min-width: 280px;
+  flex: 1;
+}

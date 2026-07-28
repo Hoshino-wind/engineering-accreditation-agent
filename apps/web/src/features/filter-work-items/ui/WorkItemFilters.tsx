@@ -32,9 +32,11 @@ export function WorkItemFilters({
         onChange={onTypeChange}
         options={[
           { value: 'all', label: '全部类型' },
-          { value: '证据缺口', label: '证据缺口' },
-          { value: '关系审核', label: '关系审核' },
+          { value: '材料处理', label: '材料处理' },
+          { value: '候选审核', label: '候选审核' },
+          { value: '图谱诊断', label: '图谱诊断' },
           { value: '评价准备', label: '评价准备' },
+          { value: '改进复评', label: '改进复评' },
         ]}
         value={type}
       />
@@ -53,7 +55,7 @@ export function WorkItemFilters({
         allowClear
         aria-label="搜索待处理事项"
         onChange={(event) => onKeywordChange(event.target.value)}
-        placeholder="搜索事项、课程或负责人"
+        placeholder="搜索模块、事项、课程或负责人"
         prefix={<SearchOutlined />}
         value={keyword}
       />
