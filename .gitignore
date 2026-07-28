@@ -1,0 +1,29 @@
+# 本地环境与密钥
+.env
+.env.*
+!.env.example
+
+# 私有教学资料与运行文件
+data-private/
+uploads/
+storage/
+*.rar
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+
+# Node.js
+node_modules/
+dist/
+coverage/
+.vite/
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/
