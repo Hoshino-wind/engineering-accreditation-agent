@@ -21,18 +21,18 @@
 }
 
 .teaching-resource-inventory .ant-table-row:focus-visible {
-  outline: 2px solid #1677ff;
+  outline: 2px solid var(--app-primary);
   outline-offset: -2px;
 }
 
 .teaching-resource-inventory .teaching-resource-row--selected > td {
-  background: #e6f4ff;
+  background: var(--app-selection-bg);
 }
 
 .teaching-resource-inventory
   .teaching-resource-row--selected:hover
   > td {
-  background: #d9eeff;
+  background: var(--app-selection-hover-bg);
 }
 
 .teaching-resource-name {
@@ -54,7 +54,7 @@
 
 .resource-detail-heading {
   padding-bottom: 12px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--app-border-soft);
 }
 
 .resource-detail-heading h4.ant-typography {
@@ -73,13 +73,13 @@
 }
 
 .resource-detail-descriptions .ant-descriptions-item-label {
-  color: rgba(0, 0, 0, 0.45);
+  color: var(--app-text-secondary);
 }
 
 .resource-detail-section {
   margin-top: 16px;
   padding-top: 14px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--app-border-soft);
 }
 
 .resource-detail-section-heading {
@@ -119,19 +119,19 @@
 }
 
 .resource-stage-icon--finish {
-  color: #52c41a;
+  color: var(--app-success);
 }
 
 .resource-stage-icon--process {
-  color: #1677ff;
+  color: var(--app-primary);
 }
 
 .resource-stage-icon--wait {
-  color: rgba(0, 0, 0, 0.25);
+  color: var(--app-text-muted);
 }
 
 .resource-stage-icon--error {
-  color: #ff4d4f;
+  color: var(--app-error);
 }
 
 .resource-next-action {
@@ -140,8 +140,8 @@
   gap: 2px;
   margin-top: 16px;
   padding: 10px 12px;
-  border-left: 3px solid #1677ff;
-  background: #f5faff;
+  border-left: 3px solid var(--app-primary);
+  background: var(--app-primary-surface);
 }
 
 .resource-detail-actions {

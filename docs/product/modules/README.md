@@ -33,42 +33,73 @@
 
 AI 不作为独立菜单。它嵌入 M3～M7，只能生成候选、解释和草稿，不能直接生成正式图谱关系、评价数值或改进结论。
 
-## 4. 核心图谱对象
+## 4. 唯一正式图谱本体
 
-### 4.1 节点
+完整决策和合法端点表见 [ADR-001：实验教学能力图谱正式本体](../../architecture/decisions/001-experimental-teaching-ontology.md)。产品文档、前后端契约、识别候选、诊断规则和评价映射不得各自定义另一套节点或关系名称。
 
-- 毕业要求、指标点；
-- 能力节点、技能节点、知识节点；
-- 课程、课程目标；
-- 实验项目、实验环节；
-- 教学资源、材料版本、证据片段；
-- Rubric、评分项；
-- 评价结果、改进问题和措施引用。
+### 4.1 主图节点
 
-### 4.2 关系
+主图只保存跨材料、跨周期仍需稳定引用的教学语义和结构：
+
+- 认证要求：毕业要求、指标点；
+- 能力语义：能力、技能、知识点；
+- 教学承载：课程、课程目标、实验项目；
+- 评价结构：考核任务、评分项；
+- 教学资源：设备、软件环境、数据集、案例、仿真平台和指导资源等可复用资产。
+
+`TeachingResource` 是 M3 拥有和版本化的一等业务对象；M2 在正式图谱快照中固定其版本引用并拥有相关正式关系。课程材料文件不等于教学资源。
+
+### 4.2 非主图对象
+
+以下对象保持可追溯，但不得与能力、实验、评分项并列为主图节点：
+
+- 工作空间、专业、培养方案、评价周期、教学班、用户和数据范围等上下文；
+- `Material`、`MaterialVersion`、`EvidenceFragment` 等材料与来源对象；
+- M4 的识别运行、候选和审核决定；
+- M5 的分析运行与诊断发现；
+- M6 的评分记录、策略、输入快照、评价运行和评价结果；
+- M7 的质量问题、改进措施、实际变更和复评；
+- M8 的支撑包与导出文件。
+
+它们通过稳定 ID 和不可变版本引用正式图谱，不复制成“应用节点”。证据是 `GraphSourceRef`，不是“证明”关系；评价和改进是运行记录，不是教学语义。
+
+### 4.3 权威关系
 
 ```text
-毕业要求 → 分解为 → 指标点
-指标点 → 对应 → 能力节点
-课程目标 → 支撑 → 指标点
-实验项目 → 支撑 → 课程目标
-实验项目 → 培养 → 能力/技能
-实验项目 → 涉及 → 知识点
-实验项目 → 使用 → 教学资源
-实验项目 → 采用 → Rubric
-评分项 → 评价 → 能力节点
-证据片段 → 证明 → 节点或关系
-改进措施 → 变更 → 教学对象版本
+GraduateOutcome REFINES PerformanceIndicator
+PerformanceIndicator EXPECTS Ability
+Ability COMPOSED_OF Skill
+Skill REQUIRES Knowledge
+
+Course DEFINES CourseOutcome
+Experiment BELONGS_TO Course
+CourseOutcome SUPPORTS PerformanceIndicator
+Experiment CONTRIBUTES_TO CourseOutcome
+Experiment CULTIVATES Ability
+Experiment TRAINS Skill
+Experiment COVERS Knowledge
+
+Experiment USES TeachingResource
+TeachingResource ENABLES Skill / Knowledge
+
+Experiment CONTAINS_TASK AssessmentTask
+AssessmentTask CONTAINS_CRITERION RubricCriterion
+RubricCriterion ASSESSES Ability / Skill
+RubricCriterion CONTRIBUTES_TO CourseOutcome
 ```
 
-每条正式关系包含两端版本、来源、创建方式、审核决定、生效周期和当前状态。首期正式关系仍可存储在 PostgreSQL 关系表中，不因“图谱”名称提前引入复杂图数据库。
+`ASSESSES` 只表达“实际测量什么能力或技能”；`CONTRIBUTES_TO` 只表达“评分汇总到哪个课程目标”。分值、权重、阈值、样本和计算结果归 M6 的评价策略与运行快照所有，不写入 M2 关系。
+
+禁止用快捷边绕过正式路径，例如课程目标直接支撑毕业要求、实验直接支撑指标点、评分项直接评价课程目标或毕业要求。证据引用、评价结果和改进变更也不得伪装成图谱关系。系统可以计算反向导航和传递路径，但不将推导结果重复保存为权威边。
+
+每条正式关系包含两端版本、来源引用、创建方式、审核决定、生效范围和当前效力状态。首期正式关系仍可存储在 PostgreSQL 关系表中，不因“图谱”名称提前引入复杂图数据库。
 
 ## 5. 两条闭环
 
 ### 5.1 图谱构建闭环
 
 ```text
-教学材料 → 解析与识别 → 候选节点/关系 → 教师审核
+教学资源/材料 → 解析与识别 → 候选节点/关系 → 教师审核
 → 正式能力图谱 → 一致性诊断 → 补材料或修正关系
 ```
 
@@ -76,7 +107,7 @@ AI 不作为独立菜单。它嵌入 M3～M7，只能生成候选、解释和草
 
 ```text
 正式能力图谱 + 达成度评价 → 问题诊断 → 改进措施
-→ 教学资源/实验/评分规则新版本 → 更新图谱
+→ M3 资源/材料、M2 图谱或 M6 评价策略新版本 → 更新依赖快照
 → 后续评价 → 验证改进效果
 ```
 
@@ -84,10 +115,11 @@ AI 不作为独立菜单。它嵌入 M3～M7，只能生成候选、解释和草
 
 ## 6. 模块协作规则
 
-- 正式图谱事实只归 M2 所有，M4 只拥有候选和审核过程。
-- M3 只拥有材料、资源和证据位置，不拥有提取出的正式能力关系。
+- M2 拥有正式图谱 Schema、语义节点版本、关系版本、发布快照和审核决定；外部对象作为固定版本引用进入快照。
+- M3 拥有 `TeachingResource` 及其版本，也拥有 `Material`、`MaterialVersion` 和 `EvidenceFragment`；M2 只拥有资源参与教学路径的正式关系。
+- M4 只拥有识别运行、候选和审核过程；审核通过仍需向 M2 提交正式化请求。
 - M5 只拥有分析运行和诊断发现，不直接修改图谱。
-- M6 正式数值只由版本化确定性策略计算。
+- M6 拥有 Rubric 计分配置、分值、权重、阈值、评分输入、运行状态和评价结果；正式数值只由版本化确定性策略计算。
 - M7 问题关闭必须关联实际变更和复评结果。
 - M8 只汇总已确认事实，不能在报告内覆盖上游数据。
 - M1 聚合任务和待办，业务动作回到事实所属模块完成。

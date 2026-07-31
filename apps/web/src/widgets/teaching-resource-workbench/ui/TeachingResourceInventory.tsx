@@ -159,6 +159,13 @@ export function TeachingResourceInventory({
         onRow={(resource) => ({
           'aria-selected': resource.id === selectedResourceId,
           onClick: () => onSelect(resource),
+          onKeyDown: (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              onSelect(resource);
+            }
+          },
+          tabIndex: 0,
         })}
         pagination={false}
         rowClassName={(resource) =>

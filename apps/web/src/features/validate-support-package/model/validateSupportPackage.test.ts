@@ -16,6 +16,13 @@ describe('validateSupportPackage', () => {
     expect(result.blockedCount).toBe(2);
     expect(result.canSubmitForReview).toBe(false);
     expect(result.canExport).toBe(false);
+    expect(
+      result.checks.find((check) => check.id === 'improvement'),
+    ).toMatchObject({
+      ownerModule: 'M7',
+      ownerObjectId: 'qi-2026-017',
+      status: 'blocked',
+    });
   });
 
   it('blocks formal claims without source references', () => {

@@ -1,6 +1,6 @@
 .readiness-row {
   padding: 9px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--app-border-soft);
 }
 
 .readiness-row:first-child {

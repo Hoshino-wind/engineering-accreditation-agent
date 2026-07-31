@@ -36,7 +36,17 @@ export interface TeachingResource {
   course: string;
   evidenceFragments: EvidenceFragment[];
   fileName: string;
-  format: 'PDF' | 'DOCX' | 'XLSX';
+  format:
+    | 'PDF'
+    | 'DOCX'
+    | 'XLSX'
+    | 'TXT'
+    | 'CSV'
+    | 'MD'
+    | 'PNG'
+    | 'JPG'
+    | 'JPEG'
+    | 'WEBP';
   hash: string;
   id: string;
   name: string;
@@ -51,5 +61,6 @@ export interface TeachingResource {
   status: TeachingResourceStatus;
   updatedAt: string;
   version: string;
+  versionId: string;
   failureReason?: string;
 }

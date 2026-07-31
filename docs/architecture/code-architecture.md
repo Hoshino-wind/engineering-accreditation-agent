@@ -37,17 +37,26 @@ app → views → widgets → features → entities → shared
 | 路径 | 页面 | 状态 |
 | --- | --- | --- |
 | `/` | M1 `OverviewPage`：总览与任务工作台 | 当前原型可用 |
-| `/graph` | M2 实验教学能力图谱 | 计划 |
+| `/graph` | M2 `AbilityGraphPage`：节点、关系、评价路径和版本发布 | 服务端持久化试点可用 |
 | `/resources` | M3 `TeachingResourcesPage`：材料治理与来源工作台 | 当前原型可用 |
 | `/recognition` | M4 `RecognitionReviewPage`：候选识别与人工审核工作台 | 当前原型可用 |
 | `/diagnostics` | M5 `GraphDiagnosticsPage`：图谱分析与一致性诊断工作台 | 当前原型可用 |
 | `/evaluations` | M6 `AttainmentEvaluationPage`：输入校验、确定性计算与结果复核工作台 | 当前原型可用 |
 | `/improvements` | M7 `TeachingImprovementPage`：问题、实际变更、复评与关闭门槛工作台 | 当前原型可用 |
 | `/support` | M8 `AccreditationSupportPage`：版本快照、章节预览、校验和导出准备工作台 | 当前原型可用 |
-| `/governance/users` | M9 用户、角色与数据范围 | 计划 |
-| `/governance/audit` | M9 审计、风险与模型调用记录 | 计划 |
+| `/governance` | M9 `GovernancePage`：用户角色、数据范围、审计与模型策略 | 本地交互原型可用 |
 
 路由定义和布局只能位于 `app`。页面不能持有领域规则或大型静态业务数据，只负责组合 widgets。产品路由必须能回到[功能模块产品总图](../product/modules/README.md)中的责任模块；AI 辅助能力嵌入 M3～M7 的任务页面，不单独建设聊天入口。
+
+PC 端应用壳按以下所有权拆分：
+
+- `app/layouts/app-shell/config`：单一导航目录，统一定义路径、菜单、面包屑和内容模式；
+- `app/layouts/app-shell/model`：路径到壳层展示状态的纯投影；
+- `app/layouts/app-shell/ui/AppShellSider`：品牌、分组菜单和试点上下文；
+- `app/layouts/app-shell/ui/AppShellHeader`：面包屑、原型保存/用户展示、帮助和本地业务通知；
+- `app/layouts/app-shell/ui/AppShell`：只负责 Ant Design Layout、React Router 和 Outlet 组合。
+
+当前“草稿已保存”和用户身份仍是静态原型；通知只读取 `entities/workflow-event` 公共 API，不代表未读通知或正式审计。该应用壳仅覆盖当前单一 PC 端主题，不新增移动端布局或响应式导航。
 
 现有总览原型中的旧导航占位不构成目标信息架构。进入业务功能实现时，应按上表逐项替换并删除旧入口，不同时保留两套模块命名。
 
@@ -56,6 +65,7 @@ app → views → widgets → features → entities → shared
 - 输入值、选中行、弹层开关等局部交互状态：离使用位置最近的组件或 feature hook。
 - 服务端状态：entity 内的 TanStack Query hook。
 - 跨页面会话、当前专业和展示偏好：`app/providers` 中的小范围 Context。
+- 本地业务操作事件：`entities/workflow-event` 统一持有事件模型、浏览器存储和订阅公共 API；当前只用于原型通知和 M9 审计界面，不等同于服务端权威审计记录。
 - 生成客户端：只封装请求与类型，不承载页面状态。
 - 未证明存在复杂跨页面客户端状态前，不引入 Redux。
 
@@ -69,6 +79,16 @@ app → views → widgets → features → entities → shared
 - 对应 API 可用后由 TanStack Query 替换。
 
 当前原型数据包括图谱总览指标、图谱建设与应用主线、图谱质量门槛、试点发布门槛、最近业务活动、待处理事项，教学资源、处理流水线、来源片段、材料治理指标，识别候选、来源证据、影响范围和审核草稿，诊断发现、规则判定、覆盖路径、版本引用、影响范围和处置草稿，评价对象、评分输入、版本快照、就绪检查、证据引用和复核草稿，改进问题、来源事实、根因、措施、实际教学对象版本、图谱版本、复评运行和有效性草稿，以及认证支撑包、模板、来源快照、章节、正式结论引用、校验结果、审批快照和导出配置草稿。
+
+M2 前端切片按以下所有权拆分：
+
+- `entities/ability-graph`：图谱类型、关系 Schema、端点校验、业务选择器、对齐投影、质量指标、发布门禁、版本差异和原型 fixture；
+- `features/edit-ability-graph`：材料来源适配、对象创建、关系创建及对应受控表单；
+- `features/govern-ability-graph-version`：对象/图谱修订、变更审核、下游影响处置和版本发布；
+- `widgets/ability-graph-evaluation`：课程目标评价结构的独立工作区；
+- `views/graph`：路由级标签、选择状态、服务端工作区装配和其余页面专用展示区块。
+
+服务端图谱状态仍由 `entities/ability-graph` 的 TanStack Query hook 持有；表单状态由对应 feature 内的 Ant Design Form 持有，页面不复制服务端图谱或表单字段。
 
 M6 前端切片按以下所有权拆分：
 
@@ -87,25 +107,40 @@ M7 前端切片按以下所有权拆分：
 - `entities/improvement-case`：改进问题聚合、来源、根因、措施、变更引用、图谱版本、复评和展示状态；
 - `features/filter-improvement-cases`：来源、状态和关键词筛选；
 - `features/assess-improvement-closure`：无副作用的关闭门槛判定；
+- `features/create-improvement-case`：本地原型问题创建、案例投影和工作流事件记录；
 - `features/decide-improvement-effectiveness`：人工有效性结论的本地草稿；
 - `features/inspect-improvement-trace`：来源对象、证据哈希、实际变更和复评运行追溯；
 - `widgets/improvement-summary`、`widgets/improvement-workbench`：页面区块编排；
-- `views/improvements`：路由页面组合。
+- `views/improvements`：路由页面组合，以及 `case` 查询参数到当前改进问题的页面级选择投影。
 
 正式问题创建、措施审批、变更关联、复评待办、关闭审批和持久化仍归后端 `improvements` 模块。关闭门槛必须由服务端再次执行，不能依赖前端状态。
 
 M8 前端切片按以下所有权拆分：
 
 - `entities/support-package`：支撑包聚合、模板、来源快照、章节、正式结论引用、审批快照和展示状态；
+- `features/create-support-package`：本地原型支撑包创建、实体投影和工作流事件记录；
 - `features/filter-support-packages`：模板、状态和关键词筛选；
 - `features/validate-support-package`：无副作用的 8 项复核/导出门槛及审批快照一致性判定；
-- `features/configure-support-export`：导出格式和用途的本地草稿；
-- `features/resolve-support-package-blocker`：返回事实所属 M2/M3/M5/M6/M7 模块；
+- `features/configure-support-export`：本地导出配置、复核提交、原型产物交付与工作流事件记录；
+- `features/resolve-support-package-blocker`：返回事实所属 M2/M3/M5/M6/M7 模块，并在目标标识已对齐时生成对象级处理地址；
 - `features/inspect-support-evidence`：来源对象、冻结版本、内容哈希和章节结论引用追溯；
 - `widgets/support-summary`、`widgets/support-workbench`：页面区块编排；
 - `views/support`：路由页面组合。
 
 正式创建、异步生成、服务端校验、审批、导出产物、下载审计和归档仍归后端 `reporting` 模块。复核和导出门槛必须由服务端再次执行，批准后的内容变化必须创建新版本。
+
+M9 前端切片按以下所有权拆分：
+
+- `entities/role-assignment`：角色授权、状态、数据范围和汇总选择器；
+- `entities/model-data-policy`：模型路由、脱敏和来源引用策略；
+- `entities/workflow-event`：跨模块工作流事件、筛选规则和展示状态；
+- `features/manage-role-assignments`：角色授权创建、撤销和恢复的本地操作；
+- `features/configure-model-data-policy`：模型数据策略的本地配置；
+- `features/export-workflow-events`：审计事件 CSV 序列化与下载；
+- `widgets/governance-workbench`：治理摘要、授权、审计和模型策略区块编排；
+- `views/governance`：路由页面、治理说明和工作台组合。
+
+当前角色、数据范围、模型政策和工作流事件仍是浏览器本地原型。正式身份认证、授权决策、服务端策略执行和不可变审计分别归后端 `identity_access`、业务用例与 `audit` 模块；前端配置不得被理解为生产安全边界。
 
 ## 3. API 模块边界
 
@@ -133,6 +168,15 @@ app/
 - ORM 模型、Pydantic 契约和领域对象职责不同，不合并为同一个类。
 
 当前 `system` 模块用于验证以上完整链路；新业务能力按相同内部结构建立，不先创建没有用例的空目录。
+
+M2 当前已经建立首条服务端权威链路：
+
+- Web 的 `entities/ability-graph` 通过 TanStack Query 和生成客户端持有服务端状态；
+- API 的 `teaching_graph` 模块拥有草稿保存、发布门禁、正式快照、修订创建和审计用例；
+- 本地开发使用 SQLite 聚合仓储，正式快照和审计事件以追加方式写入；
+- 所有写命令携带 `expectedRevision`，由仓储执行乐观锁，过期写入不得覆盖新状态；
+- 前端发布检查只用于即时反馈，服务端在发布命令中重新执行全部阻断规则；
+- 当前操作者仍是本地固定专业负责人，OIDC、组织范围和真实角色授权尚未接入，因此该链路不构成生产安全边界。
 
 目标业务模块及产品映射：
 

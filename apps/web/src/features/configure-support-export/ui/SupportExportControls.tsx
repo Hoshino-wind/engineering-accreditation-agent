@@ -5,7 +5,7 @@ import type {
   SupportExportFormat,
   SupportPackage,
 } from '../../../entities/support-package';
-import type { SupportExportDraft } from '../model/useSupportExportDrafts';
+import { useSupportExportWorkflow } from '../model/useSupportExportWorkflow';
 
 import './supportExportControls.css';
 
@@ -13,9 +13,6 @@ interface SupportExportControlsProps {
   blockedCount: number;
   canExport: boolean;
   canSubmitForReview: boolean;
-  draft: SupportExportDraft;
-  onFormatChange: (format: SupportExportFormat) => void;
-  onPurposeChange: (purpose: string) => void;
   requiresNewVersion: boolean;
   supportPackage: SupportPackage;
 }
@@ -24,12 +21,15 @@ export function SupportExportControls({
   blockedCount,
   canExport,
   canSubmitForReview,
-  draft,
-  onFormatChange,
-  onPurposeChange,
   requiresNewVersion,
   supportPackage,
 }: SupportExportControlsProps) {
+  const { draft, setFormat, setPurpose, submit } =
+    useSupportExportWorkflow({
+      canExport,
+      canSubmitForReview,
+      supportPackage,
+    });
   const actionLabel = canExport ? '导出支撑包' : '提交复核';
 
   return (
@@ -37,7 +37,7 @@ export function SupportExportControls({
       <Typography.Text strong>导出配置</Typography.Text>
       <Radio.Group
         onChange={(event) =>
-          onFormatChange(event.target.value as SupportExportFormat)
+          setFormat(event.target.value as SupportExportFormat)
         }
         options={[
           { label: 'PDF', value: 'pdf' },
@@ -48,7 +48,7 @@ export function SupportExportControls({
       />
       <Input.TextArea
         maxLength={200}
-        onChange={(event) => onPurposeChange(event.target.value)}
+        onChange={(event) => setPurpose(event.target.value)}
         placeholder="填写导出用途（必填）"
         rows={2}
         showCount
@@ -57,7 +57,11 @@ export function SupportExportControls({
       <div className="support-export-action">
         <Button
           block
-          disabled
+          disabled={
+            !draft.purpose.trim() ||
+            (!canSubmitForReview && !canExport)
+          }
+          onClick={submit}
           type={
             (canSubmitForReview || canExport) && draft.purpose.trim()
               ? 'primary'
@@ -67,7 +71,9 @@ export function SupportExportControls({
           {actionLabel}
         </Button>
         <Typography.Text type="secondary">
-          当前为本地草稿
+          {draft.purpose.trim()
+            ? '配置已自动保存'
+            : '请填写导出用途'}
         </Typography.Text>
       </div>
       <Alert
@@ -80,7 +86,7 @@ export function SupportExportControls({
               ? `存在 ${blockedCount} 个阻断项，不能提交复核或导出。`
               : supportPackage.status === 'ready-for-review'
                 ? '校验通过，等待专业负责人批准。'
-                : '正式复核与受控导出将在 reporting 后端切片接入。'
+                : '已批准支撑包可在本机生成可打印报告或交接清单。'
         }
         type={blockedCount > 0 || requiresNewVersion ? 'warning' : 'info'}
       />

@@ -26,10 +26,435 @@
           }
         }
       }
+    },
+    "/api/v1/materials": {
+      "get": {
+        "tags": [
+          "materials"
+        ],
+        "summary": "列出本地教学材料",
+        "operationId": "list_materials_api_v1_materials_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaterialListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "materials"
+        ],
+        "summary": "上传教学材料并进入本地处理流水线",
+        "operationId": "upload_material_api_v1_materials_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_material_api_v1_materials_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaterialResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/materials/{material_id}": {
+      "get": {
+        "tags": [
+          "materials"
+        ],
+        "summary": "获取材料处理详情",
+        "operationId": "get_material_api_v1_materials__material_id__get",
+        "parameters": [
+          {
+            "name": "material_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Material Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaterialResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/materials/{material_id}/retry": {
+      "post": {
+        "tags": [
+          "materials"
+        ],
+        "summary": "重试材料解析流水线",
+        "operationId": "retry_material_api_v1_materials__material_id__retry_post",
+        "parameters": [
+          {
+            "name": "material_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Material Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaterialResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/teaching-graph/workspace": {
+      "get": {
+        "tags": [
+          "teaching-graph"
+        ],
+        "summary": "读取能力图谱权威工作区",
+        "operationId": "get_workspace_api_v1_teaching_graph_workspace_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GraphWorkspaceResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "teaching-graph"
+        ],
+        "summary": "初始化或保存能力图谱草稿",
+        "operationId": "save_workspace_api_v1_teaching_graph_workspace_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveGraphDraftRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GraphWorkspaceResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/teaching-graph/workspace/publish": {
+      "post": {
+        "tags": [
+          "teaching-graph"
+        ],
+        "summary": "校验并发布不可变能力图谱快照",
+        "operationId": "publish_workspace_api_v1_teaching_graph_workspace_publish_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GraphRevisionCommandRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GraphWorkspaceResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/teaching-graph/workspace/revisions": {
+      "post": {
+        "tags": [
+          "teaching-graph"
+        ],
+        "summary": "基于正式快照创建下一能力图谱修订",
+        "operationId": "start_revision_api_v1_teaching_graph_workspace_revisions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GraphRevisionCommandRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GraphWorkspaceResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/teaching-graph/audit-events": {
+      "get": {
+        "tags": [
+          "teaching-graph"
+        ],
+        "summary": "列出能力图谱追加审计事件",
+        "operationId": "list_audit_events_api_v1_teaching_graph_audit_events_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GraphAuditEventListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AbilityGraphStateContract": {
+        "properties": {
+          "changeReviews": {
+            "items": {
+              "$ref": "#/components/schemas/GraphChangeReviewContract"
+            },
+            "type": "array",
+            "title": "Changereviews"
+          },
+          "downstreamReferences": {
+            "items": {
+              "$ref": "#/components/schemas/GraphDownstreamReferenceContract"
+            },
+            "type": "array",
+            "title": "Downstreamreferences"
+          },
+          "edges": {
+            "items": {
+              "$ref": "#/components/schemas/GraphEdgeContract"
+            },
+            "type": "array",
+            "title": "Edges"
+          },
+          "impactDecisions": {
+            "items": {
+              "$ref": "#/components/schemas/GraphImpactDecisionContract"
+            },
+            "type": "array",
+            "title": "Impactdecisions"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/GraphNodeContract"
+            },
+            "type": "array",
+            "title": "Nodes"
+          },
+          "publishedSnapshots": {
+            "items": {
+              "$ref": "#/components/schemas/GraphPublishedSnapshotContract"
+            },
+            "type": "array",
+            "title": "Publishedsnapshots"
+          },
+          "schemaVersionId": {
+            "type": "string",
+            "const": "teaching-graph-schema@2",
+            "title": "Schemaversionid"
+          },
+          "version": {
+            "$ref": "#/components/schemas/GraphVersionContract"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "changeReviews",
+          "downstreamReferences",
+          "edges",
+          "impactDecisions",
+          "nodes",
+          "publishedSnapshots",
+          "schemaVersionId",
+          "version"
+        ],
+        "title": "AbilityGraphStateContract"
+      },
+      "Body_upload_material_api_v1_materials_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "教学材料原始文件"
+          },
+          "course": {
+            "type": "string",
+            "maxLength": 100,
+            "title": "Course",
+            "default": "待分类"
+          },
+          "resource_type": {
+            "type": "string",
+            "maxLength": 40,
+            "title": "Resource Type",
+            "default": "实验项目清单"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_material_api_v1_materials_post"
+      },
       "ComponentStatus": {
         "type": "string",
         "enum": [
@@ -39,6 +464,945 @@
         ],
         "title": "ComponentStatus"
       },
+      "EvidenceFragmentResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "coordinate": {
+            "type": "string",
+            "title": "Coordinate"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "段落",
+              "表格",
+              "扫描页"
+            ],
+            "title": "Type"
+          },
+          "preview": {
+            "type": "string",
+            "title": "Preview"
+          },
+          "hash": {
+            "type": "string",
+            "title": "Hash"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "coordinate",
+          "type",
+          "preview",
+          "hash"
+        ],
+        "title": "EvidenceFragmentResponse"
+      },
+      "GraphAuditEventListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/GraphAuditEventResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "GraphAuditEventListResponse"
+      },
+      "GraphAuditEventResponse": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "actor": {
+            "type": "string",
+            "title": "Actor"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdat"
+          },
+          "graphVersion": {
+            "type": "string",
+            "title": "Graphversion"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "action",
+          "actor",
+          "createdAt",
+          "graphVersion",
+          "id",
+          "revision",
+          "summary"
+        ],
+        "title": "GraphAuditEventResponse"
+      },
+      "GraphCapabilityContract": {
+        "properties": {
+          "cognitiveLevel": {
+            "type": "string",
+            "enum": [
+              "understand",
+              "apply",
+              "analyze",
+              "evaluate",
+              "create"
+            ],
+            "title": "Cognitivelevel"
+          },
+          "domain": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Domain"
+          },
+          "observableBehaviors": {
+            "items": {
+              "type": "string",
+              "maxLength": 160,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 8,
+            "minItems": 1,
+            "title": "Observablebehaviors"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cognitiveLevel",
+          "domain",
+          "observableBehaviors"
+        ],
+        "title": "GraphCapabilityContract"
+      },
+      "GraphCapabilityMappingContract": {
+        "properties": {
+          "rationale": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Rationale"
+          },
+          "targetBehaviors": {
+            "items": {
+              "type": "string",
+              "maxLength": 160,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 8,
+            "minItems": 1,
+            "title": "Targetbehaviors"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "rationale",
+          "targetBehaviors"
+        ],
+        "title": "GraphCapabilityMappingContract"
+      },
+      "GraphChangeReviewContract": {
+        "properties": {
+          "changeId": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Changeid"
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Decidedat"
+          },
+          "draftVersion": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Draftversion"
+          },
+          "reviewer": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Reviewer"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "changeId",
+          "decidedAt",
+          "draftVersion",
+          "reviewer"
+        ],
+        "title": "GraphChangeReviewContract"
+      },
+      "GraphDownstreamReferenceContract": {
+        "properties": {
+          "edgeIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Edgeids"
+          },
+          "edgeVersionIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Edgeversionids"
+          },
+          "graphVersion": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Graphversion"
+          },
+          "id": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Label"
+          },
+          "module": {
+            "type": "string",
+            "enum": [
+              "M5",
+              "M6",
+              "M8"
+            ],
+            "title": "Module"
+          },
+          "nodeIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Nodeids"
+          },
+          "nodeVersionIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Nodeversionids"
+          },
+          "objectCode": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Objectcode"
+          },
+          "schemaVersionId": {
+            "type": "string",
+            "const": "teaching-graph-schema@2",
+            "title": "Schemaversionid"
+          },
+          "suggestedAction": {
+            "type": "string",
+            "enum": [
+              "recheck",
+              "recalculate",
+              "refresh"
+            ],
+            "title": "Suggestedaction"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "edgeIds",
+          "edgeVersionIds",
+          "graphVersion",
+          "id",
+          "label",
+          "module",
+          "nodeIds",
+          "nodeVersionIds",
+          "objectCode",
+          "schemaVersionId",
+          "suggestedAction"
+        ],
+        "title": "GraphDownstreamReferenceContract"
+      },
+      "GraphEdgeContract": {
+        "properties": {
+          "capabilityMapping": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GraphCapabilityMappingContract"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "edgeVersionId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Edgeversionid"
+          },
+          "effectiveCycle": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Effectivecycle"
+          },
+          "id": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Id"
+          },
+          "relation": {
+            "type": "string",
+            "enum": [
+              "refines",
+              "expects",
+              "defines",
+              "belongs-to",
+              "supports",
+              "contributes-to",
+              "cultivates",
+              "trains",
+              "covers",
+              "composed-of",
+              "requires",
+              "uses",
+              "enables",
+              "contains-task",
+              "contains-criterion",
+              "assesses"
+            ],
+            "title": "Relation"
+          },
+          "reviewStatus": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "pending"
+            ],
+            "title": "Reviewstatus",
+            "default": "pending"
+          },
+          "source": {
+            "$ref": "#/components/schemas/GraphSourceContract"
+          },
+          "sourceId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Sourceid"
+          },
+          "sourceNodeVersionId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Sourcenodeversionid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "effective",
+              "draft",
+              "superseded"
+            ],
+            "title": "Status",
+            "default": "draft"
+          },
+          "targetId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Targetid"
+          },
+          "targetNodeVersionId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Targetnodeversionid"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "edgeVersionId",
+          "effectiveCycle",
+          "id",
+          "relation",
+          "source",
+          "sourceId",
+          "sourceNodeVersionId",
+          "targetId",
+          "targetNodeVersionId"
+        ],
+        "title": "GraphEdgeContract"
+      },
+      "GraphImpactDecisionContract": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "recheck",
+              "recalculate",
+              "refresh"
+            ],
+            "title": "Action"
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Decidedat"
+          },
+          "draftVersion": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Draftversion"
+          },
+          "referenceId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Referenceid"
+          },
+          "reviewer": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Reviewer"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "action",
+          "decidedAt",
+          "draftVersion",
+          "referenceId",
+          "reviewer"
+        ],
+        "title": "GraphImpactDecisionContract"
+      },
+      "GraphNodeContract": {
+        "properties": {
+          "capability": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GraphCapabilityContract"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Code"
+          },
+          "definition": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Definition"
+          },
+          "id": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "nodeVersionId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Nodeversionid"
+          },
+          "owner": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Owner"
+          },
+          "source": {
+            "$ref": "#/components/schemas/GraphSourceContract"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "effective",
+              "draft",
+              "superseded"
+            ],
+            "title": "Status",
+            "default": "draft"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "graduate-outcome",
+              "performance-indicator",
+              "course",
+              "course-outcome",
+              "ability",
+              "skill",
+              "knowledge",
+              "experiment",
+              "teaching-resource",
+              "assessment-task",
+              "rubric-criterion"
+            ],
+            "title": "Type"
+          },
+          "version": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Version"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "definition",
+          "id",
+          "name",
+          "nodeVersionId",
+          "owner",
+          "source",
+          "type",
+          "version"
+        ],
+        "title": "GraphNodeContract"
+      },
+      "GraphPublishedSnapshotContract": {
+        "properties": {
+          "edges": {
+            "items": {
+              "$ref": "#/components/schemas/GraphEdgeContract"
+            },
+            "type": "array",
+            "title": "Edges"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/GraphNodeContract"
+            },
+            "type": "array",
+            "title": "Nodes"
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Publishedat"
+          },
+          "schemaVersionId": {
+            "type": "string",
+            "const": "teaching-graph-schema@2",
+            "title": "Schemaversionid"
+          },
+          "version": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Version"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "edges",
+          "nodes",
+          "publishedAt",
+          "schemaVersionId",
+          "version"
+        ],
+        "title": "GraphPublishedSnapshotContract"
+      },
+      "GraphRevisionCommandRequest": {
+        "properties": {
+          "expectedRevision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expectedrevision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expectedRevision"
+        ],
+        "title": "GraphRevisionCommandRequest"
+      },
+      "GraphSourceContract": {
+        "properties": {
+          "coordinate": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Coordinate"
+          },
+          "evidenceFragmentId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Evidencefragmentid"
+          },
+          "material": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Material"
+          },
+          "materialId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Materialid"
+          },
+          "materialVersionId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Materialversionid"
+          },
+          "sourceRefId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Sourcerefid"
+          },
+          "version": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Version"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "coordinate",
+          "evidenceFragmentId",
+          "material",
+          "materialId",
+          "materialVersionId",
+          "sourceRefId",
+          "version"
+        ],
+        "title": "GraphSourceContract"
+      },
+      "GraphVersionContract": {
+        "properties": {
+          "baseVersion": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseversion"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "published",
+              "draft"
+            ],
+            "title": "Status"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "status"
+        ],
+        "title": "GraphVersionContract"
+      },
+      "GraphWorkspaceResponse": {
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Revision"
+          },
+          "state": {
+            "$ref": "#/components/schemas/AbilityGraphStateContract"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updatedat"
+          },
+          "updatedBy": {
+            "type": "string",
+            "title": "Updatedby"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "revision",
+          "state",
+          "updatedAt",
+          "updatedBy"
+        ],
+        "title": "GraphWorkspaceResponse"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "MaterialListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/MaterialResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "MaterialListResponse"
+      },
+      "MaterialResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "file_name": {
+            "type": "string",
+            "title": "File Name"
+          },
+          "course": {
+            "type": "string",
+            "title": "Course"
+          },
+          "resource_type": {
+            "type": "string",
+            "title": "Resource Type"
+          },
+          "format": {
+            "type": "string",
+            "title": "Format"
+          },
+          "media_type": {
+            "type": "string",
+            "title": "Media Type"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Size Bytes"
+          },
+          "hash": {
+            "type": "string",
+            "title": "Hash"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "uploaded",
+              "scanning",
+              "processing",
+              "ready",
+              "failed",
+              "quarantined"
+            ],
+            "title": "Status"
+          },
+          "sensitivity": {
+            "type": "string",
+            "enum": [
+              "internal",
+              "restricted"
+            ],
+            "title": "Sensitivity"
+          },
+          "owner": {
+            "type": "string",
+            "title": "Owner"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "version_id": {
+            "type": "string",
+            "title": "Version Id"
+          },
+          "source_coverage": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Source Coverage"
+          },
+          "page_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Count"
+          },
+          "failure_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failure Reason"
+          },
+          "next_action": {
+            "type": "string",
+            "title": "Next Action"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "processing_stages": {
+            "items": {
+              "$ref": "#/components/schemas/ProcessingStageResponse"
+            },
+            "type": "array",
+            "title": "Processing Stages"
+          },
+          "evidence_fragments": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceFragmentResponse"
+            },
+            "type": "array",
+            "title": "Evidence Fragments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "file_name",
+          "course",
+          "resource_type",
+          "format",
+          "media_type",
+          "size_bytes",
+          "hash",
+          "status",
+          "sensitivity",
+          "owner",
+          "version",
+          "version_id",
+          "source_coverage",
+          "page_count",
+          "failure_reason",
+          "next_action",
+          "created_at",
+          "updated_at",
+          "processing_stages",
+          "evidence_fragments"
+        ],
+        "title": "MaterialResponse"
+      },
       "OverallStatus": {
         "type": "string",
         "enum": [
@@ -46,6 +1410,54 @@
           "needs_configuration"
         ],
         "title": "OverallStatus"
+      },
+      "ProcessingStageResponse": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "finish",
+              "process",
+              "wait",
+              "error"
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "detail",
+          "status"
+        ],
+        "title": "ProcessingStageResponse"
+      },
+      "SaveGraphDraftRequest": {
+        "properties": {
+          "expectedRevision": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expectedrevision"
+          },
+          "state": {
+            "$ref": "#/components/schemas/AbilityGraphStateContract"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expectedRevision",
+          "state"
+        ],
+        "title": "SaveGraphDraftRequest"
       },
       "SystemComponentResponse": {
         "properties": {
@@ -114,6 +1526,46 @@
           "components"
         ],
         "title": "SystemStatusResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
       }
     }
   }

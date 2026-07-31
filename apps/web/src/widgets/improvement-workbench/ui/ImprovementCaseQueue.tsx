@@ -22,26 +22,25 @@ interface ImprovementCaseQueueProps {
   selectedCaseId?: string;
   source: ImprovementSourceModule | 'all';
   status: ImprovementCaseStatus | 'all';
+  totalCount: number;
 }
 
 const columns: TableProps<ImprovementCase>['columns'] = [
   {
     key: 'issue',
     title: '问题',
-    width: 190,
+    width: 142,
     render: (_, improvementCase) => (
-      <Typography.Text ellipsis strong>
-        {improvementCase.displayId.replace('QI-2026-', 'QI-')}{' '}
-        {improvementCase.title}
-      </Typography.Text>
+      <div className="improvement-queue-title">
+        <Typography.Text ellipsis strong>
+          {improvementCase.displayId.replace('QI-2026-', 'QI-')}{' '}
+          {improvementCase.title}
+        </Typography.Text>
+        <Typography.Text ellipsis type="secondary">
+          {improvementCase.course}
+        </Typography.Text>
+      </div>
     ),
-  },
-  {
-    dataIndex: 'course',
-    ellipsis: true,
-    key: 'course',
-    title: '课程',
-    width: 76,
   },
   {
     key: 'source',
@@ -74,13 +73,14 @@ export function ImprovementCaseQueue({
   selectedCaseId,
   source,
   status,
+  totalCount,
 }: ImprovementCaseQueueProps) {
   return (
     <Card
       className="improvement-case-queue"
       extra={
         <Typography.Text type="secondary">
-          当前 {cases.length} / 共 6 项
+          当前 {cases.length} / 共 {totalCount} 项
         </Typography.Text>
       }
       size="small"

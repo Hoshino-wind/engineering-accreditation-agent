@@ -1,0 +1,38 @@
+.graph-publish-modal-list {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 14px;
+}
+
+.graph-publish-check {
+  display: grid;
+  min-height: 58px;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--app-border-soft);
+}
+
+.graph-publish-check > span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.graph-publish-check .ant-typography-secondary {
+  line-height: 17px;
+}
+
+.graph-check-icon--pass {
+  color: var(--app-success);
+}
+
+.graph-check-icon--blocked {
+  color: var(--app-error);
+}
+
+.graph-check-icon--warning {
+  color: var(--app-warning);
+}

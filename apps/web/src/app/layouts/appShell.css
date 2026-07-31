@@ -1,12 +1,16 @@
 .app-shell {
+  height: 100vh;
   min-height: 100vh;
+  overflow: hidden;
+  background: var(--app-layout-background);
 }
 
 .app-sider {
-  position: sticky;
-  top: 0;
+  position: relative;
   height: 100vh;
-  overflow: auto;
+  overflow: hidden;
+  border-right: 1px solid var(--app-border);
+  background: var(--app-sider-background) !important;
 }
 
 .app-brand {
@@ -15,13 +19,13 @@
   align-items: center;
   gap: 10px;
   padding: 0 18px;
-  border-bottom: 1px solid rgb(255 255 255 / 10%);
-  color: #ffffff;
+  border-bottom: 1px solid var(--app-border);
+  color: var(--app-text);
   white-space: nowrap;
 }
 
 .app-brand .anticon {
-  color: #91caff;
+  color: var(--app-primary);
   font-size: 24px;
 }
 
@@ -32,19 +36,23 @@
 }
 
 .app-brand-subtitle {
-  color: rgb(255 255 255 / 55%);
+  color: var(--app-text-secondary);
   font-size: 12px;
   line-height: 18px;
 }
 
 .app-sider .ant-menu {
+  overflow-y: auto;
+  height: calc(100vh - 72px - 90px);
   padding-top: 8px;
+  border-inline-end: 0 !important;
+  background: transparent;
 }
 
 .app-sider .ant-menu-item-group-title {
   padding-top: 14px;
   padding-bottom: 6px;
-  color: rgb(255 255 255 / 38%);
+  color: var(--app-text-muted);
   font-size: 12px;
 }
 
@@ -57,38 +65,64 @@
   align-items: flex-start;
   gap: 10px;
   padding: 12px;
-  border: 1px solid rgb(255 255 255 / 10%);
-  border-radius: 6px;
-  background: rgb(255 255 255 / 5%);
+  border: 1px solid var(--app-border-strong);
+  border-radius: var(--app-radius-large);
+  background: var(--app-surface-glass);
+  box-shadow: var(--app-floating-shadow);
 }
 
 .app-sider-footer > .anticon {
   margin-top: 3px;
-  color: #91caff;
+  color: var(--app-primary);
 }
 
 .app-sider-footer .ant-typography {
   display: block;
   margin: 0;
-  color: rgb(255 255 255 / 88%);
+  color: var(--app-text);
   font-size: 12px;
   line-height: 20px;
 }
 
 .app-sider-footer .ant-typography-secondary {
-  color: rgb(255 255 255 / 45%);
+  color: var(--app-text-secondary);
 }
 
 .app-header {
-  position: sticky;
+  position: relative;
   z-index: 10;
-  top: 0;
   display: flex;
-  height: 56px;
+  height: var(--app-header-height);
   align-items: center;
   justify-content: space-between;
-  padding: 0 28px;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-surface-glass-strong) !important;
+  backdrop-filter: blur(14px);
+}
+
+.app-header-actions {
+  height: 100%;
+}
+
+.app-header-navigation {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+}
+
+.app-header-actions .ant-divider-vertical {
+  height: 20px;
+  margin-inline: 2px;
+  border-color: var(--app-border);
+}
+
+.app-save-status {
+  margin: 0;
+  border-color: var(--app-success-border);
+  background: var(--app-success-soft);
+  color: var(--app-success-text);
 }
 
 .app-user {
@@ -104,6 +138,40 @@
 }
 
 .app-content {
+  height: calc(100vh - var(--app-header-height));
   min-width: 0;
-  padding: 20px 28px 28px;
+  overflow: auto;
+  padding: 18px 24px 24px;
+  background: transparent;
+}
+
+.app-content--workbench {
+  overflow: hidden;
+}
+
+.app-notification-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-notification-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--app-border-soft);
+}
+
+.app-notification-item > .ant-typography-secondary {
+  font-size: 12px;
+}
+
+@media (max-width: 1480px) {
+  .app-content {
+    padding-inline: 18px;
+  }
+
+  .app-header {
+    padding-inline: 18px;
+  }
 }

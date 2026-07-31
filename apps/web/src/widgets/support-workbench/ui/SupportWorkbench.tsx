@@ -5,7 +5,6 @@ import {
   type SupportPackage,
   type SupportPackageSection,
 } from '../../../entities/support-package';
-import { useSupportExportDrafts } from '../../../features/configure-support-export';
 import { useSupportPackageFilters } from '../../../features/filter-support-packages';
 import { SupportEvidenceDrawer } from '../../../features/inspect-support-evidence';
 import { validateSupportPackage } from '../../../features/validate-support-package';
@@ -15,14 +14,19 @@ import { SupportValidationPanel } from './SupportValidationPanel';
 
 import './supportWorkbench.css';
 
-export function SupportWorkbench() {
-  const filters = useSupportPackageFilters(prototypeOnlySupportPackages);
-  const exportDrafts = useSupportExportDrafts();
+interface SupportWorkbenchProps {
+  packages?: SupportPackage[];
+}
+
+export function SupportWorkbench({
+  packages = prototypeOnlySupportPackages,
+}: SupportWorkbenchProps) {
+  const filters = useSupportPackageFilters(packages);
   const [selectedPackageId, setSelectedPackageId] = useState(
-    prototypeOnlySupportPackages[0]?.id,
+    packages[0]?.id,
   );
   const [selectedSectionId, setSelectedSectionId] = useState(
-    prototypeOnlySupportPackages[0]?.sections[0]?.id,
+    packages[0]?.sections[0]?.id,
   );
   const [evidenceDrawerOpen, setEvidenceDrawerOpen] = useState(false);
   const selectedPackage =
@@ -37,9 +41,6 @@ export function SupportWorkbench() {
     ) ??
     selectedPackage?.sections[0] ??
     null;
-  const selectedDraft = selectedPackage
-    ? exportDrafts.getDraft(selectedPackage.id)
-    : { format: 'pdf' as const, purpose: '' };
   const validation = useMemo(
     () =>
       selectedPackage
@@ -78,17 +79,6 @@ export function SupportWorkbench() {
           supportPackage={selectedPackage}
         />
         <SupportValidationPanel
-          draft={selectedDraft}
-          onFormatChange={(format) => {
-            if (selectedPackage) {
-              exportDrafts.setFormat(selectedPackage.id, format);
-            }
-          }}
-          onPurposeChange={(purpose) => {
-            if (selectedPackage) {
-              exportDrafts.setPurpose(selectedPackage.id, purpose);
-            }
-          }}
           supportPackage={selectedPackage}
           validation={validation}
         />

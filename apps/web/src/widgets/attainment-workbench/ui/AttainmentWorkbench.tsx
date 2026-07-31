@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react';
+import { App } from 'antd';
 
 import {
   prototypeOnlyAttainmentEvaluations,
   type AttainmentEvaluationItem,
 } from '../../../entities/attainment-evaluation';
+import { recordWorkflowEvent } from '../../../entities/workflow-event';
 import { calculateAttainment } from '../../../features/calculate-attainment';
 import { useAttainmentEvaluationFilters } from '../../../features/filter-attainment-evaluations';
 import { CalculationTraceDrawer } from '../../../features/inspect-calculation-trace';
@@ -15,6 +17,7 @@ import { EvaluationObjectQueue } from './EvaluationObjectQueue';
 import './attainmentWorkbench.css';
 
 export function AttainmentWorkbench() {
+  const { message } = App.useApp();
   const filters = useAttainmentEvaluationFilters(
     prototypeOnlyAttainmentEvaluations,
   );
@@ -78,6 +81,23 @@ export function AttainmentWorkbench() {
             if (selectedEvaluation) {
               reviewDrafts.setNote(selectedEvaluation.id, note);
             }
+          }}
+          onSubmit={() => {
+            if (!selectedEvaluation || !selectedDraft.decision) {
+              return;
+            }
+            recordWorkflowEvent({
+              action: '提交达成度复核',
+              actor: '当前用户',
+              module: 'M6',
+              objectId: selectedEvaluation.id,
+              status:
+                selectedDraft.decision === 'recalculate'
+                  ? 'pending'
+                  : 'success',
+              summary: `${selectedEvaluation.objectiveCode} ${selectedEvaluation.objectiveName}：${selectedDraft.decision}`,
+            });
+            void message.success('复核结果已保存，并写入治理中心审计轨迹');
           }}
         />
       </section>

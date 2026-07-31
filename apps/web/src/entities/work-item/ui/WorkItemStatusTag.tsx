@@ -7,15 +7,15 @@ const statusPresentation: Record<
   { color: string; label: string }
 > = {
   pending: {
-    color: 'orange',
+    color: 'warning',
     label: '待处理',
   },
   processing: {
-    color: 'blue',
+    color: 'processing',
     label: '处理中',
   },
   blocked: {
-    color: 'red',
+    color: 'error',
     label: '待补充',
   },
 };

@@ -1,0 +1,241 @@
+.graph-version-summary > .ant-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.graph-version-summary > .ant-card-body > .ant-btn {
+  margin-top: auto;
+}
+
+.graph-version-route {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-medium);
+  background: var(--app-surface-soft);
+}
+
+.graph-version-route > span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.graph-version-route > span:last-child {
+  text-align: right;
+}
+
+.graph-change-summary {
+  margin-block: 10px 8px;
+}
+
+.graph-change-list {
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--app-radius-medium);
+}
+
+.graph-change-row {
+  position: relative;
+  display: flex;
+  width: 100%;
+  cursor: pointer;
+  flex-direction: column;
+  gap: 3px;
+  padding: 9px 10px;
+  border: 0;
+  border-bottom: 1px solid var(--app-border-soft);
+  color: inherit;
+  background: var(--app-surface);
+  text-align: left;
+}
+
+.graph-change-row:last-child {
+  border-bottom: 0;
+}
+
+.graph-change-row:hover {
+  background: var(--app-primary-surface);
+}
+
+.graph-change-row--selected {
+  box-shadow: inset 3px 0 0 var(--app-primary);
+  background: var(--app-primary-soft);
+}
+
+.graph-change-row > span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.graph-change-row > .ant-typography-secondary {
+  max-width: calc(100% - 58px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graph-change-review--done,
+.graph-change-review--pending {
+  position: absolute;
+  right: 9px;
+  bottom: 9px;
+  font-size: 11px;
+}
+
+.graph-change-review--done {
+  color: #218466;
+}
+
+.graph-change-review--pending {
+  color: #c97810;
+}
+
+.graph-change-detail > .ant-card-body,
+.graph-change-detail .ant-space {
+  width: 100%;
+}
+
+.graph-change-title {
+  display: block;
+  margin-top: 5px;
+  font-size: 15px;
+}
+
+.graph-field-diff-list {
+  max-height: 156px;
+  overflow: auto;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--app-radius-medium);
+}
+
+.graph-field-diff {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 10px;
+  padding: 7px 9px;
+  border-bottom: 1px solid var(--app-border-soft);
+}
+
+.graph-field-diff:last-child {
+  border-bottom: 0;
+}
+
+.graph-field-diff > span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.graph-field-diff > span .ant-typography {
+  overflow: hidden;
+  line-height: 18px;
+  text-overflow: ellipsis;
+}
+
+.graph-version-side {
+  display: grid;
+  min-height: 0;
+  grid-template-rows: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  gap: 10px;
+}
+
+.graph-version-side > .graph-workbench-panel {
+  height: auto;
+}
+
+.graph-impact-list > .ant-card-body {
+  padding: 0;
+}
+
+.graph-impact-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--app-border-soft);
+}
+
+.graph-impact-row:last-child {
+  border-bottom: 0;
+}
+
+.graph-impact-row > .ant-typography-secondary {
+  display: -webkit-box;
+  overflow: hidden;
+  line-height: 17px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.graph-impact-heading {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.graph-impact-heading > .ant-tag:last-child {
+  margin-left: auto;
+}
+
+.graph-impact-row > .ant-btn {
+  align-self: flex-start;
+  margin-top: 3px;
+}
+
+.graph-release-gate > .ant-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.graph-release-check-list {
+  min-height: 0;
+  overflow: auto;
+}
+
+.graph-release-check {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  gap: 7px;
+  padding: 5px 0;
+  border-bottom: 1px dashed var(--app-border-soft);
+}
+
+.graph-release-check:last-child {
+  border-bottom: 0;
+}
+
+.graph-release-check > span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.graph-release-check .ant-typography-secondary {
+  overflow: hidden;
+  font-size: 11px;
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graph-release-gate > .ant-card-body > .ant-btn {
+  flex: none;
+}
+
+.graph-empty-state {
+  display: grid;
+  min-height: 96px;
+  place-items: center;
+  padding: 16px;
+  color: var(--app-text-secondary);
+  text-align: center;
+}

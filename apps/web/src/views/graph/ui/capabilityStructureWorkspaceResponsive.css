@@ -1,0 +1,19 @@
+@media (max-width: 1180px) {
+  .capability-structure-grid {
+    grid-template-columns: 210px minmax(390px, 1fr) 260px;
+  }
+
+  .capability-behavior-list {
+    grid-template-columns: 1fr;
+  }
+
+  .capability-path-row {
+    grid-template-columns: 1fr;
+  }
+
+  .capability-path-activity {
+    padding: 8px 0 0;
+    border-top: 1px solid var(--app-border-soft);
+    border-left: 0;
+  }
+}

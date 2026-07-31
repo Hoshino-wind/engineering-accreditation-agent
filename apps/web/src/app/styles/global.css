@@ -1,11 +1,7 @@
 :root {
-  --app-desktop-min-width: 1440px;
-  --app-desktop-target-width: 1920px;
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
-    'Microsoft YaHei', sans-serif;
-  color: rgba(0, 0, 0, 0.88);
-  background: #f3f5f8;
+  font-family: var(--app-font-family);
+  color: var(--app-text);
+  background: var(--app-bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 }
@@ -22,8 +18,17 @@ body,
   margin: 0;
 }
 
+.route-loading {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  color: var(--app-text-secondary);
+  background: var(--app-bg);
+}
+
 body {
   min-height: 100vh;
+  background: var(--app-layout-background);
 }
 
 button,
@@ -31,4 +36,39 @@ input,
 select,
 textarea {
   font: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--app-focus-ring);
+  outline-offset: 2px;
+}
+
+.ant-card {
+  border-color: var(--app-border);
+  box-shadow: var(--app-card-shadow);
+}
+
+.ant-alert {
+  border-radius: var(--app-radius-large);
+}
+
+.ant-tag {
+  border-radius: var(--app-radius-small);
+}
+
+.ant-table-wrapper .ant-table-tbody > tr {
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }

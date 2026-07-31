@@ -1,0 +1,184 @@
+:is(
+    .teaching-resource-summary,
+    .recognition-summary,
+    .diagnostic-summary,
+    .attainment-summary,
+    .improvement-summary,
+    .support-summary
+  ) {
+  flex: none;
+}
+
+:is(
+    .teaching-resource-summary,
+    .recognition-summary,
+    .diagnostic-summary,
+    .attainment-summary,
+    .improvement-summary,
+    .support-summary
+  )
+  .ant-card {
+  height: var(--app-summary-card-height);
+  border-color: var(--app-border);
+}
+
+:is(
+    .teaching-resource-summary,
+    .recognition-summary,
+    .diagnostic-summary,
+    .attainment-summary,
+    .improvement-summary,
+    .support-summary
+  )
+  .ant-card-body {
+  padding: 10px 14px;
+}
+
+:is(
+    .teaching-resource-summary,
+    .recognition-summary,
+    .diagnostic-summary,
+    .attainment-summary,
+    .improvement-summary,
+    .support-summary
+  )
+  .ant-statistic-title {
+  margin-bottom: 0;
+  color: var(--app-text-secondary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+:is(
+    .teaching-resource-summary,
+    .recognition-summary,
+    .diagnostic-summary,
+    .attainment-summary,
+    .improvement-summary,
+    .support-summary
+  )
+  .ant-statistic-content {
+  color: var(--app-text);
+  font-size: var(--app-summary-value-size);
+  line-height: 27px;
+}
+
+:is(
+    .teaching-resource-summary,
+    .recognition-summary,
+    .diagnostic-summary,
+    .attainment-summary,
+    .improvement-summary,
+    .support-summary
+  )
+  .ant-statistic-content-suffix {
+  margin-inline-start: 4px;
+  font-size: 14px;
+}
+
+:is(
+    .teaching-resource-summary,
+    .recognition-summary,
+    .diagnostic-summary,
+    .attainment-summary,
+    .improvement-summary,
+    .support-summary
+  )
+  .ant-typography-secondary {
+  display: block;
+  overflow: hidden;
+  max-width: 220px;
+  color: var(--app-text-secondary);
+  font-size: 11px;
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:is(
+    .teaching-resource-summary-icon,
+    .recognition-summary-icon,
+    .diagnostic-summary-icon,
+    .attainment-summary-icon,
+    .improvement-summary-icon,
+    .support-summary-icon
+  ) {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+  border-radius: var(--app-radius-small);
+  font-size: 18px;
+}
+
+:is(
+    .teaching-resource-summary-icon--blue,
+    .recognition-summary-icon--blue,
+    .diagnostic-summary-icon--blue,
+    .attainment-summary-icon--blue,
+    .improvement-summary-icon--blue,
+    .support-summary-icon--blue
+  ) {
+  color: var(--app-primary);
+  background: var(--app-primary-soft);
+}
+
+:is(
+    .teaching-resource-summary-icon--green,
+    .recognition-summary-icon--green,
+    .diagnostic-summary-icon--green,
+    .attainment-summary-icon--green,
+    .improvement-summary-icon--green,
+    .support-summary-icon--green
+  ) {
+  color: var(--app-success);
+  background: var(--app-success-soft);
+}
+
+:is(
+    .teaching-resource-summary-icon--orange,
+    .recognition-summary-icon--orange,
+    .diagnostic-summary-icon--orange,
+    .improvement-summary-icon--orange,
+    .support-summary-icon--orange
+  ) {
+  color: var(--app-warning);
+  background: var(--app-warning-icon-soft);
+}
+
+:is(
+    .recognition-summary-icon--red,
+    .diagnostic-summary-icon--red,
+    .attainment-summary-icon--red
+  ) {
+  color: var(--app-error);
+  background: var(--app-error-soft);
+}
+
+.teaching-resource-summary-icon--geekblue {
+  color: var(--app-accent-indigo);
+  background: var(--app-accent-indigo-soft);
+}
+
+:is(
+    .improvement-summary-icon--purple,
+    .support-summary-icon--purple
+  ) {
+  color: var(--app-accent-purple);
+  background: var(--app-accent-purple-soft);
+}
+
+@media (max-height: 920px) {
+  :is(
+      .teaching-resource-summary,
+      .recognition-summary,
+      .diagnostic-summary,
+      .attainment-summary,
+      .improvement-summary,
+      .support-summary
+    )
+    .ant-card {
+    height: 72px;
+  }
+}

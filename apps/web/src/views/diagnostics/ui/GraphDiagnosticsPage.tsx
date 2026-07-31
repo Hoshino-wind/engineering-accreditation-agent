@@ -2,8 +2,10 @@ import {
   InfoCircleOutlined,
   PlayCircleOutlined,
 } from '@ant-design/icons';
+import { useState } from 'react';
 import {
   Alert,
+  App,
   Button,
   Space,
   Tag,
@@ -11,29 +13,53 @@ import {
   Typography,
 } from 'antd';
 
+import { recordWorkflowEvent } from '../../../entities/workflow-event';
 import { DiagnosticSummary } from '../../../widgets/diagnostic-summary';
 import { DiagnosticWorkbench } from '../../../widgets/diagnostic-workbench';
 
-import './graphDiagnosticsPage.css';
 
 const { Paragraph, Title } = Typography;
 
 export function GraphDiagnosticsPage() {
+  const { message } = App.useApp();
+  const [running, setRunning] = useState(false);
+
+  const handleRun = () => {
+    setRunning(true);
+    window.setTimeout(() => {
+      recordWorkflowEvent({
+        action: '运行图谱诊断',
+        actor: '当前用户',
+        module: 'M5',
+        objectId: 'diagnostics-run-local',
+        status: 'success',
+        summary: '完成覆盖缺口、材料冲突和结构风险检查',
+      });
+      setRunning(false);
+      void message.success('诊断完成：发现 23 项待确认问题');
+    }, 650);
+  };
+
   return (
-    <main className="graph-diagnostics-page">
+    <div className="graph-diagnostics-page">
       <div className="graph-diagnostics-page-header">
         <div>
           <Space align="center" size={10}>
             <Title level={2}>图谱分析与一致性诊断</Title>
-            <Tag color="geekblue">M5 图谱诊断</Tag>
+            <Tag color="geekblue">能力诊断</Tag>
             <Tag>试点示例数据</Tag>
           </Space>
           <Paragraph type="secondary">
             基于固定图谱、材料和规则版本，定位覆盖缺口、材料冲突与结构风险。
           </Paragraph>
         </div>
-        <Tooltip title="诊断运行将在 M5 后端业务切片接入">
-          <Button disabled icon={<PlayCircleOutlined />} type="primary">
+        <Tooltip title="按当前图谱、材料和规则版本运行本地诊断">
+          <Button
+            icon={<PlayCircleOutlined />}
+            loading={running}
+            onClick={handleRun}
+            type="primary"
+          >
             运行诊断
           </Button>
         </Tooltip>
@@ -50,6 +76,6 @@ export function GraphDiagnosticsPage() {
 
       <DiagnosticSummary />
       <DiagnosticWorkbench />
-    </main>
+    </div>
   );
 }

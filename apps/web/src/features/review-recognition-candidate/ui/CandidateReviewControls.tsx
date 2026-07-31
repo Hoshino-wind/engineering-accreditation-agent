@@ -30,6 +30,7 @@ interface CandidateReviewControlsProps {
   draft: CandidateReviewDraft;
   onDecisionChange: (decision: CandidateReviewDecision) => void;
   onNoteChange: (note: string) => void;
+  onSubmit: () => void;
 }
 
 export function CandidateReviewControls({
@@ -37,6 +38,7 @@ export function CandidateReviewControls({
   draft,
   onDecisionChange,
   onNoteChange,
+  onSubmit,
 }: CandidateReviewControlsProps) {
   return (
     <section className="candidate-review-controls">
@@ -80,15 +82,26 @@ export function CandidateReviewControls({
 
       {draft.decision ? (
         <Alert
-          description="决定和说明仅保存在当前页面草稿中，刷新后不会保留。"
+          description="决定和说明已自动保存到本机草稿，可继续切换候选后再回来处理。"
           showIcon
           title="审核草稿已更新"
           type="info"
         />
       ) : null}
 
-      <Tooltip title="审核写入将在 M4 后端业务切片接入">
-        <Button block disabled type="primary">
+      <Tooltip
+        title={
+          draft.decision
+            ? '提交后将写入本地审核轨迹'
+            : '请先选择审核决定'
+        }
+      >
+        <Button
+          block
+          disabled={!draft.decision}
+          onClick={onSubmit}
+          type="primary"
+        >
           确认审核
         </Button>
       </Tooltip>

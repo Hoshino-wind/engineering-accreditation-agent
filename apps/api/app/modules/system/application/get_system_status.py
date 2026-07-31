@@ -28,16 +28,19 @@ class GetSystemStatus:
                 key="database",
                 name="数据库",
                 is_configured=self._configuration.database_configured,
+                mode=self._configuration.database_mode,
             ),
             self._configured_component(
                 key="task_queue",
                 name="任务队列",
                 is_configured=self._configuration.task_queue_configured,
+                mode=self._configuration.task_queue_mode,
             ),
             self._configured_component(
                 key="object_storage",
                 name="对象存储",
                 is_configured=self._configuration.object_storage_configured,
+                mode=self._configuration.object_storage_mode,
             ),
         )
         overall = (
@@ -60,13 +63,18 @@ class GetSystemStatus:
         key: str,
         name: str,
         is_configured: bool,
+        mode: str,
     ) -> SystemComponent:
         if is_configured:
             return SystemComponent(
                 key=key,
                 name=name,
                 status=ComponentStatus.CONFIGURED,
-                detail="连接信息已配置；主动连通性探测将在基础设施切片启用",
+                detail=(
+                    f"{mode} 运行适配器已启用"
+                    if mode == "local"
+                    else "连接信息已配置；主动连通性探测将在基础设施切片启用"
+                ),
             )
         return SystemComponent(
             key=key,

@@ -30,7 +30,7 @@ const columns: TableProps<RecognitionCandidate>['columns'] = [
     dataIndex: 'title',
     key: 'title',
     title: '候选',
-    width: 222,
+    width: 170,
     render: (value: string, candidate) => (
       <div className="candidate-queue-title">
         <Typography.Text strong>{value}</Typography.Text>
@@ -50,7 +50,7 @@ const columns: TableProps<RecognitionCandidate>['columns'] = [
     dataIndex: 'confidence',
     key: 'confidence',
     title: '置信度',
-    width: 74,
+    width: 64,
     render: (value: number) => (
       <Progress
         format={() => `${value}%`}
@@ -65,7 +65,7 @@ const columns: TableProps<RecognitionCandidate>['columns'] = [
     dataIndex: 'risk',
     key: 'risk',
     title: '风险',
-    width: 84,
+    width: 74,
     render: (value: RecognitionCandidate['risk']) => (
       <RecognitionCandidateRiskTag risk={value} />
     ),
@@ -115,6 +115,13 @@ export function CandidateQueue({
         onRow={(candidate) => ({
           'aria-selected': candidate.id === selectedCandidateId,
           onClick: () => onSelect(candidate),
+          onKeyDown: (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              onSelect(candidate);
+            }
+          },
+          tabIndex: 0,
         })}
         pagination={false}
         rowClassName={(candidate) =>

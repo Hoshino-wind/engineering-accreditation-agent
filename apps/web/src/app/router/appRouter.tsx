@@ -1,46 +1,77 @@
 import { createBrowserRouter } from 'react-router';
 
-import { GraphDiagnosticsPage } from '../../views/diagnostics';
-import { AttainmentEvaluationPage } from '../../views/evaluations';
-import { TeachingImprovementPage } from '../../views/improvements';
-import { OverviewPage } from '../../views/overview';
-import { RecognitionReviewPage } from '../../views/recognition';
-import { TeachingResourcesPage } from '../../views/resources';
-import { AccreditationSupportPage } from '../../views/support';
-import { AppShell } from '../layouts/AppShell';
+import { AppShell } from '../layouts/app-shell';
 
 export const appRouter = createBrowserRouter([
   {
     path: '/',
     element: <AppShell />,
+    hydrateFallbackElement: (
+      <div className="route-loading" role="status">
+        正在加载工作台…
+      </div>
+    ),
     children: [
       {
         index: true,
-        element: <OverviewPage />,
+        lazy: async () => ({
+          Component: (await import('../../views/overview')).OverviewPage,
+        }),
+      },
+      {
+        path: 'graph',
+        lazy: async () => ({
+          Component: (await import('../../views/graph')).AbilityGraphPage,
+        }),
       },
       {
         path: 'resources',
-        element: <TeachingResourcesPage />,
+        lazy: async () => ({
+          Component: (await import('../../views/resources'))
+            .TeachingResourcesPage,
+        }),
       },
       {
         path: 'recognition',
-        element: <RecognitionReviewPage />,
+        lazy: async () => ({
+          Component: (await import('../../views/recognition'))
+            .RecognitionReviewPage,
+        }),
       },
       {
         path: 'diagnostics',
-        element: <GraphDiagnosticsPage />,
+        lazy: async () => ({
+          Component: (await import('../../views/diagnostics'))
+            .GraphDiagnosticsPage,
+        }),
       },
       {
         path: 'evaluations',
-        element: <AttainmentEvaluationPage />,
+        lazy: async () => ({
+          Component: (await import('../../views/evaluations'))
+            .AttainmentEvaluationPage,
+        }),
       },
       {
         path: 'improvements',
-        element: <TeachingImprovementPage />,
+        lazy: async () => ({
+          Component: (await import('../../views/improvements'))
+            .TeachingImprovementPage,
+        }),
+      },
+      {
+        path: 'governance',
+        lazy: async () => ({
+          Component: (await import('../../views/governance'))
+            .GovernancePage,
+        }),
       },
       {
         path: 'support',
-        element: <AccreditationSupportPage />,
+        lazy: async () => ({
+          Component: (await import('../../views/support'))
+            .AccreditationSupportPage,
+        }),
       },
     ],
   },

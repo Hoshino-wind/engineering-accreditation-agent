@@ -1,42 +1,39 @@
-import {
-  InfoCircleOutlined,
-  PlusCircleOutlined,
-} from '@ant-design/icons';
-import {
-  Alert,
-  Button,
-  Space,
-  Tag,
-  Tooltip,
-  Typography,
-} from 'antd';
+import { InfoCircleOutlined } from '@ant-design/icons';
+import { Alert, Space, Tag, Typography } from 'antd';
 
+import {
+  CreateImprovementCase,
+  usePrototypeOnlyImprovementCases,
+} from '../../../features/create-improvement-case';
 import { ImprovementSummary } from '../../../widgets/improvement-summary';
 import { ImprovementWorkbench } from '../../../widgets/improvement-workbench';
-
-import './teachingImprovementPage.css';
+import { useImprovementCaseRouteSelection } from '../model/useImprovementCaseRouteSelection';
 
 const { Paragraph, Title } = Typography;
 
 export function TeachingImprovementPage() {
+  const { cases, createIssue, localIssueCount } =
+    usePrototypeOnlyImprovementCases();
+  const routeSelection =
+    useImprovementCaseRouteSelection(cases);
+
   return (
-    <main className="teaching-improvement-page">
+    <div className="teaching-improvement-page">
       <div className="teaching-improvement-page-header">
         <div>
           <Space align="center" size={10}>
             <Title level={2}>教学优化与持续改进</Title>
-            <Tag color="geekblue">M7 教学改进</Tag>
+            <Tag color="geekblue">改进闭环</Tag>
             <Tag>试点示例数据</Tag>
+            {localIssueCount > 0 ? (
+              <Tag color="processing">本地新增 {localIssueCount}</Tag>
+            ) : null}
           </Space>
           <Paragraph type="secondary">
             将诊断与评价问题落实为实际教学变更，并通过后续复评判断措施是否有效。
           </Paragraph>
         </div>
-        <Tooltip title="正式问题创建将在 M7 后端业务切片接入">
-          <Button disabled icon={<PlusCircleOutlined />} type="primary">
-            新建改进问题
-          </Button>
-        </Tooltip>
+        <CreateImprovementCase onCreate={createIssue} />
       </div>
 
       <Alert
@@ -49,7 +46,11 @@ export function TeachingImprovementPage() {
       />
 
       <ImprovementSummary />
-      <ImprovementWorkbench />
-    </main>
+      <ImprovementWorkbench
+        cases={cases}
+        onSelectedCaseIdChange={routeSelection.selectCase}
+        selectedCaseId={routeSelection.selectedCaseId}
+      />
+    </div>
   );
 }

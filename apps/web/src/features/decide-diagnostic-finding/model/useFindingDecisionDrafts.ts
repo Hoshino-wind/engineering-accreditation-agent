@@ -1,6 +1,5 @@
-import { useState } from 'react';
-
 import type { FindingDecision } from '../../../entities/diagnostic-finding';
+import { useLocalStorageState } from '../../../shared/lib';
 
 export interface FindingDecisionDraft {
   decision?: FindingDecision;
@@ -12,9 +11,9 @@ const emptyDraft: FindingDecisionDraft = {
 };
 
 export function useFindingDecisionDrafts() {
-  const [drafts, setDrafts] = useState<
+  const [drafts, setDrafts] = useLocalStorageState<
     Record<string, FindingDecisionDraft>
-  >({});
+  >('engineering-accreditation.m5-decision-drafts.v1', {});
 
   const getDraft = (findingId: string) => drafts[findingId] ?? emptyDraft;
 

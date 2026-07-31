@@ -11,9 +11,12 @@ def build_system_runtime_configuration(
         service="engineering-accreditation-api",
         version=settings.app_version,
         environment=settings.environment,
-        database_configured=settings.database_url is not None,
-        task_queue_configured=settings.redis_url is not None,
-        object_storage_configured=settings.object_storage_endpoint is not None,
+        database_configured=True,
+        task_queue_configured=True,
+        object_storage_configured=True,
+        database_mode="local",
+        task_queue_mode="local",
+        object_storage_mode="local",
     )
 
 

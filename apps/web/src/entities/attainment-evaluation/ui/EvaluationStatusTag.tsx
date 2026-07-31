@@ -7,19 +7,19 @@ const statusConfig: Record<
   { color: string; label: string }
 > = {
   'awaiting-review': {
-    color: 'orange',
+    color: 'warning',
     label: '待复核',
   },
   approved: {
-    color: 'green',
+    color: 'success',
     label: '已批准',
   },
   blocked: {
-    color: 'red',
+    color: 'error',
     label: '已阻断',
   },
   'not-achieved': {
-    color: 'red',
+    color: 'error',
     label: '未达标',
   },
 };

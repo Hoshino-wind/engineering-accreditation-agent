@@ -16,6 +16,7 @@ interface EvaluationReviewControlsProps {
   evaluation: AttainmentEvaluationItem;
   onDecisionChange: (decision: EvaluationReviewDecision) => void;
   onNoteChange: (note: string) => void;
+  onSubmit: () => void;
 }
 
 export function EvaluationReviewControls({
@@ -24,6 +25,7 @@ export function EvaluationReviewControls({
   evaluation,
   onDecisionChange,
   onNoteChange,
+  onSubmit,
 }: EvaluationReviewControlsProps) {
   const blocked = blockers.length > 0;
 
@@ -76,7 +78,17 @@ export function EvaluationReviewControls({
         showCount
         value={draft.note}
       />
-      <Button block disabled size="small" type="primary">
+      <Button
+        block
+        disabled={
+          blocked ||
+          evaluation.status === 'approved' ||
+          !draft.decision
+        }
+        onClick={onSubmit}
+        size="small"
+        type="primary"
+      >
         提交确认
       </Button>
     </section>

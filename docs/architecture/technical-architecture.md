@@ -43,6 +43,7 @@ flowchart LR
 - 组件交互状态使用 `useState` / `useReducer`。
 - 服务端数据使用 TanStack Query。
 - 会话、当前专业和全局展示偏好使用小范围 Context。
+- 跨模块本地业务操作事件由 `entities/workflow-event` 统一建模和订阅；浏览器存储只服务原型通知与审计界面，正式审计事实由 M9 后端 `audit` 模块持有。
 - 首期不默认引入 Redux；只有出现可证明的跨页面复杂客户端状态时再评估。
 
 ### 3.2 后端

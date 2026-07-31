@@ -7,11 +7,11 @@ const priorityPresentation: Record<
   { color: string; label: string }
 > = {
   high: {
-    color: 'red',
+    color: 'error',
     label: '高',
   },
   medium: {
-    color: 'gold',
+    color: 'warning',
     label: '中',
   },
 };

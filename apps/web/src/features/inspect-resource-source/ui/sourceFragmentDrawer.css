@@ -19,12 +19,12 @@
   align-items: flex-start;
   gap: 12px;
   padding: 16px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--app-border-soft);
 }
 
 .source-fragment-item > .anticon {
   margin-top: 4px;
-  color: #1677ff;
+  color: var(--app-primary);
 }
 
 .source-fragment-item .ant-typography {

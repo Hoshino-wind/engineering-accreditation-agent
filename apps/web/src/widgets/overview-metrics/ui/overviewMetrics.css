@@ -1,6 +1,6 @@
 .overview-metric-card {
   min-height: 112px;
-  border-top: 3px solid #91caff;
+  border-top: 3px solid var(--app-primary-border);
 }
 
 .overview-metric-card .ant-card-body {
@@ -9,11 +9,11 @@
 }
 
 .overview-metric-card--warning {
-  border-top-color: #ffc53d;
+  border-top-color: var(--app-warning);
 }
 
 .overview-metric-card--danger {
-  border-top-color: #ff7875;
+  border-top-color: var(--app-error);
 }
 
 .overview-metric-card .ant-statistic-title {
@@ -22,20 +22,20 @@
 
 .overview-metric-card .ant-statistic-content-prefix {
   margin-inline-end: 8px;
-  color: #1677ff;
+  color: var(--app-primary);
   font-size: 18px;
 }
 
 .overview-metric-card--warning .ant-statistic-content-prefix {
-  color: #d89614;
+  color: var(--app-warning);
 }
 
 .overview-metric-card--danger .ant-statistic-content-prefix {
-  color: #cf1322;
+  color: var(--app-error);
 }
 
 .overview-metric-detail {
   margin-top: 6px;
-  color: #8c8c8c;
+  color: var(--app-text-secondary);
   font-size: 12px;
 }

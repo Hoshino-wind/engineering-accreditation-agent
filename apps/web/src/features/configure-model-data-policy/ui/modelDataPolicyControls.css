@@ -1,0 +1,58 @@
+.governance-policy-grid {
+  display: grid;
+  height: 100%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.governance-policy-card {
+  height: fit-content;
+}
+
+.governance-policy-card .ant-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.governance-policy-card .ant-typography {
+  margin-bottom: 0;
+}
+
+.governance-policy-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.governance-policy-field .ant-select {
+  width: 100%;
+}
+
+.governance-policy-toggle {
+  display: flex;
+  min-height: 54px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 12px;
+  border: 1px solid var(--app-border);
+  border-radius: 9px;
+  background: var(--app-surface-soft);
+}
+
+.governance-policy-toggle > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.governance-policy-toggle .ant-typography-secondary {
+  font-size: 12px;
+}
+
+@media (max-width: 1420px) {
+  .governance-policy-grid {
+    grid-template-columns: 1fr;
+    overflow: auto;
+  }
+}

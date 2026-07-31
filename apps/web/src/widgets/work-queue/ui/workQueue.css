@@ -15,10 +15,10 @@
 }
 
 .work-queue .work-queue-row--high > td:first-child {
-  box-shadow: inset 3px 0 0 #ff7875;
+  box-shadow: inset 3px 0 0 var(--app-error);
 }
 
 .work-queue-action {
-  color: #1677ff;
+  color: var(--app-primary);
   font-size: 13px;
 }

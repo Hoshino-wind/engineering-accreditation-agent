@@ -2,7 +2,6 @@ import { Card, Col, Row, Space, Statistic, Typography } from 'antd';
 
 import { prototypeOnlyAttainmentSummary } from '../model/prototypeOnlyAttainmentSummary';
 
-import './attainmentSummary.css';
 
 export function AttainmentSummary() {
   return (

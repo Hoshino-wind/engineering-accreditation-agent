@@ -1,6 +1,7 @@
+from fastapi.testclient import TestClient
+
 from app.core.config import get_settings
 from app.main import create_app
-from fastapi.testclient import TestClient
 
 
 def test_system_status_is_exposed_through_public_api() -> None:
@@ -12,7 +13,7 @@ def test_system_status_is_exposed_through_public_api() -> None:
     payload = response.json()
     assert payload["service"] == "engineering-accreditation-api"
     assert payload["version"] == "0.1.0"
-    assert payload["status"] == "needs_configuration"
+    assert payload["status"] == "operational"
     assert [item["key"] for item in payload["components"]] == [
         "api",
         "database",
@@ -20,6 +21,11 @@ def test_system_status_is_exposed_through_public_api() -> None:
         "object_storage",
     ]
     assert payload["components"][0]["status"] == "operational"
+    assert all(
+        item["status"] in {"operational", "configured"}
+        for item in payload["components"]
+    )
+    assert payload["components"][1]["detail"] == "local 运行适配器已启用"
 
 
 def test_openapi_contains_versioned_system_status_contract() -> None:

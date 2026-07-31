@@ -6,7 +6,7 @@
 
 | 层级 | 内容 | 是否可直接用于正式评价 |
 | --- | --- | --- |
-| 原始资源层 | 原始文件、评分记录、学生报告及不可变版本 | 需经过授权、解析和映射 |
+| 资源与材料层 | 教学资源及版本、原始文件、评分记录、学生报告与不可变版本 | 需经过授权、解析和映射 |
 | 解析证据层 | 文本片段、表格、页码、OCR、来源坐标和内容哈希 | 否 |
 | 候选审核层 | 识别出的节点、关系、冲突、置信度和人工决定 | 否，审核通过后提交正式图谱 |
 | 正式图谱层 | 已发布节点、关系、来源、版本和生效周期 | 是，属于权威业务事实 |
@@ -15,7 +15,7 @@
 基本约束：
 
 - 候选不能被分析、评价或报告当作正式关系。
-- 正式图谱事实只能由 M2 发布和变更。
+- 正式图谱 Schema、语义节点、关系和快照只能由 M2 发布和变更；M3 教学资源以固定版本引用进入图谱。
 - 诊断发现不直接修改图谱，必须回到事实所属模块处理。
 - AI 输出可以进入候选和解释，不进入正式数值计算路径。
 
@@ -39,21 +39,27 @@
 - `GraphNode`：不随内容版本变化的稳定节点身份。
 - `GraphNodeVersion`：节点在特定版本的名称、定义、属性和状态。
 - `GraphEdgeVersion`：两个指定节点版本之间的正式有向关系。
-- `GraphEvidenceRef`：节点或关系引用的材料证据片段。
+- `CapabilityElement`：`Ability`、`Skill`、`Knowledge` 三类能力语义节点。
+- `GraphSourceRef`：节点或关系对 M3 材料版本和证据片段的来源引用。
+- `ExternalObjectVersionRef`：对 M3 教学资源等外部权威对象具体版本的引用。
 - `GraphReviewDecision`：发布、变更、失效和批准记录。
 - `GraphVersionSnapshot`：供分析、评价和支撑使用的图谱版本集合。
 - `GraphImpact`：节点或关系变化影响的评价、改进和支撑对象。
 
-图谱节点至少覆盖：
+首期主图节点限定为：
 
-- 认证与培养：毕业要求、指标点、专业、培养方案；
-- 教学目标：课程、课程目标；
-- 实验教学：实验项目、实验环节、知识、技能、能力；
-- 资源与评价：教学资源、Rubric、评分项；
-- 应用引用：评价结果、质量问题和改进措施引用。
+- 认证要求：`GraduateOutcome`、`PerformanceIndicator`；
+- 能力语义：`Ability`、`Skill`、`Knowledge`；
+- 教学承载：`Course`、`CourseOutcome`、`Experiment`；
+- 评价结构：`AssessmentTask`、`RubricCriterion`；
+- 资源支撑：`TeachingResource`，其权威内容与版本归 M3，M2 固定版本引用。
+
+可观察行为、能力领域、认知层级、难度和资源类型是节点属性。专业、培养方案、评价周期和教学班是范围上下文；材料版本和证据片段是来源引用；识别候选、诊断发现、评价结果、改进问题/措施和支撑包是应用记录。后三类都不是主图节点。
 
 ### 2.3 教学资源与证据
 
+- `TeachingResource`：可跨材料引用的设备、软件环境、数据集、案例、仿真平台或指导资源的稳定身份。
+- `TeachingResourceVersion`：资源名称、类型、能力边界、适用课程/实验、可用状态和有效期的不可变版本。
 - `Material`：同一逻辑材料的稳定身份。
 - `MaterialVersion`：不可变文件版本、对象键、内容哈希和状态。
 - `MaterialClassification`：课程、周期、类型和确认状态。
@@ -61,19 +67,23 @@
 - `SensitiveContentFinding`：个人信息或受限内容标记。
 - `MaterialAccessEvent`：高风险查看、下载和外发记录。
 
+教学资源与材料不可混用：教学资源回答“实验实际使用什么资产”，材料回答“课程大纲、指导书、评分表等内容记录在哪里”。一个教学资源可由多份材料描述，一份材料也可同时证明多个资源或图谱事实。M3 拥有资源及材料版本；M2 只保存固定资源版本引用及 `USES` / `ENABLES` 正式关系。
+
 原始文件存入 S3 兼容对象存储；PostgreSQL 只保存业务元数据、对象键、哈希、来源坐标和权限信息。
+
+本地开发阶段使用等价端口的轻量适配器：SQLite 保存材料元数据和 M2 图谱工作区，本地内容寻址目录保存原件，FastAPI 后台任务执行扫描和解析。M2 图谱草稿使用聚合状态存储，正式快照与审计事件追加写入，并用修订号防止并发覆盖。领域与应用层不依赖这些实现，试点部署可替换为 PostgreSQL、S3/MinIO 和 Celery，而不改变公开契约。
 
 ### 2.4 智能识别与人工审核
 
 - `RecognitionRun`：一次识别任务，固定材料、图谱 Schema 和处理器版本。
-- `NodeCandidate`：知识、技能、能力、实验、Rubric 或评分项候选。
+- `NodeCandidate`：知识、技能、能力、课程、实验、考核任务或评分项等 M2 节点候选。
 - `EdgeCandidate`：两个候选或已有节点间的关系候选。
 - `CandidateEvidenceRef`：候选对应的原文来源。
 - `CandidateConflict`：重复、冲突、无来源或版本不一致问题。
 - `CandidateReviewDecision`：接受、修改、合并、拆分或驳回。
 - `HumanFeedback`：脱敏后的修改原因与质量评测标签。
 
-已接受候选不会原地变成正式事实，而是形成提交给 M2 的正式化请求，由 M2 校验和发布。
+已接受候选不会原地变成正式事实，而是形成提交给 M2 的正式化请求，由 M2 校验和发布。教学资源候选必须先由 M3 解析为稳定资源版本；Rubric 分值和计分配置草稿进入 M6，而不是作为 M2 主图节点。
 
 ### 2.5 图谱分析与一致性诊断
 
@@ -88,8 +98,9 @@
 
 ### 2.6 达成度评价
 
-- `Rubric` / `RubricCriterion`：评分规则和评分项。
+- `RubricVersion` / `CriterionScoringRule`：计分量表、分值和规则；每个计分项引用 M2 的正式 `RubricCriterion` 节点版本。
 - `ScoreImportBatch` / `ScoreRecord`：受控导入批次及原始或汇总评分记录。
+- `EvaluationPolicyEdgeBinding`：为指定 `RubricCriterion CONTRIBUTES_TO CourseOutcome` 关系版本绑定权重和聚合参数。
 - `EvaluationPolicyVersion`：公式、权重、阈值和缺失处理策略。
 - `EvaluationInputSnapshot`：图谱版本、关系集合、数据范围和输入哈希。
 - `DataValidationReport`：样本、缺失、异常和映射校验结果。
@@ -121,22 +132,42 @@
 ### 3.1 首版关系类型
 
 ```text
-毕业要求 → 分解为 → 指标点
-指标点 → 对应 → 能力
-课程目标 → 支撑 → 指标点
-实验项目 → 支撑 → 课程目标
-实验项目 → 培养 → 能力/技能
-实验项目 → 涉及 → 知识
-实验项目 → 包含 → 实验环节
-实验项目 → 使用 → 教学资源
-实验项目 → 采用 → Rubric
-Rubric → 包含 → 评分项
-评分项 → 评价 → 能力/技能
-证据片段 → 证明 → 节点或关系
-改进措施 → 变更 → 教学对象版本
+GraduateOutcome REFINES PerformanceIndicator
+PerformanceIndicator EXPECTS Ability
+Ability COMPOSED_OF Skill
+Skill REQUIRES Knowledge
+
+Course DEFINES CourseOutcome
+Experiment BELONGS_TO Course
+CourseOutcome SUPPORTS PerformanceIndicator
+Experiment CONTRIBUTES_TO CourseOutcome
+Experiment CULTIVATES Ability
+Experiment TRAINS Skill
+Experiment COVERS Knowledge
+
+Experiment USES TeachingResource
+TeachingResource ENABLES Skill / Knowledge
+
+Experiment CONTAINS_TASK AssessmentTask
+AssessmentTask CONTAINS_CRITERION RubricCriterion
+RubricCriterion ASSESSES Ability / Skill
+RubricCriterion CONTRIBUTES_TO CourseOutcome
 ```
 
 `GraphSchemaVersion` 定义允许的起点类型、关系类型、终点类型、必填属性和基数约束。业务代码不得通过任意字符串创建新关系类型。
+
+`ASSESSES` 表达直接测量对象，不能携带评价结论；`CONTRIBUTES_TO` 表达分数聚合去向，不能替代能力语义。分值、权重、阈值、样本和中间值归 M6 的计分配置、策略和运行快照，不进入 `GraphEdgeVersion`。
+
+禁止存储以下快捷边：
+
+- 课程目标直接支撑毕业要求；
+- 实验直接支撑指标点或毕业要求；
+- 评分项直接评价课程目标、指标点或毕业要求；
+- 证据片段“证明”节点或关系；
+- 评价结果、诊断发现或改进措施与教学对象之间的应用边；
+- 反向边、传递闭包边或未经人工正式化的 AI 推断边。
+
+反向导航、跨层路径和应用追溯由查询投影或引用解析生成，不建立第二套权威事实。完整端点和基数约束见 [ADR-001](decisions/001-experimental-teaching-ontology.md)。
 
 ### 3.2 正式关系字段
 
@@ -144,7 +175,7 @@ Rubric → 包含 → 评分项
 
 - 稳定关系身份和当前版本；
 - 起点、终点及其具体节点版本；
-- 关系类型、权重或强度（适用时）；
+- 关系类型和关系语义属性；
 - 生效专业、课程和周期；
 - 创建方式：人工、规则辅助或 AI 辅助；
 - 证据片段和理由；
@@ -156,7 +187,7 @@ Rubric → 包含 → 评分项
 以下内容修改时不得原地覆盖历史值：
 
 - 图谱 Schema、节点和正式关系；
-- 教学资源、课程目标、实验项目、Rubric 和评分项；
+- 教学资源、课程目标、实验项目、评分项和 Rubric 计分配置；
 - 评价公式、权重、阈值和缺失策略；
 - 诊断规则；
 - 改进措施和实际教学对象变更；
@@ -165,7 +196,17 @@ Rubric → 包含 → 评分项
 
 上游对象创建新版本后，旧关系不自动迁移。系统先产生影响清单，再由相应负责人确认新关系和适用周期。
 
-### 3.4 存储选择
+### 3.4 所有权与状态分离
+
+| 模块 | 权威对象 | 独立状态轴 |
+| --- | --- | --- |
+| M2 | 图谱 Schema、语义节点版本、关系版本、发布快照和审核决定 | 图谱修订生命周期；单项审核决定；节点/关系效力 |
+| M3 | 教学资源/材料稳定身份与版本、处理产物和证据片段 | 材料处理状态；教学资源生命周期；当前有效版本 |
+| M6 | 计分配置、权重、阈值、评分输入、评价策略、运行和结果 | 输入就绪度；运行状态；达成结论；审批状态 |
+
+M2 通过 `teaching_resource_version_id` 引用 M3，通过 `graph_node_version_id` 和 `graph_edge_version_id` 向 M6 提供正式结构。M3 不发布能力关系；M6 不修改图谱，也不把 `blocked`、`failed`、`not_achieved` 和 `rejected` 压缩为同一状态枚举。
+
+### 3.5 存储选择
 
 首期使用 PostgreSQL 保存图谱节点、边、版本、来源和状态，原因是：
 
@@ -202,8 +243,9 @@ pgvector 只保存经过授权的脱敏片段向量，用于相似内容召回�
 
 评价引擎负责：
 
-- 按正式图谱把评分项映射到能力、课程目标或指标点；
-- 按已批准权重聚合分数；
+- 读取正式 `ASSESSES` 关系确定评分项直接评价的能力或技能；
+- 读取正式 `CONTRIBUTES_TO` 关系确定课程目标聚合路径；
+- 按 `EvaluationPolicyEdgeBinding` 和已批准策略聚合分数；
 - 执行缺失值、异常值和有效样本规则；
 - 计算个体、课程目标、课程和毕业要求层面的结果；
 - 输出完整中间值和解释字段，支持逐层复核。
@@ -243,7 +285,8 @@ flowchart LR
 
 AI 适用于：
 
-- 从非结构化材料提取实验、知识、技能、能力、Rubric 和评分项候选；
+- 从非结构化材料提取课程、实验、知识、技能、能力、考核任务和评分项候选；
+- 识别教学资源描述并提交 M3 解析，识别 Rubric 计分配置草稿并提交 M6 人工确认；
 - 推荐节点之间的候选关系；
 - 比较多份材料中的复杂语义差异；
 - 基于已计算结果生成带引用解释；
@@ -273,11 +316,12 @@ AI 适用于：
 
 ```text
 workspace_id / evaluation_cycle_id
+  → teaching_resource_version_id
   → material_version_id / evidence_fragment_id
   → recognition_run_id / candidate_review_decision_id
-  → graph_schema_version_id / graph_node_version_id / graph_edge_version_id
+  → graph_schema_version_id / graph_node_version_id / graph_edge_version_id / graph_version_snapshot_id
   → graph_analysis_run_id / diagnostic_finding_id
-  → evaluation_policy_version_id / evaluation_run_id
+  → evaluation_policy_version_id / evaluation_input_snapshot_id / evaluation_run_id
   → quality_issue_id / improvement_action_id
   → changed_object_version_id / updated_graph_version_id
   → reevaluation_id

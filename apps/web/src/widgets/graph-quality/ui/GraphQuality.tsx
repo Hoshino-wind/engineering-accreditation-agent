@@ -5,14 +5,14 @@ import './graphQuality.css';
 
 function getProgressColor(percent: number, target: number) {
   if (percent >= target) {
-    return '#389e0d';
+    return 'var(--app-success)';
   }
 
   if (target - percent <= 10) {
-    return '#1677ff';
+    return 'var(--app-primary)';
   }
 
-  return '#d89614';
+  return 'var(--app-warning)';
 }
 
 export function GraphQuality() {

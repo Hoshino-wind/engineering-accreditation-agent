@@ -27,7 +27,9 @@ import {
 
 interface TeachingResourceDetailProps {
   onInspectSource: () => void;
+  onRetry?: (materialId: string) => void;
   resource: TeachingResource | null;
+  retrying?: boolean;
 }
 
 const processingStageIcon: Record<ProcessingStageStatus, React.ReactNode> = {
@@ -37,9 +39,17 @@ const processingStageIcon: Record<ProcessingStageStatus, React.ReactNode> = {
   error: <CloseCircleFilled className="resource-stage-icon--error" />,
 };
 
+function compactHash(value: string): string {
+  return value.length > 30
+    ? `${value.slice(0, 15)}…${value.slice(-10)}`
+    : value;
+}
+
 export function TeachingResourceDetail({
   onInspectSource,
+  onRetry,
   resource,
+  retrying = false,
 }: TeachingResourceDetailProps) {
   if (!resource) {
     return (
@@ -116,7 +126,7 @@ export function TeachingResourceDetail({
             span: 2,
             children: (
               <Typography.Text copyable={{ text: resource.hash }}>
-                {resource.hash}
+                {compactHash(resource.hash)}
               </Typography.Text>
             ),
           },
@@ -165,8 +175,21 @@ export function TeachingResourceDetail({
         </Button>
         {resource.status === 'ready' ? (
           <Button href="/recognition">进入 M4 审核</Button>
+        ) : resource.status === 'failed' && onRetry ? (
+          <Button
+            loading={retrying}
+            onClick={() => onRetry(resource.id)}
+          >
+            重新扫描与解析
+          </Button>
         ) : (
-          <Tooltip title="处理操作将在 M3 后端业务切片接入">
+          <Tooltip
+            title={
+              resource.status === 'quarantined'
+                ? '安全隔离文件需要确认后重新上传'
+                : '当前材料仍在处理流水线中'
+            }
+          >
             <Button disabled>处理该材料</Button>
           </Tooltip>
         )}

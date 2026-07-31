@@ -3,7 +3,7 @@
   flex-direction: column;
   gap: 8px;
   padding: 10px 12px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--app-border-soft);
 }
 
 .diagnostic-finding-filter-row {

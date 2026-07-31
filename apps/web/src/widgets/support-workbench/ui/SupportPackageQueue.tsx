@@ -31,20 +31,18 @@ const columns: TableProps<SupportPackage>['columns'] = [
   {
     key: 'package',
     title: '支撑包',
-    width: 190,
+    width: 142,
     render: (_, supportPackage) => (
-      <Typography.Text ellipsis strong>
-        {supportPackage.displayId.replace('SP-2026-', 'SP-')}{' '}
-        {supportPackage.title}
-      </Typography.Text>
+      <div className="support-queue-title">
+        <Typography.Text ellipsis strong>
+          {supportPackage.displayId.replace('SP-2026-', 'SP-')}{' '}
+          {supportPackage.title}
+        </Typography.Text>
+        <Typography.Text ellipsis type="secondary">
+          {supportPackage.course}
+        </Typography.Text>
+      </div>
     ),
-  },
-  {
-    dataIndex: 'course',
-    ellipsis: true,
-    key: 'course',
-    title: '课程',
-    width: 76,
   },
   {
     key: 'template',

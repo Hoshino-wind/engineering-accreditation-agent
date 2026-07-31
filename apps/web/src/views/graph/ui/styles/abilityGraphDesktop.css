@@ -1,0 +1,17 @@
+@media (max-width: 1460px) {
+  .ability-graph-workbench {
+    grid-template-columns: 225px minmax(430px, 1fr) 300px;
+  }
+
+  .graph-publish-view {
+    grid-template-columns: minmax(500px, 1fr) 340px;
+  }
+
+  .graph-version-workbench {
+    grid-template-columns: 225px minmax(310px, 1fr) 310px;
+  }
+
+  .graph-canonical-relation {
+    padding-inline: 7px;
+  }
+}

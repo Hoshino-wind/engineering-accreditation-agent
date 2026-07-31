@@ -28,6 +28,7 @@ interface EvaluationConfigurationPanelProps {
   onDecisionChange: (decision: EvaluationReviewDecision) => void;
   onInspectTrace: () => void;
   onNoteChange: (note: string) => void;
+  onSubmit: () => void;
 }
 
 export function EvaluationConfigurationPanel({
@@ -37,6 +38,7 @@ export function EvaluationConfigurationPanel({
   onDecisionChange,
   onInspectTrace,
   onNoteChange,
+  onSubmit,
 }: EvaluationConfigurationPanelProps) {
   if (!evaluation || !calculation) {
     return (
@@ -125,6 +127,7 @@ export function EvaluationConfigurationPanel({
         evaluation={evaluation}
         onDecisionChange={onDecisionChange}
         onNoteChange={onNoteChange}
+        onSubmit={onSubmit}
       />
     </Card>
   );

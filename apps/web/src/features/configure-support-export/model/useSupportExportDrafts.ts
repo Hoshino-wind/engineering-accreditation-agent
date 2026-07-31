@@ -1,6 +1,5 @@
-import { useState } from 'react';
-
 import type { SupportExportFormat } from '../../../entities/support-package';
+import { useLocalStorageState } from '../../../shared/lib';
 
 export interface SupportExportDraft {
   format: SupportExportFormat;
@@ -13,9 +12,9 @@ const emptyDraft: SupportExportDraft = {
 };
 
 export function useSupportExportDrafts() {
-  const [drafts, setDrafts] = useState<
+  const [drafts, setDrafts] = useLocalStorageState<
     Record<string, SupportExportDraft>
-  >({});
+  >('engineering-accreditation.m8-export-drafts.v1', {});
 
   const getDraft = (packageId: string) =>
     drafts[packageId] ?? emptyDraft;

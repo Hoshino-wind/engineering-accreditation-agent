@@ -21,6 +21,7 @@ interface ImprovementClosurePanelProps {
     >,
   ) => void;
   onNoteChange: (note: string) => void;
+  onSubmit: () => void;
 }
 
 export function ImprovementClosurePanel({
@@ -29,6 +30,7 @@ export function ImprovementClosurePanel({
   improvementCase,
   onEffectivenessChange,
   onNoteChange,
+  onSubmit,
 }: ImprovementClosurePanelProps) {
   if (!improvementCase || !assessment) {
     return (
@@ -85,7 +87,7 @@ export function ImprovementClosurePanel({
               : `Δ ${delta >= 0 ? '+' : ''}${delta.toFixed(2)}`}
           </Typography.Text>
           {reevaluation ? (
-            <Tag color={targetReached ? 'success' : 'orange'}>
+            <Tag color={targetReached ? 'success' : 'warning'}>
               {targetReached ? '已达到目标' : '未达到目标'}
             </Tag>
           ) : (
@@ -121,6 +123,7 @@ export function ImprovementClosurePanel({
         improvementCase={improvementCase}
         onEffectivenessChange={onEffectivenessChange}
         onNoteChange={onNoteChange}
+        onSubmit={onSubmit}
         requiresRevisedAction={assessment.requiresRevisedAction}
       />
     </Card>

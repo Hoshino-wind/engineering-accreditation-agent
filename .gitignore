@@ -7,6 +7,7 @@
 data-private/
 uploads/
 storage/
+.local-data/
 *.rar
 
 # Python

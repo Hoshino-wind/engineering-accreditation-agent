@@ -1,7 +1,6 @@
 import { Card, Col, Row, Space, Statistic, Typography } from 'antd';
 
 import { prototypeOnlyRecognitionSummary } from '../model/prototypeOnlyRecognitionSummary';
-import './recognitionSummary.css';
 
 export function RecognitionSummary() {
   return (

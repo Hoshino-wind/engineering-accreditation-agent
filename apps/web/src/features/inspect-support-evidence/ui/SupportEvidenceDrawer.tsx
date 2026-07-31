@@ -87,7 +87,7 @@ export function SupportEvidenceDrawer({
                       color={
                         ['formal', 'confirmed'].includes(source.state)
                           ? 'success'
-                          : 'orange'
+                          : 'warning'
                       }
                     >
                       {source.state === 'formal'

@@ -22,6 +22,7 @@ interface DiagnosticFindingDispositionProps {
   onDecisionChange: (decision: FindingDecision) => void;
   onInspectEvidence: () => void;
   onNoteChange: (note: string) => void;
+  onSubmit: () => void;
 }
 
 export function DiagnosticFindingDisposition({
@@ -30,6 +31,7 @@ export function DiagnosticFindingDisposition({
   onDecisionChange,
   onInspectEvidence,
   onNoteChange,
+  onSubmit,
 }: DiagnosticFindingDispositionProps) {
   if (!finding) {
     return (
@@ -91,6 +93,7 @@ export function DiagnosticFindingDisposition({
         finding={finding}
         onDecisionChange={onDecisionChange}
         onNoteChange={onNoteChange}
+        onSubmit={onSubmit}
       />
     </Card>
   );

@@ -13,7 +13,10 @@ import {
 } from 'antd';
 import { useNavigate } from 'react-router';
 
-import { GraphPipeline } from '../../../widgets/graph-pipeline';
+import {
+  getPrimaryGraphPipelineStage,
+  GraphPipeline,
+} from '../../../widgets/graph-pipeline';
 import { GraphQuality } from '../../../widgets/graph-quality';
 import { OverviewMetrics } from '../../../widgets/overview-metrics';
 import { PilotReadiness } from '../../../widgets/pilot-readiness';
@@ -25,35 +28,40 @@ const { Paragraph, Title } = Typography;
 
 export function OverviewPage() {
   const navigate = useNavigate();
+  const primaryStage = getPrimaryGraphPipelineStage();
 
   return (
-    <main className="overview-page">
+    <div className="overview-page">
       <div className="overview-page-header">
         <div>
           <Space align="center" size={10}>
-            <Title level={2}>实验教学能力图谱总览</Title>
-            <Tag color="geekblue">M1 总览与任务</Tag>
+            <Title level={2}>实验教学能力工作台</Title>
+            <Tag color="geekblue">计算机科学与技术</Tag>
             <Tag>试点示例数据</Tag>
           </Space>
           <Paragraph type="secondary">
-            从教学材料出发，跟踪图谱构建、诊断、评价与教学改进的完整状态。
+            先处理当前阻断，再沿能力培养与评价路径完成诊断、改进和复评。
           </Paragraph>
         </div>
         <Button
           icon={<ArrowRightOutlined />}
-          onClick={() => navigate('/support')}
+          onClick={() => navigate(primaryStage?.route ?? '/graph')}
           type="primary"
         >
-          进入认证支撑
+          {primaryStage?.actionLabel ?? '查看正式能力图谱'}
         </Button>
       </div>
 
       <Alert
         className="overview-notice"
-        description="当前 5 个支撑包中 2 个存在导出阻断；未批准评价、未闭环改进或失效引用必须返回事实所属模块修正。页面业务数量为试点示例，系统运行状态来自真实 API。"
+        description={
+          primaryStage
+            ? `${primaryStage.description}。完成后系统会按“正式图谱—能力诊断—达成度评价—教学改进”继续给出下一步。`
+            : '当前主流程没有待处理阻断，可以进入正式图谱核对已发布事实。'
+        }
         icon={<InfoCircleOutlined />}
         showIcon
-        title="当前阶段：认证支撑包校验与受控导出准备"
+        title={`当前下一步：${primaryStage?.title ?? '核对正式图谱'}`}
         type="warning"
       />
 
@@ -80,6 +88,6 @@ export function OverviewPage() {
           <RecentActivity />
         </Col>
       </Row>
-    </main>
+    </div>
   );
 }

@@ -12,10 +12,20 @@ import { TeachingResourceInventory } from './TeachingResourceInventory';
 
 import './teachingResourceWorkbench.css';
 
-export function TeachingResourceWorkbench() {
-  const filters = useTeachingResourceFilters(prototypeOnlyTeachingResources);
+interface TeachingResourceWorkbenchProps {
+  onRetry?: (materialId: string) => void;
+  resources?: TeachingResource[];
+  retryingResourceId?: string;
+}
+
+export function TeachingResourceWorkbench({
+  onRetry,
+  resources = prototypeOnlyTeachingResources,
+  retryingResourceId,
+}: TeachingResourceWorkbenchProps) {
+  const filters = useTeachingResourceFilters(resources);
   const [selectedResourceId, setSelectedResourceId] = useState(
-    prototypeOnlyTeachingResources[0]?.id,
+    resources[0]?.id,
   );
   const [sourceDrawerOpen, setSourceDrawerOpen] = useState(false);
 
@@ -52,7 +62,9 @@ export function TeachingResourceWorkbench() {
         <Col span={7}>
           <TeachingResourceDetail
             onInspectSource={() => setSourceDrawerOpen(true)}
+            onRetry={onRetry}
             resource={selectedResource}
+            retrying={retryingResourceId === selectedResource?.id}
           />
         </Col>
       </Row>

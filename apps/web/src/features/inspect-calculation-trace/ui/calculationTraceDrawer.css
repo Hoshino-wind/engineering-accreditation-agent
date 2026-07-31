@@ -17,10 +17,10 @@
 .calculation-trace-formula {
   margin-bottom: 10px;
   padding: 10px 12px;
-  border: 1px solid #d9d9d9;
-  border-radius: 6px;
-  background: #fafafa;
-  color: #262626;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-small);
+  background: var(--app-surface-soft);
+  color: var(--app-text);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
@@ -35,13 +35,13 @@
   grid-template-columns: 24px minmax(0, 1fr);
   gap: 10px;
   padding: 12px;
-  border: 1px solid #f0f0f0;
-  border-radius: 6px;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--app-radius-small);
 }
 
 .calculation-trace-evidence article > .anticon {
   margin-top: 2px;
-  color: #1677ff;
+  color: var(--app-primary);
 }
 
 .calculation-trace-evidence article > div {

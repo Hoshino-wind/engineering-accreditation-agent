@@ -53,8 +53,8 @@ const sourceStateView: Record<
 > = {
   confirmed: { color: 'success', label: '已确认' },
   formal: { color: 'success', label: '正式' },
-  open: { color: 'orange', label: '未闭环' },
-  unapproved: { color: 'orange', label: '未批准' },
+  open: { color: 'warning', label: '未闭环' },
+  unapproved: { color: 'warning', label: '未批准' },
 };
 
 export function SupportPackageContentPanel({

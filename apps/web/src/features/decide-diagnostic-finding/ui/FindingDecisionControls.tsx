@@ -30,6 +30,7 @@ interface FindingDecisionControlsProps {
   finding: DiagnosticFinding;
   onDecisionChange: (decision: FindingDecision) => void;
   onNoteChange: (note: string) => void;
+  onSubmit: () => void;
 }
 
 export function FindingDecisionControls({
@@ -37,6 +38,7 @@ export function FindingDecisionControls({
   finding,
   onDecisionChange,
   onNoteChange,
+  onSubmit,
 }: FindingDecisionControlsProps) {
   return (
     <section className="finding-decision-controls">
@@ -92,15 +94,24 @@ export function FindingDecisionControls({
               </Button>
             ) : undefined
           }
-          description="处置决定只保存在当前页面，刷新后不会保留，也不会修改正式图谱。"
+          description="处置决定已自动保存到本机草稿；提交后会进入可追踪的审计轨迹。"
           showIcon
           title="处置草稿已更新"
           type="info"
         />
       ) : null}
 
-      <Tooltip title="处置写入将在 M5 后端业务切片接入">
-        <Button block disabled type="primary">
+      <Tooltip
+        title={
+          draft.decision ? '提交本地处置结果' : '请先选择处置决定'
+        }
+      >
+        <Button
+          block
+          disabled={!draft.decision}
+          onClick={onSubmit}
+          type="primary"
+        >
           提交处置
         </Button>
       </Tooltip>

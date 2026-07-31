@@ -1,0 +1,69 @@
+.ability-graph-page-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.ability-graph-task-tabs {
+  min-height: 40px;
+  flex: none;
+}
+
+.ability-graph-task-tabs .ant-tabs-nav {
+  margin: 0 0 8px;
+}
+
+.ability-graph-task-tabs .ant-tabs-tab {
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ability-graph-notice {
+  min-height: 48px !important;
+  margin-bottom: 8px !important;
+  padding-block: 7px !important;
+}
+
+.ability-graph-summary {
+  flex: none;
+}
+
+.ability-graph-summary .ant-card {
+  height: 72px;
+}
+
+.ability-graph-summary .ant-card-body {
+  position: relative;
+  padding: 8px 12px;
+}
+
+.ability-graph-summary .ant-statistic-title {
+  font-size: 11px;
+}
+
+.ability-graph-summary .ant-statistic-content {
+  color: var(--app-text);
+  font-size: 21px;
+  line-height: 25px;
+}
+
+.ability-graph-summary .ant-statistic-content-prefix {
+  margin-inline-end: 7px;
+  color: var(--app-primary);
+  font-size: 16px;
+}
+
+.ability-graph-summary .ant-progress {
+  position: absolute;
+  right: 40px;
+  bottom: 10px;
+  left: 12px;
+  margin: 0;
+}
+
+.ability-graph-summary .ant-card-body > .ant-typography {
+  position: absolute;
+  right: 12px;
+  bottom: 7px;
+  font-size: 10px;
+}

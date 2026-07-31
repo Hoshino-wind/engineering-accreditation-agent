@@ -167,7 +167,7 @@ export function ImprovementPlanPanel({
               </Typography.Text>
               <Tag
                 color={
-                  change.status === 'approved' ? 'success' : 'purple'
+                  change.status === 'approved' ? 'success' : 'processing'
                 }
               >
                 {change.status === 'approved' ? '已审核' : '草稿'}
@@ -189,7 +189,11 @@ export function ImprovementPlanPanel({
               : '尚未关联图谱新版本'}
           </Typography.Text>
           {graphChange && (
-            <Tag color={graphChange.status === 'approved' ? 'success' : 'purple'}>
+            <Tag
+              color={
+                graphChange.status === 'approved' ? 'success' : 'processing'
+              }
+            >
               {graphChange.status === 'approved' ? '已发布' : '待发布'}
             </Tag>
           )}

@@ -21,20 +21,530 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/materials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 列出本地教学材料 */
+        get: operations["list_materials_api_v1_materials_get"];
+        put?: never;
+        /** 上传教学材料并进入本地处理流水线 */
+        post: operations["upload_material_api_v1_materials_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/materials/{material_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 获取材料处理详情 */
+        get: operations["get_material_api_v1_materials__material_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/materials/{material_id}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 重试材料解析流水线 */
+        post: operations["retry_material_api_v1_materials__material_id__retry_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teaching-graph/workspace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 读取能力图谱权威工作区 */
+        get: operations["get_workspace_api_v1_teaching_graph_workspace_get"];
+        /** 初始化或保存能力图谱草稿 */
+        put: operations["save_workspace_api_v1_teaching_graph_workspace_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teaching-graph/workspace/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 校验并发布不可变能力图谱快照 */
+        post: operations["publish_workspace_api_v1_teaching_graph_workspace_publish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teaching-graph/workspace/revisions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 基于正式快照创建下一能力图谱修订 */
+        post: operations["start_revision_api_v1_teaching_graph_workspace_revisions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teaching-graph/audit-events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 列出能力图谱追加审计事件 */
+        get: operations["list_audit_events_api_v1_teaching_graph_audit_events_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AbilityGraphStateContract */
+        AbilityGraphStateContract: {
+            /** Changereviews */
+            changeReviews: components["schemas"]["GraphChangeReviewContract"][];
+            /** Downstreamreferences */
+            downstreamReferences: components["schemas"]["GraphDownstreamReferenceContract"][];
+            /** Edges */
+            edges: components["schemas"]["GraphEdgeContract"][];
+            /** Impactdecisions */
+            impactDecisions: components["schemas"]["GraphImpactDecisionContract"][];
+            /** Nodes */
+            nodes: components["schemas"]["GraphNodeContract"][];
+            /** Publishedsnapshots */
+            publishedSnapshots: components["schemas"]["GraphPublishedSnapshotContract"][];
+            /**
+             * Schemaversionid
+             * @constant
+             */
+            schemaVersionId: "teaching-graph-schema@2";
+            version: components["schemas"]["GraphVersionContract"];
+        };
+        /** Body_upload_material_api_v1_materials_post */
+        Body_upload_material_api_v1_materials_post: {
+            /**
+             * File
+             * @description 教学材料原始文件
+             */
+            file: string;
+            /**
+             * Course
+             * @default 待分类
+             */
+            course: string;
+            /**
+             * Resource Type
+             * @default 实验项目清单
+             */
+            resource_type: string;
+        };
         /**
          * ComponentStatus
          * @enum {string}
          */
         ComponentStatus: "operational" | "configured" | "not_configured";
+        /** EvidenceFragmentResponse */
+        EvidenceFragmentResponse: {
+            /** Id */
+            id: string;
+            /** Coordinate */
+            coordinate: string;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "段落" | "表格" | "扫描页";
+            /** Preview */
+            preview: string;
+            /** Hash */
+            hash: string;
+        };
+        /** GraphAuditEventListResponse */
+        GraphAuditEventListResponse: {
+            /** Items */
+            items: components["schemas"]["GraphAuditEventResponse"][];
+            /** Total */
+            total: number;
+        };
+        /** GraphAuditEventResponse */
+        GraphAuditEventResponse: {
+            /** Action */
+            action: string;
+            /** Actor */
+            actor: string;
+            /**
+             * Createdat
+             * Format: date-time
+             */
+            createdAt: string;
+            /** Graphversion */
+            graphVersion: string;
+            /** Id */
+            id: string;
+            /** Revision */
+            revision: number;
+            /** Summary */
+            summary: string;
+        };
+        /** GraphCapabilityContract */
+        GraphCapabilityContract: {
+            /**
+             * Cognitivelevel
+             * @enum {string}
+             */
+            cognitiveLevel: "understand" | "apply" | "analyze" | "evaluate" | "create";
+            /** Domain */
+            domain: string;
+            /** Observablebehaviors */
+            observableBehaviors: string[];
+        };
+        /** GraphCapabilityMappingContract */
+        GraphCapabilityMappingContract: {
+            /** Rationale */
+            rationale: string;
+            /** Targetbehaviors */
+            targetBehaviors: string[];
+        };
+        /** GraphChangeReviewContract */
+        GraphChangeReviewContract: {
+            /** Changeid */
+            changeId: string;
+            /**
+             * Decidedat
+             * Format: date-time
+             */
+            decidedAt: string;
+            /** Draftversion */
+            draftVersion: string;
+            /** Reviewer */
+            reviewer: string;
+        };
+        /** GraphDownstreamReferenceContract */
+        GraphDownstreamReferenceContract: {
+            /** Edgeids */
+            edgeIds: string[];
+            /** Edgeversionids */
+            edgeVersionIds: string[];
+            /** Graphversion */
+            graphVersion: string;
+            /** Id */
+            id: string;
+            /** Label */
+            label: string;
+            /**
+             * Module
+             * @enum {string}
+             */
+            module: "M5" | "M6" | "M8";
+            /** Nodeids */
+            nodeIds: string[];
+            /** Nodeversionids */
+            nodeVersionIds: string[];
+            /** Objectcode */
+            objectCode: string;
+            /**
+             * Schemaversionid
+             * @constant
+             */
+            schemaVersionId: "teaching-graph-schema@2";
+            /**
+             * Suggestedaction
+             * @enum {string}
+             */
+            suggestedAction: "recheck" | "recalculate" | "refresh";
+        };
+        /** GraphEdgeContract */
+        GraphEdgeContract: {
+            capabilityMapping?: components["schemas"]["GraphCapabilityMappingContract"] | null;
+            /** Edgeversionid */
+            edgeVersionId: string;
+            /** Effectivecycle */
+            effectiveCycle: string;
+            /** Id */
+            id: string;
+            /**
+             * Relation
+             * @enum {string}
+             */
+            relation: "refines" | "expects" | "defines" | "belongs-to" | "supports" | "contributes-to" | "cultivates" | "trains" | "covers" | "composed-of" | "requires" | "uses" | "enables" | "contains-task" | "contains-criterion" | "assesses";
+            /**
+             * Reviewstatus
+             * @default pending
+             * @enum {string}
+             */
+            reviewStatus: "approved" | "pending";
+            source: components["schemas"]["GraphSourceContract"];
+            /** Sourceid */
+            sourceId: string;
+            /** Sourcenodeversionid */
+            sourceNodeVersionId: string;
+            /**
+             * Status
+             * @default draft
+             * @enum {string}
+             */
+            status: "effective" | "draft" | "superseded";
+            /** Targetid */
+            targetId: string;
+            /** Targetnodeversionid */
+            targetNodeVersionId: string;
+        };
+        /** GraphImpactDecisionContract */
+        GraphImpactDecisionContract: {
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "recheck" | "recalculate" | "refresh";
+            /**
+             * Decidedat
+             * Format: date-time
+             */
+            decidedAt: string;
+            /** Draftversion */
+            draftVersion: string;
+            /** Referenceid */
+            referenceId: string;
+            /** Reviewer */
+            reviewer: string;
+        };
+        /** GraphNodeContract */
+        GraphNodeContract: {
+            capability?: components["schemas"]["GraphCapabilityContract"] | null;
+            /** Code */
+            code: string;
+            /** Definition */
+            definition: string;
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Nodeversionid */
+            nodeVersionId: string;
+            /** Owner */
+            owner: string;
+            source: components["schemas"]["GraphSourceContract"];
+            /**
+             * Status
+             * @default draft
+             * @enum {string}
+             */
+            status: "effective" | "draft" | "superseded";
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "graduate-outcome" | "performance-indicator" | "course" | "course-outcome" | "ability" | "skill" | "knowledge" | "experiment" | "teaching-resource" | "assessment-task" | "rubric-criterion";
+            /** Version */
+            version: string;
+        };
+        /** GraphPublishedSnapshotContract */
+        GraphPublishedSnapshotContract: {
+            /** Edges */
+            edges: components["schemas"]["GraphEdgeContract"][];
+            /** Nodes */
+            nodes: components["schemas"]["GraphNodeContract"][];
+            /**
+             * Publishedat
+             * Format: date-time
+             */
+            publishedAt: string;
+            /**
+             * Schemaversionid
+             * @constant
+             */
+            schemaVersionId: "teaching-graph-schema@2";
+            /** Version */
+            version: string;
+        };
+        /** GraphRevisionCommandRequest */
+        GraphRevisionCommandRequest: {
+            /** Expectedrevision */
+            expectedRevision: number;
+        };
+        /** GraphSourceContract */
+        GraphSourceContract: {
+            /** Coordinate */
+            coordinate: string;
+            /** Evidencefragmentid */
+            evidenceFragmentId: string;
+            /** Material */
+            material: string;
+            /** Materialid */
+            materialId: string;
+            /** Materialversionid */
+            materialVersionId: string;
+            /** Sourcerefid */
+            sourceRefId: string;
+            /** Version */
+            version: string;
+        };
+        /** GraphVersionContract */
+        GraphVersionContract: {
+            /** Baseversion */
+            baseVersion?: string | null;
+            /** Name */
+            name: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "published" | "draft";
+        };
+        /** GraphWorkspaceResponse */
+        GraphWorkspaceResponse: {
+            /** Revision */
+            revision: number;
+            state: components["schemas"]["AbilityGraphStateContract"];
+            /**
+             * Updatedat
+             * Format: date-time
+             */
+            updatedAt: string;
+            /** Updatedby */
+            updatedBy: string;
+        };
+        /** HTTPValidationError */
+        HTTPValidationError: {
+            /** Detail */
+            detail?: components["schemas"]["ValidationError"][];
+        };
+        /** MaterialListResponse */
+        MaterialListResponse: {
+            /** Items */
+            items: components["schemas"]["MaterialResponse"][];
+            /** Total */
+            total: number;
+        };
+        /** MaterialResponse */
+        MaterialResponse: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** File Name */
+            file_name: string;
+            /** Course */
+            course: string;
+            /** Resource Type */
+            resource_type: string;
+            /** Format */
+            format: string;
+            /** Media Type */
+            media_type: string;
+            /** Size Bytes */
+            size_bytes: number;
+            /** Hash */
+            hash: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "uploaded" | "scanning" | "processing" | "ready" | "failed" | "quarantined";
+            /**
+             * Sensitivity
+             * @enum {string}
+             */
+            sensitivity: "internal" | "restricted";
+            /** Owner */
+            owner: string;
+            /** Version */
+            version: string;
+            /** Version Id */
+            version_id: string;
+            /** Source Coverage */
+            source_coverage: number;
+            /** Page Count */
+            page_count: number | null;
+            /** Failure Reason */
+            failure_reason: string | null;
+            /** Next Action */
+            next_action: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Processing Stages */
+            processing_stages: components["schemas"]["ProcessingStageResponse"][];
+            /** Evidence Fragments */
+            evidence_fragments: components["schemas"]["EvidenceFragmentResponse"][];
+        };
         /**
          * OverallStatus
          * @enum {string}
          */
         OverallStatus: "operational" | "needs_configuration";
+        /** ProcessingStageResponse */
+        ProcessingStageResponse: {
+            /** Label */
+            label: string;
+            /** Detail */
+            detail: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "finish" | "process" | "wait" | "error";
+        };
+        /** SaveGraphDraftRequest */
+        SaveGraphDraftRequest: {
+            /** Expectedrevision */
+            expectedRevision: number;
+            state: components["schemas"]["AbilityGraphStateContract"];
+        };
         /** SystemComponentResponse */
         SystemComponentResponse: {
             /** Key */
@@ -62,6 +572,19 @@ export interface components {
             /** Components */
             components: components["schemas"]["SystemComponentResponse"][];
         };
+        /** ValidationError */
+        ValidationError: {
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
+            /** Input */
+            input?: unknown;
+            /** Context */
+            ctx?: Record<string, never>;
+        };
     };
     responses: never;
     parameters: never;
@@ -87,6 +610,271 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SystemStatusResponse"];
+                };
+            };
+        };
+    };
+    list_materials_api_v1_materials_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialListResponse"];
+                };
+            };
+        };
+    };
+    upload_material_api_v1_materials_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_upload_material_api_v1_materials_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_material_api_v1_materials__material_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                material_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    retry_material_api_v1_materials__material_id__retry_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                material_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_workspace_api_v1_teaching_graph_workspace_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GraphWorkspaceResponse"];
+                };
+            };
+        };
+    };
+    save_workspace_api_v1_teaching_graph_workspace_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveGraphDraftRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GraphWorkspaceResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    publish_workspace_api_v1_teaching_graph_workspace_publish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GraphRevisionCommandRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GraphWorkspaceResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_revision_api_v1_teaching_graph_workspace_revisions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GraphRevisionCommandRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GraphWorkspaceResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_audit_events_api_v1_teaching_graph_audit_events_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GraphAuditEventListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

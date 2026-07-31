@@ -105,7 +105,7 @@ export function ImprovementTraceDrawer({
                         color={
                           change.status === 'approved'
                             ? 'success'
-                            : 'purple'
+                            : 'processing'
                         }
                       >
                         {change.status === 'approved'

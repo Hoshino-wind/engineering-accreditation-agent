@@ -1,0 +1,67 @@
+.graph-evidence-chain > .ant-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.graph-evidence-flow {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.8fr) minmax(320px, 1.4fr);
+  align-items: stretch;
+  gap: 12px;
+}
+
+.graph-evidence-branch > .anticon {
+  color: var(--app-text-muted);
+}
+
+.graph-evidence-branches {
+  display: grid;
+  gap: 8px;
+}
+
+.graph-evidence-branch {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.graph-evidence-step {
+  display: flex;
+  min-height: 84px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-medium);
+  background: var(--app-surface);
+}
+
+.graph-evidence-step--ready {
+  border-color: #a8dbc8;
+  background: #f4fbf8;
+}
+
+.graph-evidence-step--blocked {
+  border-color: #e6a9a9;
+  background: #fff7f7;
+}
+
+.graph-evidence-detail {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.graph-evidence-detail > div {
+  padding: 12px;
+  border-top: 2px solid #c4d9ea;
+  background: var(--app-surface-soft);
+}
+
+.graph-evidence-detail h5.ant-typography {
+  margin: 4px 0 6px;
+}

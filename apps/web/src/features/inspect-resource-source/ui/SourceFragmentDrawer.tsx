@@ -76,7 +76,7 @@ export function SourceFragmentDrawer({
           {resource.evidenceFragments.length > 0 ? (
             <div className="source-fragment-list">
               <Typography.Text strong>
-                已定位 {resource.evidenceFragments.length} 个示例片段
+                已定位 {resource.evidenceFragments.length} 个证据片段
               </Typography.Text>
               {resource.evidenceFragments.map((fragment) => (
                 <article className="source-fragment-item" key={fragment.id}>

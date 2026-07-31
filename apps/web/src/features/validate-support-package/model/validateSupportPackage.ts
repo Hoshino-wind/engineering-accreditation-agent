@@ -15,6 +15,7 @@ export interface SupportValidationCheck {
   id: SupportValidationCheckId;
   label: string;
   ownerModule?: 'M2' | 'M3' | 'M5' | 'M6' | 'M7';
+  ownerObjectId?: string;
   status: 'pass' | 'blocked';
 }
 
@@ -127,6 +128,7 @@ export function validateSupportPackage(
           ? '改进问题已经闭环'
           : '改进问题尚未关闭',
       ownerModule: 'M7',
+      ownerObjectId: improvementSnapshot?.objectId,
       status:
         improvementSnapshot?.state === 'confirmed'
           ? 'pass'

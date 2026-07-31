@@ -1,0 +1,82 @@
+.graph-alignment-canvas > .ant-card-body {
+  display: flex;
+  align-items: stretch;
+  overflow-x: auto;
+}
+
+.graph-alignment-flow {
+  display: grid;
+  width: 100%;
+  min-width: 760px;
+  grid-template-columns:
+    minmax(170px, 1.15fr) 20px minmax(150px, 1fr) 20px
+    minmax(150px, 1fr) 20px minmax(170px, 1fr);
+  align-items: center;
+  gap: 7px;
+}
+
+.graph-alignment-column {
+  display: flex;
+  min-width: 0;
+  align-self: stretch;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.graph-alignment-column-title {
+  min-height: 26px;
+  color: var(--app-text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.graph-alignment-object {
+  display: flex;
+  min-height: 94px;
+  cursor: pointer;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  padding: 10px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-medium);
+  color: var(--app-text);
+  background: var(--app-surface);
+  text-align: left;
+}
+
+.graph-alignment-object:hover {
+  border-color: var(--app-primary-border);
+  box-shadow: var(--app-shadow);
+}
+
+.graph-alignment-object--primary {
+  border-color: #9dc5ed;
+  background: var(--app-primary-surface);
+}
+
+.graph-alignment-object > .ant-typography-secondary {
+  display: -webkit-box;
+  overflow: hidden;
+  line-height: 17px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+.graph-alignment-arrow {
+  color: var(--app-text-muted);
+}
+
+.graph-alignment-missing {
+  display: flex;
+  min-height: 150px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px dashed #e6a9a9;
+  border-radius: var(--app-radius-medium);
+  color: var(--app-text);
+  background: #fff7f7;
+}

@@ -1,7 +1,7 @@
 import {
-  ApartmentOutlined,
   AuditOutlined,
-  LinkOutlined,
+  ExperimentOutlined,
+  SyncOutlined,
   WarningOutlined,
 } from '@ant-design/icons';
 import { Card, Col, Row, Statistic } from 'antd';
@@ -14,10 +14,10 @@ const metricIcons: Record<
   (typeof prototypeOnlyOverviewMetrics)[number]['key'],
   ReactNode
 > = {
-  graphNodes: <ApartmentOutlined />,
-  graphEdges: <LinkOutlined />,
-  candidates: <AuditOutlined />,
-  findings: <WarningOutlined />,
+  assessmentGaps: <AuditOutlined />,
+  blockedCourses: <WarningOutlined />,
+  cultivationGaps: <ExperimentOutlined />,
+  reevaluations: <SyncOutlined />,
 };
 
 export function OverviewMetrics() {

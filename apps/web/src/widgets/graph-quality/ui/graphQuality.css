@@ -19,7 +19,7 @@
 }
 
 .graph-quality-header .ant-typography:last-child {
-  color: #595959;
+  color: var(--app-text-secondary);
   font-size: 12px;
   white-space: nowrap;
 }

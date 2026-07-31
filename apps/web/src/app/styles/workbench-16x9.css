@@ -1,0 +1,288 @@
+.app-content--workbench > :is(
+    .teaching-resources-page,
+    .recognition-review-page,
+    .graph-diagnostics-page,
+    .attainment-evaluation-page,
+    .teaching-improvement-page,
+    .accreditation-support-page,
+    .ability-graph-page,
+    .governance-page
+  ) {
+  display: flex;
+  width: 100%;
+  max-width: var(--app-workbench-max-width);
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+  margin: 0 auto;
+}
+
+:is(
+    .teaching-resources-page-header,
+    .recognition-review-page-header,
+    .graph-diagnostics-page-header,
+    .attainment-evaluation-page-header,
+    .teaching-improvement-page-header,
+    .accreditation-support-page-header,
+    .ability-graph-page-header,
+    .governance-page-header
+  ) {
+  min-height: var(--app-workbench-header-height);
+  flex: none;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+:is(
+    .teaching-resources-page-header,
+    .recognition-review-page-header,
+    .graph-diagnostics-page-header,
+    .attainment-evaluation-page-header,
+    .teaching-improvement-page-header,
+    .accreditation-support-page-header,
+    .ability-graph-page-header,
+    .governance-page-header
+  )
+  h2.ant-typography {
+  margin: 0;
+  color: var(--app-text);
+  font-size: var(--app-page-title-size);
+  line-height: 30px;
+  letter-spacing: -0.01em;
+}
+
+:is(
+    .teaching-resources-page-header,
+    .recognition-review-page-header,
+    .graph-diagnostics-page-header,
+    .attainment-evaluation-page-header,
+    .teaching-improvement-page-header,
+    .accreditation-support-page-header,
+    .ability-graph-page-header,
+    .governance-page-header
+  )
+  .ant-typography-secondary {
+  margin: 2px 0 0;
+  color: var(--app-text-secondary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+:is(
+    .teaching-resources-notice,
+    .recognition-review-notice,
+    .graph-diagnostics-notice,
+    .attainment-evaluation-notice,
+    .teaching-improvement-notice,
+    .accreditation-support-notice,
+    .ability-graph-notice,
+    .governance-notice
+  ) {
+  min-height: 58px;
+  flex: none;
+  margin-bottom: 10px;
+  padding: 9px 14px;
+  border-color: var(--app-warning-border);
+  background: var(--app-warning-soft);
+}
+
+:is(
+    .teaching-resources-notice,
+    .recognition-review-notice,
+    .graph-diagnostics-notice,
+    .attainment-evaluation-notice,
+    .teaching-improvement-notice,
+    .accreditation-support-notice,
+    .ability-graph-notice,
+    .governance-notice
+  )
+  .ant-alert-message {
+  color: var(--app-warning-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+:is(
+    .teaching-resources-notice,
+    .recognition-review-notice,
+    .graph-diagnostics-notice,
+    .attainment-evaluation-notice,
+    .teaching-improvement-notice,
+    .accreditation-support-notice,
+    .ability-graph-notice,
+    .governance-notice
+  )
+  .ant-alert-description {
+  color: var(--app-warning-text-secondary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.app-content--workbench
+  :is(
+    .teaching-resource-workbench,
+    .recognition-workbench,
+    .diagnostic-workbench,
+    .attainment-workbench,
+    .improvement-workbench,
+    .support-workbench
+  ) {
+  min-height: 0;
+  flex: 1;
+  margin-top: 10px;
+}
+
+.app-content--workbench
+  :is(
+    .recognition-workbench,
+    .diagnostic-workbench,
+    .attainment-workbench,
+    .improvement-workbench,
+    .support-workbench
+  ) {
+  grid-template-columns: 340px minmax(480px, 1fr) 380px;
+  gap: 12px;
+}
+
+.app-content--workbench
+  :is(
+    .recognition-workbench,
+    .diagnostic-workbench,
+    .attainment-workbench,
+    .improvement-workbench,
+    .support-workbench
+  )
+  > .ant-card {
+  height: 100% !important;
+  min-height: 0;
+}
+
+.app-content--workbench
+  :is(
+    .recognition-workbench,
+    .diagnostic-workbench,
+    .attainment-workbench,
+    .improvement-workbench,
+    .support-workbench
+  )
+  > .ant-card
+  > .ant-card-body {
+  min-height: 0;
+}
+
+.teaching-resource-workbench > .ant-col {
+  min-height: 0;
+}
+
+.teaching-resource-workbench .ant-card {
+  height: 100%;
+}
+
+.teaching-resource-workbench .ant-card-body {
+  overflow: auto;
+}
+
+.candidate-primary-evidence {
+  min-height: 170px;
+}
+
+.candidate-relation-node,
+.diagnostic-comparison-node {
+  min-width: 0;
+}
+
+.candidate-relation-node .ant-typography,
+.diagnostic-comparison-node .ant-typography {
+  overflow-wrap: anywhere;
+}
+
+:is(
+    .diagnostic-queue-title,
+    .evaluation-queue-title,
+    .improvement-queue-title,
+    .support-queue-title
+  ) {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+:is(
+    .diagnostic-queue-title,
+    .evaluation-queue-title,
+    .improvement-queue-title,
+    .support-queue-title
+  )
+  > .ant-typography {
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 17px;
+  text-overflow: ellipsis;
+}
+
+.diagnostic-queue-title .ant-tag {
+  margin-inline-end: 6px;
+}
+
+@media (max-height: 920px) {
+  :is(
+      .teaching-resources-page-header,
+      .recognition-review-page-header,
+      .graph-diagnostics-page-header,
+      .attainment-evaluation-page-header,
+      .teaching-improvement-page-header,
+      .accreditation-support-page-header,
+      .ability-graph-page-header,
+      .governance-page-header
+    )
+    .ant-typography-secondary {
+    display: none;
+  }
+
+  :is(
+      .teaching-resources-notice,
+      .recognition-review-notice,
+      .graph-diagnostics-notice,
+      .attainment-evaluation-notice,
+      .teaching-improvement-notice,
+      .accreditation-support-notice,
+      .ability-graph-notice,
+      .governance-notice
+    )
+    .ant-alert-description {
+    display: none;
+  }
+
+  :is(
+      .teaching-resources-notice,
+      .recognition-review-notice,
+      .graph-diagnostics-notice,
+      .attainment-evaluation-notice,
+      .teaching-improvement-notice,
+      .accreditation-support-notice,
+      .ability-graph-notice,
+      .governance-notice
+    ) {
+    min-height: 42px;
+  }
+
+}
+
+@media (max-width: 1580px) {
+  .app-content--workbench
+    :is(
+      .recognition-workbench,
+      .diagnostic-workbench,
+      .attainment-workbench,
+      .improvement-workbench,
+      .support-workbench
+    ) {
+    grid-template-columns: 320px minmax(420px, 1fr) 350px;
+  }
+
+  .candidate-comparison > .ant-card-body,
+  .candidate-evidence-review > .ant-card-body {
+    padding-inline: 12px;
+  }
+}

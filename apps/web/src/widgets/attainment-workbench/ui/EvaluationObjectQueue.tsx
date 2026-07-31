@@ -26,19 +26,17 @@ const columns: TableProps<AttainmentEvaluationItem>['columns'] = [
   {
     key: 'objective',
     title: '课程目标',
-    width: 180,
+    width: 146,
     render: (_, evaluation) => (
-      <Typography.Text strong>
-        {evaluation.objectiveCode} {evaluation.objectiveName}
-      </Typography.Text>
+      <div className="evaluation-queue-title">
+        <Typography.Text strong>
+          {evaluation.objectiveCode} {evaluation.objectiveName}
+        </Typography.Text>
+        <Typography.Text type="secondary">
+          {evaluation.course}
+        </Typography.Text>
+      </div>
     ),
-  },
-  {
-    dataIndex: 'course',
-    ellipsis: true,
-    key: 'course',
-    title: '课程',
-    width: 86,
   },
   {
     dataIndex: 'status',

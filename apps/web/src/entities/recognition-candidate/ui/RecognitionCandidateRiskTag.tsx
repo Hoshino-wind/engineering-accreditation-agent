@@ -6,8 +6,8 @@ const riskPresentation: Record<
   RecognitionCandidateRisk,
   { color?: string; label: string }
 > = {
-  highImpact: { color: 'red', label: '高影响' },
-  lowConfidence: { color: 'orange', label: '低置信度' },
+  highImpact: { color: 'error', label: '高影响' },
+  lowConfidence: { color: 'warning', label: '低置信度' },
   conflict: { color: 'error', label: '冲突' },
   normal: { label: '常规' },
 };

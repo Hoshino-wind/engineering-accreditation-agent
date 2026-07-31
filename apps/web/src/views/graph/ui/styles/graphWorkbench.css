@@ -1,0 +1,44 @@
+.ability-graph-workbench,
+.graph-publish-view,
+.graph-version-workbench {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.ability-graph-workbench {
+  grid-template-columns: 250px minmax(480px, 1fr) 330px;
+}
+
+.graph-publish-view {
+  grid-template-columns: minmax(540px, 1fr) 380px;
+}
+
+.graph-version-workbench {
+  grid-template-columns: 250px minmax(330px, 1fr) 340px;
+}
+
+.graph-workbench-panel {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.graph-workbench-panel > .ant-card-head {
+  min-height: 38px;
+  padding-inline: 12px;
+}
+
+.graph-workbench-panel > .ant-card-head .ant-card-head-title {
+  padding-block: 8px;
+  font-size: 13px;
+}
+
+.graph-workbench-panel > .ant-card-body {
+  height: calc(100% - 39px);
+  min-height: 0;
+  padding: 10px 12px;
+  overflow: auto;
+}

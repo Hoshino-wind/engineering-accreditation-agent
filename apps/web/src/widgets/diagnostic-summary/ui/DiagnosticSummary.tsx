@@ -1,7 +1,6 @@
 import { Card, Col, Row, Space, Statistic, Typography } from 'antd';
 
 import { prototypeOnlyDiagnosticSummary } from '../model/prototypeOnlyDiagnosticSummary';
-import './diagnosticSummary.css';
 
 export function DiagnosticSummary() {
   return (

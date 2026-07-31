@@ -10,7 +10,7 @@ const statusPresentation: Record<
   processing: { color: 'processing', label: '处理中' },
   awaitingClassification: { color: 'warning', label: '待分类' },
   failed: { color: 'error', label: '解析失败' },
-  quarantined: { color: 'magenta', label: '已隔离' },
+  quarantined: { color: 'error', label: '已隔离' },
 };
 
 interface TeachingResourceStatusTagProps {

@@ -36,13 +36,13 @@
 .improvement-case-queue
   .improvement-case-row--selected
   > td {
-  background: #e6f4ff;
+  background: var(--app-selection-bg);
 }
 
 .improvement-case-queue
   .improvement-case-row--selected:hover
   > td {
-  background: #d9eeff;
+  background: var(--app-selection-hover-bg);
 }
 
 .improvement-plan-panel > .ant-card-body,
@@ -61,9 +61,9 @@
   flex-direction: column;
   gap: 4px;
   padding: 10px 12px;
-  border: 1px solid #f0f0f0;
-  border-radius: 6px;
-  background: #fafafa;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--app-radius-small);
+  background: var(--app-surface-soft);
 }
 
 .improvement-plan-heading .ant-typography-secondary {
@@ -100,8 +100,8 @@
   align-items: center;
   gap: 8px;
   padding: 7px 10px;
-  border: 1px solid #f0f0f0;
-  border-radius: 6px;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--app-radius-small);
 }
 
 .improvement-change-row > .ant-typography {
@@ -121,15 +121,15 @@
 }
 
 .improvement-change-icon--blue {
-  color: #1677ff;
+  color: var(--app-primary);
 }
 
 .improvement-change-icon--green {
-  color: #52c41a;
+  color: var(--app-success);
 }
 
 .improvement-change-icon--purple {
-  color: #722ed1;
+  color: var(--app-accent-purple);
 }
 
 .improvement-change-row .improvement-trace-link {
@@ -147,9 +147,9 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   padding: 10px 8px;
-  border: 1px solid #f0f0f0;
-  border-radius: 6px;
-  background: #fafafa;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--app-radius-small);
+  background: var(--app-surface-soft);
 }
 
 .improvement-reevaluation-strip > div {
@@ -164,7 +164,7 @@
 }
 
 .improvement-reevaluation-strip > div + div {
-  border-left: 1px solid #f0f0f0;
+  border-left: 1px solid var(--app-border-soft);
 }
 
 .improvement-reevaluation-strip .ant-typography-secondary {
@@ -187,8 +187,8 @@
 }
 
 .improvement-closure-gates > div {
-  border: 1px solid #f0f0f0;
-  border-radius: 6px;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--app-radius-small);
 }
 
 .improvement-closure-gates > div > div {
@@ -200,7 +200,7 @@
 }
 
 .improvement-closure-gates > div > div + div {
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--app-border-soft);
 }
 
 .improvement-closure-gates span {
@@ -214,9 +214,9 @@
 }
 
 .improvement-gate--complete {
-  color: #52c41a;
+  color: var(--app-success);
 }
 
 .improvement-gate--pending {
-  color: #fa8c16;
+  color: var(--app-warning);
 }

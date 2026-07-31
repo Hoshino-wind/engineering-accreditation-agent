@@ -24,13 +24,13 @@
 }
 
 .candidate-queue .candidate-queue-row--selected > td {
-  background: #e6f4ff;
+  background: var(--app-selection-bg);
 }
 
 .candidate-queue
   .candidate-queue-row--selected:hover
   > td {
-  background: #d9eeff;
+  background: var(--app-selection-hover-bg);
 }
 
 .candidate-queue-title {
@@ -77,15 +77,15 @@
   justify-content: center;
   gap: 4px;
   padding: 10px 14px;
-  border: 1px solid #91caff;
-  border-radius: 6px;
-  background: #f5faff;
+  border: 1px solid var(--app-primary-border);
+  border-radius: var(--app-radius-small);
+  background: var(--app-primary-surface);
   text-align: center;
 }
 
 .candidate-relation-node--target {
-  border-color: #b7eb8f;
-  background: #f6ffed;
+  border-color: var(--app-success-border);
+  background: var(--app-success-soft);
 }
 
 .candidate-relation-edge {
@@ -102,8 +102,8 @@
 .candidate-formal-value {
   height: 196px;
   padding: 12px;
-  border: 1px solid #f0f0f0;
-  border-radius: 6px;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--app-radius-small);
 }
 
 .candidate-section-heading {
@@ -153,8 +153,8 @@
 .candidate-impact {
   margin-top: 12px;
   padding: 12px;
-  border: 1px solid #f0f0f0;
-  border-radius: 6px;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--app-radius-small);
 }
 
 .candidate-impact > .ant-typography {
@@ -169,7 +169,7 @@
 }
 
 .candidate-impact-item > .anticon {
-  color: #1677ff;
+  color: var(--app-primary);
   font-size: 18px;
 }
 

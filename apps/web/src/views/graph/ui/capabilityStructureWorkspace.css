@@ -1,0 +1,384 @@
+.capability-structure-workspace {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  margin-top: 2px;
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-medium);
+  background: var(--app-surface);
+}
+
+.capability-structure-intro {
+  display: flex;
+  min-height: 52px;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-surface-soft);
+}
+
+.capability-structure-intro h4.ant-typography {
+  margin: 0 0 2px;
+  font-size: 15px;
+}
+
+.capability-structure-overview {
+  display: flex;
+  min-width: 150px;
+  flex: none;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.capability-structure-grid {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  grid-template-columns: 230px minmax(448px, 1fr) 280px;
+}
+
+.capability-structure-rail,
+.capability-carry-panel,
+.capability-evaluation-panel {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+.capability-structure-rail,
+.capability-evaluation-panel {
+  background: var(--app-surface-soft);
+}
+
+.capability-structure-rail {
+  border-right: 1px solid var(--app-border);
+}
+
+.capability-carry-panel {
+  padding-bottom: 14px;
+}
+
+.capability-evaluation-panel {
+  border-left: 1px solid var(--app-border);
+}
+
+.capability-section-heading {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 11px;
+  border-bottom: 1px solid var(--app-border-soft);
+}
+
+.capability-section-heading > span {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--app-text-inverse);
+  background: var(--app-primary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.capability-section-heading > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  line-height: 18px;
+}
+
+.capability-profile-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.capability-profile-button {
+  display: flex;
+  width: 100%;
+  cursor: pointer;
+  flex-direction: column;
+  gap: 6px;
+  padding: 11px 12px;
+  border: 0;
+  border-bottom: 1px solid var(--app-border-soft);
+  border-left: 3px solid transparent;
+  color: var(--app-text);
+  background: transparent;
+  text-align: left;
+}
+
+.capability-profile-button:hover {
+  background: var(--app-primary-surface-hover);
+}
+
+.capability-profile-button:focus-visible {
+  outline: 2px solid var(--app-primary);
+  outline-offset: -2px;
+}
+
+.capability-profile-button--selected {
+  border-left-color: var(--app-primary);
+  background: var(--app-primary-soft);
+}
+
+.capability-profile-parent {
+  color: var(--app-text-secondary);
+  font-size: 11px;
+}
+
+.capability-profile-title,
+.capability-profile-meta {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 7px;
+}
+
+.capability-profile-title strong {
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.capability-profile-title > code {
+  flex: none;
+  white-space: nowrap;
+}
+
+.capability-profile-meta {
+  justify-content: space-between;
+}
+
+.capability-profile-meta > span:first-child {
+  overflow: hidden;
+  color: var(--app-text-secondary);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.capability-profile-meta .ant-tag {
+  flex: none;
+  margin: 0;
+  font-size: 10px;
+}
+
+.capability-definition {
+  padding: 9px 12px 8px;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.capability-definition-title,
+.capability-path-title,
+.capability-evaluation-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.capability-definition-title h4.ant-typography {
+  margin: 3px 0;
+  font-size: 16px;
+}
+
+.capability-definition > .ant-typography {
+  margin-bottom: 6px;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.capability-behavior-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.capability-behavior-list > .ant-typography {
+  grid-column: 1 / -1;
+}
+
+.capability-behavior {
+  display: grid;
+  min-height: 44px;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 2px 7px;
+  padding: 6px 8px;
+  border: 1px dashed #e3b1b1;
+  border-radius: 7px;
+  color: #bd3e46;
+  background: #fff8f8;
+  font-size: 11px;
+  line-height: 15px;
+}
+
+.capability-behavior > .ant-typography {
+  grid-column: 2;
+  font-size: 10px;
+  line-height: 13px;
+}
+
+.capability-behavior--mapped {
+  border-style: solid;
+  border-color: #b8d9cb;
+  color: var(--app-success);
+  background: #f4fbf8;
+}
+
+.capability-path-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.capability-path-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 146px;
+  gap: 8px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--app-border-soft);
+}
+
+.capability-path-main {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.capability-path-main > .ant-typography-secondary {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 11px;
+  line-height: 16px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.capability-path-title > span {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.capability-path-behaviors {
+  display: block;
+  margin-top: 1px;
+  color: var(--app-text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 15px;
+}
+
+.capability-path-activity {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-content: center;
+  gap: 2px 6px;
+  padding-left: 8px;
+  border-left: 1px solid var(--app-border-soft);
+}
+
+.capability-path-activity > .anticon {
+  margin-top: 2px;
+  color: var(--app-primary);
+}
+
+.capability-path-activity > span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  font-size: 11px;
+}
+
+.capability-path-activity .ant-btn {
+  grid-column: 2;
+  width: max-content;
+  height: 28px;
+  padding: 0 4px;
+  font-size: 11px;
+}
+
+.capability-evaluation-progress {
+  padding: 12px;
+  border-bottom: 1px solid var(--app-border-soft);
+}
+
+.capability-evaluation-progress > div {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.capability-evaluation-progress .ant-progress {
+  margin: 0;
+}
+
+.capability-evaluation-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.capability-evaluation-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--app-border-soft);
+  border-left: 3px solid var(--app-error);
+  background: #fffafa;
+}
+
+.capability-evaluation-item--ready {
+  border-left-color: var(--app-success);
+  background: #f7fcfa;
+}
+
+.capability-evaluation-title > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.capability-evaluation-title .anticon {
+  color: var(--app-primary);
+}
+
+.capability-evaluation-item > .ant-typography-secondary {
+  line-height: 17px;
+}
+
+.capability-evaluation-gap {
+  color: #bd3e46;
+  font-size: 11px;
+}
+
+.capability-evaluation-item .ant-btn {
+  width: max-content;
+  height: 28px;
+  padding: 0 4px;
+  font-size: 11px;
+}
+
+.capability-structure-empty {
+  display: flex;
+  min-height: 360px;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-medium);
+  background: var(--app-surface);
+}

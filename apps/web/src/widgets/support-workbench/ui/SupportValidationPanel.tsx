@@ -3,32 +3,18 @@ import {
   ExclamationCircleFilled,
 } from '@ant-design/icons';
 import { Card, Empty, Typography } from 'antd';
-import type { ComponentProps } from 'react';
 
 import type { SupportPackage } from '../../../entities/support-package';
-import {
-  SupportExportControls,
-  type SupportExportDraft,
-} from '../../../features/configure-support-export';
+import { SupportExportControls } from '../../../features/configure-support-export';
 import { SupportBlockerLink } from '../../../features/resolve-support-package-blocker';
 import type { SupportPackageValidation } from '../../../features/validate-support-package';
 
 interface SupportValidationPanelProps {
-  draft: SupportExportDraft;
-  onFormatChange: SupportExportControlsProps['onFormatChange'];
-  onPurposeChange: (purpose: string) => void;
   supportPackage: SupportPackage | null;
   validation: SupportPackageValidation | null;
 }
 
-type SupportExportControlsProps = ComponentProps<
-  typeof SupportExportControls
->;
-
 export function SupportValidationPanel({
-  draft,
-  onFormatChange,
-  onPurposeChange,
   supportPackage,
   validation,
 }: SupportValidationPanelProps) {
@@ -88,7 +74,10 @@ export function SupportValidationPanel({
                 <Typography.Text>{check.label}</Typography.Text>
               </span>
               {check.status === 'blocked' && check.ownerModule ? (
-                <SupportBlockerLink module={check.ownerModule} />
+                <SupportBlockerLink
+                  module={check.ownerModule}
+                  objectId={check.ownerObjectId}
+                />
               ) : (
                 <Typography.Text type="secondary">
                   {check.status === 'pass' ? '已通过' : '待处理'}
@@ -103,9 +92,6 @@ export function SupportValidationPanel({
         blockedCount={validation.blockedCount}
         canExport={validation.canExport}
         canSubmitForReview={validation.canSubmitForReview}
-        draft={draft}
-        onFormatChange={onFormatChange}
-        onPurposeChange={onPurposeChange}
         requiresNewVersion={validation.requiresNewVersion}
         supportPackage={supportPackage}
       />

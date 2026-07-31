@@ -16,7 +16,20 @@ infra/
 openapi/     # 固定版本的服务端契约
 ```
 
-当前公开垂直切片是 `GET /api/v1/system/status`。前端通过生成契约和 TanStack Query 获取系统状态；总览中的业务数量与待办数据均保存在显式命名的 `prototypeOnly` 文件中。
+当前公开垂直切片包括系统状态、本地教学材料和 M2 能力图谱：
+
+- `GET /api/v1/system/status`
+- `POST /api/v1/materials`
+- `GET /api/v1/materials`
+- `GET /api/v1/materials/{material_id}`
+- `POST /api/v1/materials/{material_id}/retry`
+- `GET /api/v1/teaching-graph/workspace`
+- `PUT /api/v1/teaching-graph/workspace`
+- `POST /api/v1/teaching-graph/workspace/publish`
+- `POST /api/v1/teaching-graph/workspace/revisions`
+- `GET /api/v1/teaching-graph/audit-events`
+
+M2、M3 均通过生成契约和 TanStack Query 访问本地 API。图谱工作区保存在 `.local-data/teaching-graph.sqlite3`，材料元数据保存在 `.local-data/materials.sqlite3`，材料原件保存在 `.local-data/objects`。M2 首次连接时使用显式命名的 `prototypeOnly` 图谱初始化服务端工作区，此后草稿、快照和审计均以服务端为准。其他模块的试点数据仍来自显式命名的 `prototypeOnly` 文件，用户操作草稿保存在浏览器。
 
 管理端以 1920×1080 PC 屏幕为主要设计和验收基准，不实现移动端导航或移动端页面重排。1440 像素宽的桌面窗口保留基础可用布局。
 
@@ -36,6 +49,15 @@ make generate-contracts
 ```
 
 根据 `.env.example` 创建本地 `.env`。不要把真实学生数据、学校密钥或模型凭据写入仓库。
+
+不配置外部基础设施也可以运行 M3。普通文本和带文本层文档使用本地解析；图片和扫描 PDF 需要配置：
+
+```bash
+EA_DEEPSEEK_OCR_BASE_URL=http://localhost:8001/v1
+EA_DEEPSEEK_OCR_MODEL=deepseek-ai/DeepSeek-OCR
+```
+
+该地址应指向用户自己部署的 DeepSeek-OCR OpenAI 兼容服务。官方 DeepSeek 通用 API 当前不接受图片输入，因此不能把 `https://api.deepseek.com` 当作 OCR 端点。若要用 DeepSeek 对已提取文本做结构化，再配置 `EA_DEEPSEEK_API_KEY`。
 
 ## 4. 开发启动
 
@@ -115,8 +137,11 @@ infrastructure → application/domain ports
 ## 8. 尚未接入
 
 - OIDC 和数据范围授权。
-- 文件上传、病毒扫描、对象存储桶初始化。
 - PostgreSQL 领域模型与 Alembic 迁移。
-- 文档解析、OCR、脱敏和向量化流水线。
+- 个人信息检测、脱敏和向量化流水线。
+- ClamAV 病毒库安装与自动更新（代码会在本机可用时调用）。
+- DeepSeek-OCR 服务部署和真实模型密钥（仅提供适配器与配置）。
 - 评价策略、确定性计算和评价快照。
-- 正式关系审核、持续改进和审计持久化。
+- OIDC 接入后的正式关系角色授权与组织数据范围。
+- M2 PostgreSQL 关系化投影、数据库级业务约束和 Alembic 迁移。
+- M5—M8 对 M2 影响待办的真实跨模块消费。

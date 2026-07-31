@@ -23,6 +23,7 @@ interface CandidateEvidenceReviewProps {
   onDecisionChange: (decision: CandidateReviewDecision) => void;
   onInspectEvidence: () => void;
   onNoteChange: (note: string) => void;
+  onSubmit: () => void;
 }
 
 export function CandidateEvidenceReview({
@@ -31,6 +32,7 @@ export function CandidateEvidenceReview({
   onDecisionChange,
   onInspectEvidence,
   onNoteChange,
+  onSubmit,
 }: CandidateEvidenceReviewProps) {
   if (!candidate) {
     return (
@@ -94,6 +96,7 @@ export function CandidateEvidenceReview({
         draft={draft}
         onDecisionChange={onDecisionChange}
         onNoteChange={onNoteChange}
+        onSubmit={onSubmit}
       />
     </Card>
   );

@@ -1,6 +1,5 @@
-import { useState } from 'react';
-
 import type { ImprovementEffectiveness } from '../../../entities/improvement-case';
+import { useLocalStorageState } from '../../../shared/lib';
 
 export interface ImprovementEffectivenessDraft {
   effectiveness?: ImprovementEffectiveness;
@@ -12,9 +11,9 @@ const emptyDraft: ImprovementEffectivenessDraft = {
 };
 
 export function useImprovementEffectivenessDrafts() {
-  const [drafts, setDrafts] = useState<
+  const [drafts, setDrafts] = useLocalStorageState<
     Record<string, ImprovementEffectivenessDraft>
-  >({});
+  >('engineering-accreditation.m7-effectiveness-drafts.v1', {});
 
   const getDraft = (caseId: string) => drafts[caseId] ?? emptyDraft;
 

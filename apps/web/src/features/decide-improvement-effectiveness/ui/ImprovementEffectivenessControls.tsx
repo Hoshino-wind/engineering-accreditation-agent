@@ -17,6 +17,7 @@ interface ImprovementEffectivenessControlsProps {
     effectiveness: ImprovementEffectiveness,
   ) => void;
   onNoteChange: (note: string) => void;
+  onSubmit: () => void;
   requiresRevisedAction: boolean;
 }
 
@@ -26,6 +27,7 @@ export function ImprovementEffectivenessControls({
   improvementCase,
   onEffectivenessChange,
   onNoteChange,
+  onSubmit,
   requiresRevisedAction,
 }: ImprovementEffectivenessControlsProps) {
   const readOnly = improvementCase.status === 'closed';
@@ -61,13 +63,20 @@ export function ImprovementEffectivenessControls({
       <div className="improvement-effectiveness-action">
         <Button
           block
-          disabled
+          disabled={
+            readOnly ||
+            !selectedEffectiveness ||
+            !draft.note.trim()
+          }
+          onClick={onSubmit}
           type={canRequestClosure ? 'primary' : 'default'}
         >
           {readOnly ? '关闭结论已归档' : '提交结论'}
         </Button>
         <Typography.Text type="secondary">
-          当前为本地草稿
+          {draft.note.trim()
+            ? '草稿已自动保存'
+            : '请补充判断依据后提交'}
         </Typography.Text>
       </div>
       {!readOnly && (

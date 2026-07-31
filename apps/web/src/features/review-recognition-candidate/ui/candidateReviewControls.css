@@ -3,7 +3,7 @@
   flex-direction: column;
   gap: 10px;
   padding-top: 14px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--app-border-soft);
 }
 
 .candidate-review-controls .ant-radio-group {

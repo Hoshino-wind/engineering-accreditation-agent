@@ -30,24 +30,17 @@ const columns: TableProps<DiagnosticFinding>['columns'] = [
     dataIndex: 'title',
     key: 'title',
     title: '发现标题',
-    width: 166,
-    render: (value: string) => (
-      <Typography.Text strong>{value}</Typography.Text>
-    ),
-  },
-  {
-    dataIndex: 'course',
-    key: 'course',
-    title: '课程',
-    width: 86,
-  },
-  {
-    dataIndex: 'type',
-    key: 'type',
-    title: '类型',
-    width: 82,
-    render: (value: DiagnosticFindingType) => (
-      <DiagnosticFindingTypeTag findingType={value} />
+    width: 206,
+    render: (value: string, finding) => (
+      <div className="diagnostic-queue-title">
+        <Typography.Text strong>{value}</Typography.Text>
+        <div>
+          <DiagnosticFindingTypeTag findingType={finding.type} />
+          <Typography.Text type="secondary">
+            {finding.course}
+          </Typography.Text>
+        </div>
+      </div>
     ),
   },
   {

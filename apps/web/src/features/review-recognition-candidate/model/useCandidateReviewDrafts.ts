@@ -1,6 +1,5 @@
-import { useState } from 'react';
-
 import type { CandidateReviewDecision } from '../../../entities/recognition-candidate';
+import { useLocalStorageState } from '../../../shared/lib';
 
 export interface CandidateReviewDraft {
   decision?: CandidateReviewDecision;
@@ -12,9 +11,9 @@ const emptyDraft: CandidateReviewDraft = {
 };
 
 export function useCandidateReviewDrafts() {
-  const [drafts, setDrafts] = useState<
+  const [drafts, setDrafts] = useLocalStorageState<
     Record<string, CandidateReviewDraft>
-  >({});
+  >('engineering-accreditation.m4-review-drafts.v1', {});
 
   const getDraft = (candidateId: string) => drafts[candidateId] ?? emptyDraft;
 

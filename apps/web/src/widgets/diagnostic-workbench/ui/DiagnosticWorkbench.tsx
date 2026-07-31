@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { App } from 'antd';
 
 import {
   prototypeOnlyDiagnosticFindings,
   type DiagnosticFinding,
 } from '../../../entities/diagnostic-finding';
+import { recordWorkflowEvent } from '../../../entities/workflow-event';
 import { useFindingDecisionDrafts } from '../../../features/decide-diagnostic-finding';
 import { useDiagnosticFindingFilters } from '../../../features/filter-diagnostic-findings';
 import { DiagnosticEvidenceDrawer } from '../../../features/inspect-diagnostic-evidence';
@@ -14,6 +16,7 @@ import { DiagnosticFindingQueue } from './DiagnosticFindingQueue';
 import './diagnosticWorkbench.css';
 
 export function DiagnosticWorkbench() {
+  const { message } = App.useApp();
   const filters = useDiagnosticFindingFilters(
     prototypeOnlyDiagnosticFindings,
   );
@@ -68,6 +71,23 @@ export function DiagnosticWorkbench() {
             if (selectedFinding) {
               decisionDrafts.setNote(selectedFinding.id, note);
             }
+          }}
+          onSubmit={() => {
+            if (!selectedFinding || !selectedDraft.decision) {
+              return;
+            }
+            recordWorkflowEvent({
+              action: '提交诊断处置',
+              actor: '当前用户',
+              module: 'M5',
+              objectId: selectedFinding.id,
+              status:
+                selectedDraft.decision === 'dismiss'
+                  ? 'warning'
+                  : 'success',
+              summary: `${selectedFinding.title}：${selectedDraft.decision}`,
+            });
+            void message.success('处置结果已保存，并写入治理中心审计轨迹');
           }}
         />
       </section>

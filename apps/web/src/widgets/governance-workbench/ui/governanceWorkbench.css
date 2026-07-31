@@ -1,0 +1,77 @@
+.governance-summary {
+  flex: none;
+}
+
+.governance-summary .ant-card {
+  height: 76px;
+}
+
+.governance-summary .ant-card-body {
+  padding: 9px 14px;
+}
+
+.governance-summary .ant-statistic-title {
+  font-size: 12px;
+}
+
+.governance-summary .ant-statistic-content {
+  color: var(--app-text);
+  font-size: 23px;
+  line-height: 28px;
+}
+
+.governance-summary .ant-statistic-content-prefix {
+  margin-inline-end: 8px;
+  color: var(--app-primary);
+  font-size: 18px;
+}
+
+.governance-tabs {
+  min-height: 0;
+  flex: 1;
+  margin-top: 8px;
+}
+
+.governance-tabs > .ant-tabs-nav {
+  margin-bottom: 8px;
+}
+
+.governance-tabs > .ant-tabs-content-holder,
+.governance-tabs .ant-tabs-content,
+.governance-tabs .ant-tabs-tabpane {
+  height: 100%;
+  min-height: 0;
+}
+
+.governance-tab-card {
+  height: 100%;
+}
+
+.governance-tab-card > .ant-card-body {
+  height: calc(100% - 41px);
+  min-height: 0;
+  padding: 12px;
+  overflow: hidden;
+}
+
+.governance-user {
+  display: flex;
+  flex-direction: column;
+}
+
+.governance-user .ant-typography-secondary {
+  font-size: 12px;
+}
+
+.governance-audit-filters {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.governance-audit-filters .ant-select {
+  width: 150px;
+}
+
+.governance-audit-filters .ant-input-group-wrapper {
+  width: 360px;
+}

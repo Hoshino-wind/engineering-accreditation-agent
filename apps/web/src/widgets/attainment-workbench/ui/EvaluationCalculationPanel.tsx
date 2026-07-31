@@ -106,10 +106,10 @@ export function EvaluationCalculationPanel({
           <Tag
             color={
               calculation.outcome === 'achieved'
-                ? 'green'
+                ? 'success'
                 : calculation.outcome === 'blocked'
-                  ? 'red'
-                  : 'orange'
+                  ? 'error'
+                  : 'warning'
             }
           >
             {calculation.outcome === 'achieved'

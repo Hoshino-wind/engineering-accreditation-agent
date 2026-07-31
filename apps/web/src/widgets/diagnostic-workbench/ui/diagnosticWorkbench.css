@@ -30,13 +30,13 @@
 .diagnostic-finding-queue
   .diagnostic-finding-row--selected
   > td {
-  background: #e6f4ff;
+  background: var(--app-selection-bg);
 }
 
 .diagnostic-finding-queue
   .diagnostic-finding-row--selected:hover
   > td {
-  background: #d9eeff;
+  background: var(--app-selection-hover-bg);
 }
 
 .diagnostic-finding-queue .ant-tag {
@@ -63,15 +63,15 @@
   justify-content: center;
   gap: 5px;
   padding: 10px 12px;
-  border: 1px solid #91caff;
-  border-radius: 6px;
-  background: #f5faff;
+  border: 1px solid var(--app-primary-border);
+  border-radius: var(--app-radius-small);
+  background: var(--app-primary-surface);
   text-align: center;
 }
 
 .diagnostic-relation-node--target {
-  border-color: #b7eb8f;
-  background: #f6ffed;
+  border-color: var(--app-success-border);
+  background: var(--app-success-soft);
 }
 
 .diagnostic-broken-edge {
@@ -79,14 +79,14 @@
   flex-direction: column;
   align-items: center;
   gap: 5px;
-  color: #ff4d4f;
+  color: var(--app-error);
   text-align: center;
 }
 
 .diagnostic-broken-edge::before,
 .diagnostic-broken-edge::after {
   width: 100%;
-  border-top: 1px dashed #ff4d4f;
+  border-top: 1px dashed var(--app-error);
   content: '';
 }
 
@@ -96,8 +96,8 @@
   height: 22px;
   place-items: center;
   border-radius: 50%;
-  color: #ffffff;
-  background: #ff4d4f;
+  color: var(--app-text-inverse);
+  background: var(--app-error);
 }
 
 .diagnostic-broken-edge .ant-typography {
@@ -110,8 +110,8 @@
   gap: 6px;
   margin-top: 12px;
   padding: 12px;
-  border: 1px solid #f0f0f0;
-  border-radius: 6px;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--app-radius-small);
 }
 
 .diagnostic-section-heading {
@@ -142,8 +142,8 @@
 .diagnostic-impact {
   margin-top: 12px;
   padding: 10px 12px;
-  border: 1px solid #f0f0f0;
-  border-radius: 6px;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--app-radius-small);
 }
 
 .diagnostic-impact > .ant-typography {
@@ -158,7 +158,7 @@
 }
 
 .diagnostic-impact-item > .anticon {
-  color: #1677ff;
+  color: var(--app-primary);
   font-size: 18px;
 }
 
@@ -194,21 +194,21 @@
   justify-content: center;
   gap: 3px;
   padding: 7px;
-  border: 1px solid #91caff;
+  border: 1px solid var(--app-primary-border);
   border-radius: 5px;
-  background: #f5faff;
+  background: var(--app-primary-surface);
   text-align: center;
 }
 
 .diagnostic-path-node--danger {
-  border-color: #ff7875;
+  border-color: var(--app-error);
   border-style: dashed;
-  background: #fff2f0;
+  background: var(--app-error-soft);
 }
 
 .diagnostic-path-node--target {
-  border-color: #b7eb8f;
-  background: #f6ffed;
+  border-color: var(--app-success-border);
+  background: var(--app-success-soft);
 }
 
 .diagnostic-path-node .ant-typography {
@@ -221,7 +221,7 @@
 .diagnostic-path-edge {
   flex: none;
   margin: 0 5px;
-  color: #8c8c8c;
+  color: var(--app-text-secondary);
 }
 
 .diagnostic-path-edge--broken {
@@ -231,8 +231,8 @@
   place-items: center;
   margin: 0 4px;
   border-radius: 50%;
-  color: #ffffff;
-  background: #ff4d4f;
+  color: var(--app-text-inverse);
+  background: var(--app-error);
 }
 
 .diagnostic-source-version {

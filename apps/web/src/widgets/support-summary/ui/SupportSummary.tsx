@@ -2,7 +2,6 @@ import { Card, Col, Row, Space, Statistic, Typography } from 'antd';
 
 import { prototypeOnlySupportSummary } from '../model/prototypeOnlySupportSummary';
 
-import './supportSummary.css';
 
 export function SupportSummary() {
   return (
