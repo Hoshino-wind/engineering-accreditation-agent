@@ -1,14 +1,16 @@
+/* === 教学改进页面 === */
 .teaching-improvement-page {
   width: 100%;
-  max-width: 1680px;
+  max-width: var(--app-content-max-width);
   margin: 0 auto;
+  padding: var(--space-4);
 }
 
 .teaching-improvement-page-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .teaching-improvement-page-header .ant-typography {
@@ -17,15 +19,94 @@
 
 .teaching-improvement-page-header h2.ant-typography {
   margin-top: 0;
-  font-size: 24px;
+  font-size: var(--font-size-2xl);
   line-height: 32px;
+  font-weight: var(--font-weight-semibold);
 }
 
 .teaching-improvement-page-header .ant-typography-secondary {
   margin-top: 4px;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
 }
 
-.teaching-improvement-notice {
-  margin-bottom: 16px;
+.improvement-stats {
+  margin-bottom: 12px;
+}
+
+.improvement-alert {
+  margin-bottom: 12px;
+}
+
+/* 左右布局 */
+.improvement-body {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+/* 建议列表 */
+.improvement-list-card {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.improvement-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.improvement-list-item {
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.improvement-list-item:hover {
+  border-color: #6fa8ff;
+  background: var(--color-primary-lighter);
+}
+
+.improvement-list-item.selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.improvement-list-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.improvement-list-item-title {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+/* 详情卡片 */
+.improvement-detail-card {
+  min-height: 400px;
+}
+
+.improvement-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.improvement-detail-section {
+  margin-top: 16px;
+}
+
+.improvement-detail-actions {
+  margin-top: 24px;
+  display: flex;
+  gap: 8px;
 }

@@ -71,8 +71,8 @@ function createSections(course: string): SupportPackageSection[] {
       claims: [
         {
           id: 'claim-graph-path',
-          referenceIds: ['G-CT6', 'E-RS18'],
-          text: `${course}已形成从毕业要求指标点到课程目标、实验项目和评分项的正式支撑路径。`,
+          referenceIds: ['G-GR05', 'G-GR03', 'E-RS18'],
+          text: `${course}已形成从毕业要求指标点（GR-01/GR-03/GR-05）到课程目标、实验项目（如系统设计 EXP-EMB-01、LED流水灯 EXP-FPGA-01）和评分项的正式支撑路径。`,
         },
       ],
       code: '1',
@@ -181,8 +181,8 @@ function createPackage(seed: PackageSeed): SupportPackage {
 }
 
 const selectedPackage = createPackage({
-  course: '计算机网络',
-  courseCode: 'network',
+  course: '单片机基础',
+  courseCode: 'co-mcu',
   displayId: 'SP-2026-001',
   evaluationState: 'unapproved',
   id: 'support-package-001',
@@ -210,8 +210,8 @@ selectedPackage.sections = selectedPackage.sections.map((section) =>
 export const prototypeOnlySupportPackages: SupportPackage[] = [
   selectedPackage,
   createPackage({
-    course: '数据结构',
-    courseCode: 'data-structure',
+    course: '数据结构与算法',
+    courseCode: 'co-ds',
     displayId: 'SP-2026-002',
     id: 'support-package-002',
     kind: 'course-teaching',
@@ -225,8 +225,8 @@ export const prototypeOnlySupportPackages: SupportPackage[] = [
       approver: '王老师',
       snapshotHash: 'sha256:0037…b921',
     },
-    course: '软件工程',
-    courseCode: 'software-engineering',
+    course: '嵌入式系统原理',
+    courseCode: 'co-fpga',
     displayId: 'SP-2026-003',
     id: 'support-package-003',
     kind: 'capstone',
@@ -236,8 +236,8 @@ export const prototypeOnlySupportPackages: SupportPackage[] = [
   }),
   {
     ...createPackage({
-      course: '操作系统',
-      courseCode: 'operating-system',
+      course: '单片机基础',
+      courseCode: 'co-mcu',
       displayId: 'SP-2026-004',
       evaluationState: 'unapproved',
       id: 'support-package-004',
@@ -254,8 +254,8 @@ export const prototypeOnlySupportPackages: SupportPackage[] = [
       approver: '王老师',
       snapshotHash: 'sha256:0057…b921',
     },
-    course: '数据库原理',
-    courseCode: 'database',
+    course: '嵌入式系统原理',
+    courseCode: 'co-fpga',
     displayId: 'SP-2026-005',
     id: 'support-package-005',
     kind: 'experiment-teaching',

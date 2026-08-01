@@ -1,13 +1,19 @@
+/* === 达成度摘要卡 === */
 .attainment-summary {
   margin-top: 16px;
 }
 
 .attainment-summary .ant-card {
-  height: 96px;
+  height: 92px;
+  transition: box-shadow var(--transition-normal);
+}
+
+.attainment-summary .ant-card:hover {
+  box-shadow: var(--shadow-sm);
 }
 
 .attainment-summary .ant-card-body {
-  padding: 14px 16px;
+  padding: 16px;
 }
 
 .attainment-summary-icon {
@@ -16,41 +22,42 @@
   height: 36px;
   flex: none;
   place-items: center;
-  border-radius: 6px;
-  font-size: 19px;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-lg);
 }
 
 .attainment-summary-icon--blue {
-  color: #1677ff;
-  background: #e6f4ff;
+  color: var(--color-primary);
+  background: var(--color-info-light);
 }
 
 .attainment-summary-icon--green {
-  color: #389e0d;
-  background: #f6ffed;
+  color: var(--color-success);
+  background: var(--color-success-light);
 }
 
 .attainment-summary-icon--red {
-  color: #cf1322;
-  background: #fff1f0;
+  color: var(--color-danger);
+  background: var(--color-danger-light);
 }
 
 .attainment-summary .ant-statistic-title {
-  margin-bottom: 1px;
-  color: #8c8c8c;
-  font-size: 13px;
+  margin-bottom: 2px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
 }
 
 .attainment-summary .ant-statistic-content {
-  font-size: 25px;
-  line-height: 30px;
+  font-size: 24px;
+  line-height: 28px;
+  font-weight: var(--font-weight-semibold);
 }
 
 .attainment-summary .ant-statistic-content-suffix {
   margin-left: 4px;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
 }
 
 .attainment-summary .ant-typography-secondary {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
 }

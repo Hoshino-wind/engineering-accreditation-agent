@@ -8,7 +8,7 @@ describe('filterTeachingResources', () => {
     const resources = filterTeachingResources(
       prototypeOnlyTeachingResources,
       {
-        course: '操作系统',
+        course: '单片机基础',
         keyword: '',
         resourceType: '评分表',
         status: 'failed',
@@ -16,7 +16,7 @@ describe('filterTeachingResources', () => {
     );
 
     expect(resources.map((resource) => resource.id)).toEqual([
-      'resource-os-rubric',
+      'resource-mcu-rubric',
     ]);
   });
 
@@ -32,7 +32,7 @@ describe('filterTeachingResources', () => {
     );
 
     expect(resources.map((resource) => resource.id)).toEqual([
-      'resource-se-guide',
+      'resource-embedded-guide',
     ]);
   });
 });

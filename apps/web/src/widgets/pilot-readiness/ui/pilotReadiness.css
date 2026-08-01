@@ -1,6 +1,6 @@
 .readiness-row {
   padding: 9px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .readiness-row:first-child {
@@ -19,5 +19,5 @@
 }
 
 .readiness-row .ant-typography-secondary {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
 }

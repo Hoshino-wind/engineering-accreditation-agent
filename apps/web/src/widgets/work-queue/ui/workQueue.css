@@ -3,7 +3,7 @@
 }
 
 .work-queue .ant-card-body {
-  padding: 12px 16px 16px;
+  padding: var(--space-3) var(--space-4) var(--space-4);
 }
 
 .work-queue .ant-tag {
@@ -19,6 +19,6 @@
 }
 
 .work-queue-action {
-  color: #1677ff;
-  font-size: 13px;
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
 }

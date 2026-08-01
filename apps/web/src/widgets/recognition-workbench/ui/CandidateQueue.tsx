@@ -55,8 +55,9 @@ const columns: TableProps<RecognitionCandidate>['columns'] = [
       <Progress
         format={() => `${value}%`}
         percent={value}
-        size="small"
+        size={38}
         status={value < 70 ? 'exception' : 'normal'}
+        strokeColor={value < 70 ? '#d4380d' : '#2f6fed'}
         type="circle"
       />
     ),

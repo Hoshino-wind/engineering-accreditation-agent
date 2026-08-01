@@ -1,24 +1,51 @@
-import {
-  FileAddOutlined,
-  InfoCircleOutlined,
-} from '@ant-design/icons';
-import {
-  Alert,
-  Button,
-  Space,
-  Tag,
-  Tooltip,
-  Typography,
-} from 'antd';
+import { InfoCircleOutlined } from '@ant-design/icons';
+import { Alert, Col, Row, Space, Spin, Tag, Typography } from 'antd';
+import { useEffect, useState } from 'react';
 
+import { prototypeOnlyAbilityGraph } from '../../../entities/ability-graph/model/prototypeOnlyAbilityGraph';
+import {
+  checkReportCompleteness,
+  CompletenessCheckList,
+  generateSelfEvaluationReport,
+  ReportExportButton,
+  ReportPreview,
+} from '../../../features/generate-report';
 import { SupportSummary } from '../../../widgets/support-summary';
 import { SupportWorkbench } from '../../../widgets/support-workbench';
 
 import './accreditationSupportPage.css';
 
-const { Paragraph, Title } = Typography;
+const { Paragraph, Title, Text } = Typography;
 
 export function AccreditationSupportPage() {
+  const [sections, setSections] = useState<Awaited<ReturnType<typeof generateSelfEvaluationReport>>>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    void generateSelfEvaluationReport(prototypeOnlyAbilityGraph)
+      .then((result) => setSections(result))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const checks = checkReportCompleteness(sections);
+  const allPassed = checks.every((c) => c.passed);
+
+  if (loading) {
+    return (
+      <main className="accreditation-support-page">
+        <div style={{ padding: '80px 0', textAlign: 'center' }}>
+          <Spin size="large" />
+          <div style={{ marginTop: 16 }}>
+            <Text type="secondary">AI 正在生成自评报告...</Text>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  const aiModel = sections[0]?.aiModel;
+  const aiLatency = sections[0]?.aiLatency;
+
   return (
     <main className="accreditation-support-page">
       <div className="accreditation-support-page-header">
@@ -26,27 +53,35 @@ export function AccreditationSupportPage() {
           <Space align="center" size={10}>
             <Title level={2}>工程认证支撑</Title>
             <Tag color="geekblue">M8 认证支撑</Tag>
-            <Tag>试点示例数据</Tag>
+            {aiModel && <Tag color="purple">AI 生成 · {aiModel}</Tag>}
+            {aiLatency !== undefined && (
+              <Text type="secondary">耗时 {Math.round(aiLatency)}ms</Text>
+            )}
           </Space>
           <Paragraph type="secondary">
-            从已确认的图谱、评价与改进事实生成可追溯、可校验的认证支撑材料。
+            从已确认的图谱、评价与改进事实生成可追溯、可校验的认证自评报告。
           </Paragraph>
         </div>
-        <Tooltip title="正式支撑包创建将在 M8 reporting 后端业务切片接入">
-          <Button disabled icon={<FileAddOutlined />} type="primary">
-            新建支撑包
-          </Button>
-        </Tooltip>
+        <ReportExportButton disabled={!allPassed} sections={sections} />
       </div>
 
       <Alert
         className="accreditation-support-notice"
-        description="当前 5 个支撑包中，2 个需要修正、1 个待复核、1 个已批准；未批准评价、未闭环改进或失效引用必须返回事实所属模块处理后才能导出。页面业务数量均为试点示例数据。"
+        description="报告章节按 2024 版认证标准毕业要求组织，数据来源于图谱(M2)、达成度评价(M6)和教学改进(M7)。未达成项需关联改进案例后方可导出。"
         icon={<InfoCircleOutlined />}
         showIcon
-        title="当前重点：报告不能覆盖上游正式事实"
-        type="warning"
+        title="报告生成规则：数据必须来自上游已确认事实"
+        type="info"
       />
+
+      <Row gutter={16}>
+        <Col span={16}>
+          <ReportPreview sections={sections} />
+        </Col>
+        <Col span={8}>
+          <CompletenessCheckList checks={checks} />
+        </Col>
+      </Row>
 
       <SupportSummary />
       <SupportWorkbench />

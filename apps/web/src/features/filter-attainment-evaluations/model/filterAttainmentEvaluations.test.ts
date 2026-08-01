@@ -8,25 +8,25 @@ describe('filterAttainmentEvaluations', () => {
     const results = filterAttainmentEvaluations(
       prototypeOnlyAttainmentEvaluations,
       {
-        course: '软件工程',
-        keyword: '团队',
+        course: '单片机基础',
+        keyword: '工具',
         status: 'blocked',
       },
     );
 
-    expect(results.map((item) => item.id)).toEqual(['evaluation-ct5']);
+    expect(results.map((item) => item.id)).toEqual(['evaluation-mcu-tool']);
   });
 
-  it('关键词可以匹配能力编码', () => {
+  it('关键词可以匹配能力指标编码', () => {
     const results = filterAttainmentEvaluations(
       prototypeOnlyAttainmentEvaluations,
       {
         course: 'all',
-        keyword: 'BA-2',
+        keyword: 'C-05-01',
         status: 'all',
       },
     );
 
-    expect(results.map((item) => item.id)).toEqual(['evaluation-ct3']);
+    expect(results.map((item) => item.id)).toEqual(['evaluation-mcu-tool']);
   });
 });

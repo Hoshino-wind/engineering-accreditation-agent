@@ -1,6 +1,6 @@
 .recognition-review-page {
   width: 100%;
-  max-width: 1680px;
+  max-width: var(--app-content-max-width);
   margin: 0 auto;
 }
 
@@ -17,15 +17,15 @@
 
 .recognition-review-page-header h2.ant-typography {
   margin-top: 0;
-  font-size: 24px;
+  font-size: var(--font-size-2xl);
   line-height: 32px;
 }
 
 .recognition-review-page-header .ant-typography-secondary {
-  margin-top: 4px;
-  font-size: 13px;
+  margin-top: var(--space-1);
+  font-size: var(--font-size-sm);
 }
 
 .recognition-review-notice {
-  margin-bottom: 16px;
+  margin-bottom: var(--space-4);
 }

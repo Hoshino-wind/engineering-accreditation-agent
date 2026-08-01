@@ -1,0 +1,126 @@
+/* === 图谱视图页面 === */
+.graph-view-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  min-height: 0;
+}
+
+.graph-view-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.graph-view-page-header .ant-typography {
+  margin: 0;
+}
+
+.graph-view-stats {
+  flex-shrink: 0;
+}
+
+.graph-view-stats .ant-card-body {
+  padding: 12px 16px;
+}
+
+.graph-view-stats .ant-statistic {
+  margin: 0;
+}
+
+.graph-view-stats .ant-statistic-title {
+  font-size: var(--font-size-xs);
+  margin-bottom: 0;
+  color: var(--color-text-secondary);
+}
+
+.graph-view-stats .ant-statistic-content {
+  font-size: var(--font-size-xl);
+  line-height: 1.2;
+  font-weight: var(--font-weight-semibold);
+}
+
+.graph-view-process-col {
+  min-width: 0;
+  padding-left: 24px;
+  border-left: 1px dashed var(--color-border);
+}
+
+.graph-view-process-col .ant-steps {
+  padding: 4px 0;
+}
+
+.graph-view-toolbar {
+  flex-shrink: 0;
+}
+
+/* 主区域：左画布 + 右审核面板 */
+.graph-view-main {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+}
+
+.graph-view-canvas-card {
+  flex: 7;
+  min-width: 0;
+  overflow: hidden;
+  min-height: 480px;
+}
+
+.graph-view-canvas-card .ant-card-body {
+  height: 100%;
+}
+
+.graph-view-review-card {
+  flex: 3;
+  min-width: 320px;
+  max-width: 420px;
+  overflow: hidden;
+}
+
+.graph-view-review-card .ant-card-body {
+  height: 100%;
+}
+
+.graph-view-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.graph-view-legend {
+  flex-shrink: 0;
+}
+
+.graph-view-legend-line {
+  display: inline-block;
+  width: 28px;
+  height: 0;
+  border-top-width: 2px;
+  border-top-style: solid;
+}
+
+.graph-view-legend-approved {
+  border-top-color: var(--color-text-tertiary);
+}
+
+.graph-view-legend-pending {
+  border-top-color: var(--color-warning);
+  border-top-style: dashed;
+}
+
+.graph-view-legend-selected {
+  border-top-color: var(--color-primary);
+  border-top-width: 3px;
+}
+
+.graph-view-pending-notice {
+  flex-shrink: 0;
+}

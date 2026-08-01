@@ -3,21 +3,21 @@
 }
 
 .teaching-resource-summary .ant-card-body {
-  padding: 16px;
+  padding: var(--space-4);
 }
 
 .teaching-resource-summary .ant-statistic-title {
   margin-bottom: 0;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
 }
 
 .teaching-resource-summary .ant-statistic-content {
-  font-size: 24px;
+  font-size: var(--font-size-2xl);
   line-height: 32px;
 }
 
 .teaching-resource-summary .ant-typography-secondary {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
 }
 
 .teaching-resource-summary-icon {
@@ -26,23 +26,23 @@
   height: 36px;
   flex: none;
   place-items: center;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   font-size: 18px;
 }
 
 .teaching-resource-summary-icon--blue {
-  color: #1677ff;
-  background: #e6f4ff;
+  color: var(--color-primary);
+  background: var(--color-info-light);
 }
 
 .teaching-resource-summary-icon--green {
-  color: #389e0d;
-  background: #f6ffed;
+  color: var(--color-success);
+  background: var(--color-success-light);
 }
 
 .teaching-resource-summary-icon--geekblue {
   color: #2f54eb;
-  background: #f0f5ff;
+  background: var(--color-primary-lighter);
 }
 
 .teaching-resource-summary-icon--orange {

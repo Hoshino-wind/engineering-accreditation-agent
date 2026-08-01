@@ -1,5 +1,5 @@
 .improvement-summary {
-  margin-top: 16px;
+  margin-top: var(--space-4);
 }
 
 .improvement-summary .ant-card {
@@ -7,7 +7,7 @@
 }
 
 .improvement-summary .ant-card-body {
-  padding: 14px 16px;
+  padding: 14px var(--space-4);
 }
 
 .improvement-summary-icon {
@@ -16,18 +16,18 @@
   height: 36px;
   flex: none;
   place-items: center;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   font-size: 19px;
 }
 
 .improvement-summary-icon--blue {
-  color: #1677ff;
-  background: #e6f4ff;
+  color: var(--color-primary);
+  background: var(--color-info-light);
 }
 
 .improvement-summary-icon--green {
-  color: #389e0d;
-  background: #f6ffed;
+  color: var(--color-success);
+  background: var(--color-success-light);
 }
 
 .improvement-summary-icon--orange {
@@ -42,8 +42,8 @@
 
 .improvement-summary .ant-statistic-title {
   margin-bottom: 1px;
-  color: #8c8c8c;
-  font-size: 13px;
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
 }
 
 .improvement-summary .ant-statistic-content {
@@ -52,8 +52,8 @@
 }
 
 .improvement-summary .ant-statistic-content-suffix {
-  margin-left: 4px;
-  font-size: 14px;
+  margin-left: var(--space-1);
+  font-size: var(--font-size-base);
 }
 
 .improvement-summary .ant-typography-secondary {
