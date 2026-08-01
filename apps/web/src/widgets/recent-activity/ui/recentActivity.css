@@ -10,7 +10,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--space-4);
   margin-bottom: 3px;
 }
 
@@ -19,6 +19,6 @@
 }
 
 .recent-activity-header > .ant-typography {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   white-space: nowrap;
 }

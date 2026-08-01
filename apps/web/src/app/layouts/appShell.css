@@ -2,108 +2,545 @@
   min-height: 100vh;
 }
 
+/* === 侧栏：Industrial Intelligence 深空工业风 === */
 .app-sider {
   position: sticky;
   top: 0;
   height: 100vh;
   overflow: auto;
+  background:
+    radial-gradient(
+      600px 320px at 110% -30px,
+      rgba(59, 91, 219, 0.18) 0%,
+      rgba(59, 91, 219, 0) 65%
+    ),
+    radial-gradient(
+      480px 280px at -10% 108%,
+      rgba(176, 141, 87, 0.09) 0%,
+      rgba(176, 141, 87, 0) 70%
+    ),
+    var(--color-sider-bg-grad);
+  box-shadow: var(--shadow-sider);
 }
 
+.app-sider::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--noise-texture);
+  background-repeat: repeat;
+  opacity: 0.35;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app-sider > * {
+  position: relative;
+  z-index: 1;
+}
+
+.app-sider::-webkit-scrollbar {
+  width: 4px;
+}
+
+.app-sider::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+}
+
+.app-sider::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* 品牌区：工业铭牌风 */
 .app-brand {
   display: flex;
   height: 72px;
   align-items: center;
-  gap: 10px;
-  padding: 0 18px;
-  border-bottom: 1px solid rgb(255 255 255 / 10%);
-  color: #ffffff;
+  gap: 13px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--color-sider-border);
+  color: var(--color-sider-text);
   white-space: nowrap;
+  position: relative;
+  overflow: hidden;
 }
 
-.app-brand .anticon {
-  color: #91caff;
-  font-size: 24px;
+.app-brand::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 20px;
+  width: 28px;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--color-accent) 0%,
+    rgba(176, 141, 87, 0) 100%
+  );
+  opacity: 0.7;
+}
+
+.app-brand-mark {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(59, 91, 219, 0.95) 0%,
+      rgba(76, 55, 200, 0.9) 50%,
+      rgba(124, 58, 237, 0.85) 100%
+    );
+  color: #ffffff;
+  font-size: 19px;
+  flex-shrink: 0;
+}
+
+.app-brand-mark::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  pointer-events: none;
+}
+
+.app-brand-mark::after {
+  content: '';
+  position: absolute;
+  right: 2px;
+  top: 2px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow:
+    0 0 0 2px rgba(10, 15, 29, 0.85),
+    0 0 0 4px rgba(176, 141, 87, 0.28);
+}
+
+.app-brand-texts {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .app-brand-title {
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 22px;
+  font-size: 14.5px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 20px;
+  letter-spacing: 0.2px;
+  color: rgba(255, 255, 255, 0.96);
 }
 
 .app-brand-subtitle {
-  color: rgb(255 255 255 / 55%);
-  font-size: 12px;
-  line-height: 18px;
+  color: var(--color-sider-text-secondary);
+  font-size: 10.5px;
+  line-height: 15px;
+  letter-spacing: 0.45px;
+  margin-top: 2px;
+  text-transform: uppercase;
 }
 
+/* 菜单：分组标题 + 几何装饰 */
 .app-sider .ant-menu {
-  padding-top: 8px;
+  padding: 6px 10px 16px;
+  border-inline-end: none !important;
+  background: transparent;
+}
+
+.app-sider .ant-menu-item-group {
+  position: relative;
 }
 
 .app-sider .ant-menu-item-group-title {
-  padding-top: 14px;
-  padding-bottom: 6px;
-  color: rgb(255 255 255 / 38%);
-  font-size: 12px;
+  position: relative;
+  padding: 18px 8px 8px 20px;
+  color: var(--color-sider-text-muted);
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  user-select: none;
 }
 
-.app-sider-footer {
+.app-sider .ant-menu-item-group-title::before {
+  content: '';
   position: absolute;
-  right: 16px;
-  bottom: 16px;
-  left: 16px;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  background: var(--color-accent);
+  opacity: 0.6;
+  clip-path: polygon(0 0, 100% 0, 100% 70%, 30% 70%, 30% 100%, 0 100%);
+}
+
+.app-sider .ant-menu-item-group-title::after {
+  content: '';
+  position: absolute;
+  left: 20px;
+  right: 10px;
+  bottom: 4px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+.app-sider .ant-menu-item {
+  position: relative;
+  height: 38px;
+  line-height: 38px;
+  margin-block: 2px;
+  border-radius: 8px !important;
+  padding: 0 12px !important;
+  color: var(--color-sider-text-secondary);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    transform var(--transition-fast);
+  overflow: hidden;
+}
+
+.app-sider .ant-menu-item > .ant-menu-title-content {
+  position: relative;
+  z-index: 2;
+  font-size: 13.5px;
+  letter-spacing: 0.15px;
+}
+
+.app-sider .ant-menu-item > .anticon {
+  position: relative;
+  z-index: 2;
+  font-size: 15px;
+}
+
+.app-sider .ant-menu-item:hover {
+  color: var(--color-sider-text);
+  background: rgba(255, 255, 255, 0.045) !important;
+}
+
+.app-sider .ant-menu-item:hover > .anticon {
+  transform: scale(1.05);
+}
+
+.app-sider .ant-menu-item-selected {
+  color: #ffffff !important;
+  background: transparent !important;
+}
+
+.app-sider .ant-menu-item-selected::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(59, 91, 219, 0.98) 0%,
+      rgba(84, 112, 230, 0.94) 55%,
+      rgba(59, 91, 219, 0.88) 100%
+    );
+  z-index: 1;
+  box-shadow:
+    0 4px 14px -3px rgba(59, 91, 219, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.app-sider .ant-menu-item-selected::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 9px;
+  bottom: 9px;
+  width: 2.5px;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(
+    180deg,
+    #e9efff 0%,
+    #c5d3ff 50%,
+    #9fb1ff 100%
+  );
+  z-index: 3;
+  box-shadow: 0 0 8px rgba(197, 211, 255, 0.5);
+}
+
+/* 选中项的琥珀金细点 —— 右侧 */
+.app-sider .ant-menu-item-selected > .ant-menu-title-content::after {
+  content: '';
+  position: absolute;
+  right: -2px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 6px rgba(176, 141, 87, 0.55);
+  z-index: 3;
+}
+
+/* 底部信息卡：工业铭牌 */
+.app-sider-footer {
+  position: relative;
+  margin: 4px 10px 12px;
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 12px;
-  border: 1px solid rgb(255 255 255 / 10%);
-  border-radius: 6px;
-  background: rgb(255 255 255 / 5%);
+  padding: 12px 13px;
+  border-radius: 10px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.035) 0%,
+      rgba(255, 255, 255, 0.015) 100%
+    );
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+.app-sider-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(176, 141, 87, 0) 0%,
+    rgba(176, 141, 87, 0.45) 30%,
+    rgba(176, 141, 87, 0) 100%
+  );
+}
+
+.app-sider-footer::after {
+  content: 'PILOT';
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  color: rgba(176, 141, 87, 0.35);
 }
 
 .app-sider-footer > .anticon {
-  margin-top: 3px;
-  color: #91caff;
+  margin-top: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 7px;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 91, 219, 0.25) 0%,
+    rgba(108, 43, 209, 0.22) 100%
+  );
+  color: #9fb1ff;
+  font-size: 14px;
+  border: 1px solid rgba(159, 177, 255, 0.18);
 }
 
 .app-sider-footer .ant-typography {
   display: block;
   margin: 0;
-  color: rgb(255 255 255 / 88%);
+  color: var(--color-sider-text);
   font-size: 12px;
-  line-height: 20px;
+  line-height: 18px;
+  letter-spacing: 0.1px;
+  font-weight: var(--font-weight-medium);
 }
 
 .app-sider-footer .ant-typography-secondary {
-  color: rgb(255 255 255 / 45%);
+  color: var(--color-sider-text-secondary);
+  font-weight: var(--font-weight-regular);
+  font-size: 11px;
+  letter-spacing: 0.2px;
+  margin-top: 1px;
 }
 
+/* === Header：编辑风玻璃态 === */
 .app-header {
   position: sticky;
   z-index: 10;
   top: 0;
   display: flex;
-  height: 56px;
+  height: var(--app-header-height);
   align-items: center;
   justify-content: space-between;
   padding: 0 28px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border-light);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.88) 0%,
+      rgba(255, 255, 255, 0.78) 100%
+    );
+  backdrop-filter: saturate(180%) blur(14px);
 }
 
+.app-header::after {
+  content: '';
+  position: absolute;
+  left: 28px;
+  right: 28px;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(176, 141, 87, 0) 0%,
+    rgba(176, 141, 87, 0.25) 18%,
+    rgba(59, 91, 219, 0.22) 50%,
+    rgba(176, 141, 87, 0.25) 82%,
+    rgba(176, 141, 87, 0) 100%
+  );
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* 面包屑：Editorial 风 */
+.app-header .ant-breadcrumb {
+  font-size: 13px;
+  letter-spacing: 0.1px;
+}
+
+.app-header .ant-breadcrumb-link {
+  color: var(--color-text-tertiary);
+  font-weight: var(--font-weight-regular);
+  transition: color var(--transition-fast);
+}
+
+.app-header .ant-breadcrumb-link:hover {
+  color: var(--color-primary);
+}
+
+.app-header .ant-breadcrumb ol > li:last-child .ant-breadcrumb-link {
+  color: var(--color-text);
+  font-weight: var(--font-weight-semibold);
+  position: relative;
+}
+
+.app-header .ant-breadcrumb ol > li:last-child .ant-breadcrumb-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--color-accent) 0%,
+    rgba(176, 141, 87, 0) 100%
+  );
+  opacity: 0.7;
+  border-radius: 1px;
+}
+
+.app-header .ant-breadcrumb-separator {
+  color: var(--color-text-disabled);
+  margin: 0 8px;
+  font-size: 11px;
+}
+
+/* 图谱状态指示 —— 编辑风胶囊 */
+.app-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 28px;
+  padding: 0 12px 0 8px;
+  border-radius: 14px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(59, 91, 219, 0.07) 0%,
+      rgba(176, 141, 87, 0.06) 100%
+    );
+  color: var(--color-text-secondary);
+  font-size: 11.5px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.2px;
+  border: 1px solid rgba(59, 91, 219, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.app-status-pill .anticon {
+  font-size: 11px;
+  color: var(--color-primary);
+}
+
+.app-status-dot {
+  position: relative;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-success);
+  box-shadow:
+    0 0 0 3px rgba(12, 153, 102, 0.12),
+    0 0 6px rgba(12, 153, 102, 0.45);
+}
+
+.app-status-dot::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1px solid rgba(12, 153, 102, 0.22);
+  animation: header-pulse 2.2s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
+}
+
+@keyframes header-pulse {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+
+/* 用户区 */
 .app-user {
   display: flex;
-  min-width: 72px;
+  min-width: 76px;
   flex-direction: column;
 }
 
 .app-user .ant-typography {
   margin: 0;
-  font-size: 12px;
+  font-size: 12.5px;
   line-height: 17px;
 }
 
+.app-user .ant-typography:last-child {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+}
+
+/* === Content：四周留白呼吸感 === */
 .app-content {
   min-width: 0;
-  padding: 20px 28px 28px;
+  padding: 28px 28px 40px;
+  max-width: var(--app-content-max-width);
+  margin: 0 auto;
+  width: 100%;
 }

@@ -8,7 +8,7 @@ describe('filterDiagnosticFindings', () => {
     const findings = filterDiagnosticFindings(
       prototypeOnlyDiagnosticFindings,
       {
-        course: '软件工程',
+        course: '嵌入式系统原理',
         findingType: 'all',
         keyword: '',
         risk: 'high',
@@ -31,7 +31,7 @@ describe('filterDiagnosticFindings', () => {
     );
 
     expect(findings.map((finding) => finding.id)).toEqual([
-      'finding-os-assessment-ability-gap',
+      'finding-mcu-assessment-ability-gap',
     ]);
   });
 

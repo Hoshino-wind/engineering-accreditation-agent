@@ -15,19 +15,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .graph-quality-header .ant-typography:last-child {
   color: #595959;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   white-space: nowrap;
 }
 
 .graph-quality-item .ant-progress {
-  margin: 4px 0 1px;
+  margin: var(--space-1) 0 1px;
 }
 
 .graph-quality-item > .ant-typography {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
 }

@@ -6,7 +6,7 @@ import { filterWorkItems } from './filterWorkItems';
 describe('filterWorkItems', () => {
   it('按课程关键字和状态筛选试点事项', () => {
     const result = filterWorkItems(prototypeOnlyWorkItems, {
-      keyword: '软件工程',
+      keyword: '单片机基础',
       status: 'pending',
       type: '候选审核',
     });

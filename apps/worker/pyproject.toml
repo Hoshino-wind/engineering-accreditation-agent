@@ -2,7 +2,7 @@
 name = "engineering-accreditation-worker"
 version = "0.1.0"
 description = "工程认证智能体异步任务服务"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
   "celery[redis]>=5.6.3,<6",
   "pydantic-settings>=2.14.2,<3",

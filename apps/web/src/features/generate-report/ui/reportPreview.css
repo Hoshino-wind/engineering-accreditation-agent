@@ -1,0 +1,76 @@
+/* === 报告预览 === */
+.report-preview-card {
+  margin-bottom: var(--space-4);
+}
+
+.report-section-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.report-section-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.report-section-block .ant-typography-secondary {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.report-section-block .ant-typography {
+  margin-bottom: 0;
+}
+
+/* AI 叙述区块 */
+.report-section-block .ant-typography-paragraph {
+  background: var(--color-bg-hover);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-purple);
+  font-size: var(--font-size-sm);
+  line-height: 1.7;
+  color: var(--color-text);
+  margin: 0;
+}
+
+/* 完整性检查 */
+.report-completeness-card {
+  margin-bottom: var(--space-4);
+}
+
+.report-completeness-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.report-completeness-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+
+.report-completeness-item .anticon {
+  margin-top: 3px;
+  font-size: 14px;
+}
+
+.report-completeness-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.report-completeness-text .ant-typography-secondary {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}

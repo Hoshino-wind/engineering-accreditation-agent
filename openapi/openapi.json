@@ -6,6 +6,139 @@
     "version": "0.1.0"
   },
   "paths": {
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "注册新用户",
+        "operationId": "register_api_v1_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthTokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "用户登录",
+        "operationId": "login_api_v1_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthTokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "获取当前登录用户信息",
+        "operationId": "get_me_api_v1_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "用户登出",
+        "operationId": "logout_api_v1_auth_logout_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "boolean"
+                  },
+                  "type": "object",
+                  "title": "Response Logout Api V1 Auth Logout Post"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/system/status": {
       "get": {
         "tags": [
@@ -26,10 +159,1447 @@
           }
         }
       }
+    },
+    "/api/v1/resources": {
+      "get": {
+        "tags": [
+          "resources"
+        ],
+        "summary": "获取教学资源列表",
+        "operationId": "list_resources_api_v1_resources_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "按课程筛选",
+              "title": "Course"
+            },
+            "description": "按课程筛选"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "按状态筛选",
+              "title": "Status"
+            },
+            "description": "按状态筛选"
+          },
+          {
+            "name": "resource_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "按材料类型筛选",
+              "title": "Resource Type"
+            },
+            "description": "按材料类型筛选"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TeachingResourceResponse"
+                  },
+                  "title": "Response List Resources Api V1 Resources Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resources/{resource_id}": {
+      "get": {
+        "tags": [
+          "resources"
+        ],
+        "summary": "获取教学资源详情",
+        "operationId": "get_resource_api_v1_resources__resource_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "resource_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Resource Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeachingResourceResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recognition/candidates": {
+      "get": {
+        "tags": [
+          "recognition"
+        ],
+        "summary": "获取识别候选列表",
+        "operationId": "list_candidates_api_v1_recognition_candidates_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "按课程筛选",
+              "title": "Course"
+            },
+            "description": "按课程筛选"
+          },
+          {
+            "name": "risk",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "按风险等级筛选",
+              "title": "Risk"
+            },
+            "description": "按风险等级筛选"
+          },
+          {
+            "name": "candidate_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "按候选类型筛选",
+              "title": "Candidate Type"
+            },
+            "description": "按候选类型筛选"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RecognitionCandidateResponse"
+                  },
+                  "title": "Response List Candidates Api V1 Recognition Candidates Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recognition/candidates/{candidate_id}/review": {
+      "post": {
+        "tags": [
+          "recognition"
+        ],
+        "summary": "审核候选关系",
+        "operationId": "review_candidate_api_v1_recognition_candidates__candidate_id__review_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "candidate_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Candidate Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CandidateReviewRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecognitionCandidateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/diagnostics/findings": {
+      "get": {
+        "tags": [
+          "diagnostics"
+        ],
+        "summary": "获取诊断发现列表",
+        "operationId": "list_findings_api_v1_diagnostics_findings_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "按课程筛选",
+              "title": "Course"
+            },
+            "description": "按课程筛选"
+          },
+          {
+            "name": "risk",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "按风险等级筛选",
+              "title": "Risk"
+            },
+            "description": "按风险等级筛选"
+          },
+          {
+            "name": "finding_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "按发现类型筛选",
+              "title": "Finding Type"
+            },
+            "description": "按发现类型筛选"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DiagnosticFindingResponse"
+                  },
+                  "title": "Response List Findings Api V1 Diagnostics Findings Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/diagnostics/findings/{finding_id}/decision": {
+      "post": {
+        "tags": [
+          "diagnostics"
+        ],
+        "summary": "处置诊断发现",
+        "operationId": "decide_finding_api_v1_diagnostics_findings__finding_id__decision_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "finding_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Finding Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FindingDecisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticFindingResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/llm/extract": {
+      "post": {
+        "tags": [
+          "llm"
+        ],
+        "summary": "M4 智能体：从材料文本提取结构化节点",
+        "operationId": "extract_nodes_api_v1_llm_extract_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExtractNodesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtractNodesResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/llm/infer-relations": {
+      "post": {
+        "tags": [
+          "llm"
+        ],
+        "summary": "M4→M2 智能体：推断学校节点与标准指标的支撑关系",
+        "operationId": "infer_relations_api_v1_llm_infer_relations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InferRelationsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InferRelationsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/llm/explain": {
+      "post": {
+        "tags": [
+          "llm"
+        ],
+        "summary": "M5 智能体：基于缺口事实生成诊断叙述",
+        "operationId": "generate_explanation_api_v1_llm_explain_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateExplanationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateExplanationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/llm/suggest": {
+      "post": {
+        "tags": [
+          "llm"
+        ],
+        "summary": "M7 智能体：基于缺口数据生成改进建议",
+        "operationId": "generate_suggestions_api_v1_llm_suggest_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateSuggestionsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateSuggestionsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/llm/report": {
+      "post": {
+        "tags": [
+          "llm"
+        ],
+        "summary": "M8 智能体：基于全图谱数据生成自评报告章节",
+        "operationId": "generate_report_api_v1_llm_report_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateReportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateReportResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/llm/rag/search": {
+      "post": {
+        "tags": [
+          "llm"
+        ],
+        "summary": "RAG 向量检索：检索与 query 最相关的文本块",
+        "operationId": "rag_search_api_v1_llm_rag_search_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RAGSearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RAGSearchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/autopilot/run": {
+      "post": {
+        "tags": [
+          "autopilot"
+        ],
+        "summary": "一键编排：材料 → 节点提取 → 关系推断 → 诊断 → 建议",
+        "operationId": "run_autopilot_api_v1_autopilot_run_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutopilotRunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutopilotRunResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/orchestration/runs": {
+      "get": {
+        "tags": [
+          "orchestration"
+        ],
+        "summary": "列出所有运行",
+        "operationId": "list_runs_api_v1_orchestration_runs_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RunResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Runs Api V1 Orchestration Runs Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "orchestration"
+        ],
+        "summary": "启动多智能体协作运行",
+        "operationId": "start_run_api_v1_orchestration_runs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartRunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/orchestration/runs/{run_id}": {
+      "get": {
+        "tags": [
+          "orchestration"
+        ],
+        "summary": "获取运行状态",
+        "operationId": "get_run_api_v1_orchestration_runs__run_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orchestration/runs/{run_id}/events": {
+      "get": {
+        "tags": [
+          "orchestration"
+        ],
+        "summary": "SSE 事件流",
+        "operationId": "stream_events_api_v1_orchestration_runs__run_id__events_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orchestration/runs/{run_id}/review": {
+      "post": {
+        "tags": [
+          "orchestration"
+        ],
+        "summary": "提交审核决策并恢复运行",
+        "operationId": "submit_review_api_v1_orchestration_runs__run_id__review_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AgentStepResponse": {
+        "properties": {
+          "phase": {
+            "type": "string",
+            "title": "Phase"
+          },
+          "agent": {
+            "type": "string",
+            "title": "Agent"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary",
+            "default": ""
+          },
+          "startedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Startedat"
+          },
+          "finishedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finishedat"
+          },
+          "toolCalls": {
+            "items": {
+              "$ref": "#/components/schemas/ToolCallResponse"
+            },
+            "type": "array",
+            "title": "Toolcalls"
+          }
+        },
+        "type": "object",
+        "required": [
+          "phase",
+          "agent",
+          "title",
+          "status"
+        ],
+        "title": "AgentStepResponse"
+      },
+      "AuthTokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "default": "bearer"
+          },
+          "expires_in": {
+            "type": "integer",
+            "title": "Expires In"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "expires_in"
+        ],
+        "title": "AuthTokenResponse"
+      },
+      "AutopilotFindingItem": {
+        "properties": {
+          "target_code": {
+            "type": "string",
+            "title": "Target Code"
+          },
+          "target_name": {
+            "type": "string",
+            "title": "Target Name"
+          },
+          "narrative": {
+            "type": "string",
+            "title": "Narrative"
+          },
+          "evidence_refs": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence Refs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "target_code",
+          "target_name",
+          "narrative"
+        ],
+        "title": "AutopilotFindingItem"
+      },
+      "AutopilotNodeItem": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence"
+          },
+          "source_excerpt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Excerpt"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "name",
+          "kind",
+          "confidence"
+        ],
+        "title": "AutopilotNodeItem"
+      },
+      "AutopilotRelationItem": {
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "title": "Source Id"
+          },
+          "target_id": {
+            "type": "string",
+            "title": "Target Id"
+          },
+          "relation_type": {
+            "type": "string",
+            "title": "Relation Type"
+          },
+          "strength": {
+            "type": "string",
+            "title": "Strength"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence"
+          },
+          "reasoning": {
+            "type": "string",
+            "title": "Reasoning"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_id",
+          "target_id",
+          "relation_type",
+          "strength",
+          "confidence",
+          "reasoning"
+        ],
+        "title": "AutopilotRelationItem"
+      },
+      "AutopilotRunRequest": {
+        "properties": {
+          "resource_id": {
+            "type": "string",
+            "title": "Resource Id"
+          },
+          "course": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course"
+          }
+        },
+        "type": "object",
+        "required": [
+          "resource_id"
+        ],
+        "title": "AutopilotRunRequest"
+      },
+      "AutopilotRunResponse": {
+        "properties": {
+          "resource_id": {
+            "type": "string",
+            "title": "Resource Id"
+          },
+          "resource_name": {
+            "type": "string",
+            "title": "Resource Name"
+          },
+          "course": {
+            "type": "string",
+            "title": "Course"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "started_at": {
+            "type": "string",
+            "title": "Started At"
+          },
+          "finished_at": {
+            "type": "string",
+            "title": "Finished At"
+          },
+          "total_latency_ms": {
+            "type": "integer",
+            "title": "Total Latency Ms"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/AutopilotStepResult"
+            },
+            "type": "array",
+            "title": "Steps"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/AutopilotNodeItem"
+            },
+            "type": "array",
+            "title": "Nodes"
+          },
+          "relations": {
+            "items": {
+              "$ref": "#/components/schemas/AutopilotRelationItem"
+            },
+            "type": "array",
+            "title": "Relations"
+          },
+          "findings": {
+            "items": {
+              "$ref": "#/components/schemas/AutopilotFindingItem"
+            },
+            "type": "array",
+            "title": "Findings"
+          },
+          "suggestions": {
+            "items": {
+              "$ref": "#/components/schemas/AutopilotSuggestionItem"
+            },
+            "type": "array",
+            "title": "Suggestions"
+          },
+          "candidates_created": {
+            "type": "integer",
+            "title": "Candidates Created"
+          },
+          "findings_created": {
+            "type": "integer",
+            "title": "Findings Created"
+          }
+        },
+        "type": "object",
+        "required": [
+          "resource_id",
+          "resource_name",
+          "course",
+          "model",
+          "started_at",
+          "finished_at",
+          "total_latency_ms",
+          "steps",
+          "nodes",
+          "relations",
+          "findings",
+          "suggestions",
+          "candidates_created",
+          "findings_created"
+        ],
+        "title": "AutopilotRunResponse"
+      },
+      "AutopilotStepResult": {
+        "properties": {
+          "step": {
+            "type": "string",
+            "title": "Step"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "latency_ms": {
+            "type": "integer",
+            "title": "Latency Ms"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "items_count": {
+            "type": "integer",
+            "title": "Items Count",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "step",
+          "status",
+          "latency_ms",
+          "summary"
+        ],
+        "title": "AutopilotStepResult"
+      },
+      "AutopilotSuggestionItem": {
+        "properties": {
+          "target_code": {
+            "type": "string",
+            "title": "Target Code"
+          },
+          "target_name": {
+            "type": "string",
+            "title": "Target Name"
+          },
+          "root_cause": {
+            "type": "string",
+            "title": "Root Cause"
+          },
+          "suggestion": {
+            "type": "string",
+            "title": "Suggestion"
+          },
+          "expected_effect": {
+            "type": "string",
+            "title": "Expected Effect"
+          }
+        },
+        "type": "object",
+        "required": [
+          "target_code",
+          "target_name",
+          "root_cause",
+          "suggestion",
+          "expected_effect"
+        ],
+        "title": "AutopilotSuggestionItem"
+      },
+      "CandidateEvidenceResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "resourceName": {
+            "type": "string",
+            "title": "Resourcename"
+          },
+          "resourceVersion": {
+            "type": "string",
+            "title": "Resourceversion"
+          },
+          "coordinate": {
+            "type": "string",
+            "title": "Coordinate"
+          },
+          "excerpt": {
+            "type": "string",
+            "title": "Excerpt"
+          },
+          "hash": {
+            "type": "string",
+            "title": "Hash"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "resourceName",
+          "resourceVersion",
+          "coordinate",
+          "excerpt",
+          "hash"
+        ],
+        "title": "CandidateEvidenceResponse"
+      },
+      "CandidateReviewRequest": {
+        "properties": {
+          "decision": {
+            "type": "string",
+            "title": "Decision"
+          }
+        },
+        "type": "object",
+        "required": [
+          "decision"
+        ],
+        "title": "CandidateReviewRequest"
+      },
+      "CandidateReviewStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "accepted",
+          "rejected",
+          "modified"
+        ],
+        "title": "CandidateReviewStatus"
+      },
       "ComponentStatus": {
         "type": "string",
         "enum": [
@@ -39,6 +1609,646 @@
         ],
         "title": "ComponentStatus"
       },
+      "DiagnosticEvidenceRefResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "objectName": {
+            "type": "string",
+            "title": "Objectname"
+          },
+          "objectVersion": {
+            "type": "string",
+            "title": "Objectversion"
+          },
+          "coordinate": {
+            "type": "string",
+            "title": "Coordinate"
+          },
+          "excerpt": {
+            "type": "string",
+            "title": "Excerpt"
+          },
+          "hash": {
+            "type": "string",
+            "title": "Hash"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "objectName",
+          "objectVersion",
+          "coordinate",
+          "excerpt",
+          "hash"
+        ],
+        "title": "DiagnosticEvidenceRefResponse"
+      },
+      "DiagnosticFindingResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "course": {
+            "type": "string",
+            "title": "Course"
+          },
+          "type": {
+            "$ref": "#/components/schemas/DiagnosticFindingType"
+          },
+          "risk": {
+            "$ref": "#/components/schemas/DiagnosticFindingRisk"
+          },
+          "sourceNode": {
+            "type": "string",
+            "title": "Sourcenode"
+          },
+          "targetNode": {
+            "type": "string",
+            "title": "Targetnode"
+          },
+          "relationLabel": {
+            "type": "string",
+            "title": "Relationlabel"
+          },
+          "graphVersion": {
+            "type": "string",
+            "title": "Graphversion"
+          },
+          "rule": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Rule"
+          },
+          "decisionStatus": {
+            "$ref": "#/components/schemas/FindingDecisionStatus"
+          },
+          "impact": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Impact"
+          },
+          "suggestedDestination": {
+            "type": "string",
+            "title": "Suggesteddestination"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/DiagnosticEvidenceRefResponse"
+            },
+            "type": "array",
+            "title": "Evidence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "course",
+          "type",
+          "risk",
+          "sourceNode",
+          "targetNode",
+          "relationLabel",
+          "graphVersion",
+          "rule",
+          "decisionStatus",
+          "impact",
+          "suggestedDestination",
+          "evidence"
+        ],
+        "title": "DiagnosticFindingResponse"
+      },
+      "DiagnosticFindingRisk": {
+        "type": "string",
+        "enum": [
+          "high",
+          "medium",
+          "low"
+        ],
+        "title": "DiagnosticFindingRisk"
+      },
+      "DiagnosticFindingType": {
+        "type": "string",
+        "enum": [
+          "coverage-gap",
+          "material-conflict",
+          "structural-risk",
+          "version-impact"
+        ],
+        "title": "DiagnosticFindingType"
+      },
+      "EvidenceFragmentResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "coordinate": {
+            "type": "string",
+            "title": "Coordinate"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "preview": {
+            "type": "string",
+            "title": "Preview"
+          },
+          "hash": {
+            "type": "string",
+            "title": "Hash"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "coordinate",
+          "type",
+          "preview",
+          "hash"
+        ],
+        "title": "EvidenceFragmentResponse"
+      },
+      "ExplanationItemResponse": {
+        "properties": {
+          "target_code": {
+            "type": "string",
+            "title": "Target Code"
+          },
+          "target_name": {
+            "type": "string",
+            "title": "Target Name"
+          },
+          "narrative": {
+            "type": "string",
+            "title": "Narrative"
+          },
+          "evidence_refs": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence Refs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "target_code",
+          "target_name",
+          "narrative"
+        ],
+        "title": "ExplanationItemResponse"
+      },
+      "ExtractNodesRequest": {
+        "properties": {
+          "material_text": {
+            "type": "string",
+            "title": "Material Text",
+            "default": ""
+          },
+          "material_category": {
+            "type": "string",
+            "title": "Material Category",
+            "default": ""
+          },
+          "material_name": {
+            "type": "string",
+            "title": "Material Name",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "ExtractNodesRequest"
+      },
+      "ExtractNodesResponse": {
+        "properties": {
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/LLMUsageResponse"
+          },
+          "latency": {
+            "type": "integer",
+            "title": "Latency",
+            "default": 0
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/ExtractionItemResponse"
+            },
+            "type": "array",
+            "title": "Data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "model",
+          "data"
+        ],
+        "title": "ExtractNodesResponse"
+      },
+      "ExtractionItemResponse": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "credit_hours": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Credit Hours"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence",
+            "default": 0.9
+          },
+          "source_excerpt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Excerpt"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "name",
+          "kind"
+        ],
+        "title": "ExtractionItemResponse"
+      },
+      "FindingDecisionRequest": {
+        "properties": {
+          "decision": {
+            "type": "string",
+            "title": "Decision"
+          }
+        },
+        "type": "object",
+        "required": [
+          "decision"
+        ],
+        "title": "FindingDecisionRequest"
+      },
+      "FindingDecisionStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "confirmed",
+          "dismissed",
+          "converted"
+        ],
+        "title": "FindingDecisionStatus"
+      },
+      "GenerateExplanationRequest": {
+        "properties": {
+          "gap_facts": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Gap Facts",
+            "default": []
+          },
+          "rag_context": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rag Context"
+          }
+        },
+        "type": "object",
+        "title": "GenerateExplanationRequest"
+      },
+      "GenerateExplanationResponse": {
+        "properties": {
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/LLMUsageResponse"
+          },
+          "latency": {
+            "type": "integer",
+            "title": "Latency",
+            "default": 0
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/ExplanationItemResponse"
+            },
+            "type": "array",
+            "title": "Data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "model",
+          "data"
+        ],
+        "title": "GenerateExplanationResponse"
+      },
+      "GenerateReportRequest": {
+        "properties": {
+          "report_context": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Report Context",
+            "default": []
+          }
+        },
+        "type": "object",
+        "title": "GenerateReportRequest"
+      },
+      "GenerateReportResponse": {
+        "properties": {
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/LLMUsageResponse"
+          },
+          "latency": {
+            "type": "integer",
+            "title": "Latency",
+            "default": 0
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/ReportChapterItemResponse"
+            },
+            "type": "array",
+            "title": "Data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "model",
+          "data"
+        ],
+        "title": "GenerateReportResponse"
+      },
+      "GenerateSuggestionsRequest": {
+        "properties": {
+          "gaps": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Gaps",
+            "default": []
+          }
+        },
+        "type": "object",
+        "title": "GenerateSuggestionsRequest"
+      },
+      "GenerateSuggestionsResponse": {
+        "properties": {
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/LLMUsageResponse"
+          },
+          "latency": {
+            "type": "integer",
+            "title": "Latency",
+            "default": 0
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/SuggestionItemResponse"
+            },
+            "type": "array",
+            "title": "Data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "model",
+          "data"
+        ],
+        "title": "GenerateSuggestionsResponse"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "InferRelationsRequest": {
+        "properties": {
+          "school_nodes": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "School Nodes",
+            "default": []
+          },
+          "standard_nodes": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Standard Nodes",
+            "default": []
+          }
+        },
+        "type": "object",
+        "title": "InferRelationsRequest"
+      },
+      "InferRelationsResponse": {
+        "properties": {
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/LLMUsageResponse"
+          },
+          "latency": {
+            "type": "integer",
+            "title": "Latency",
+            "default": 0
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/RelationItemResponse"
+            },
+            "type": "array",
+            "title": "Data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "model",
+          "data"
+        ],
+        "title": "InferRelationsResponse"
+      },
+      "LLMUsageResponse": {
+        "properties": {
+          "prompt_tokens": {
+            "type": "integer",
+            "title": "Prompt Tokens",
+            "default": 0
+          },
+          "completion_tokens": {
+            "type": "integer",
+            "title": "Completion Tokens",
+            "default": 0
+          },
+          "total_tokens": {
+            "type": "integer",
+            "title": "Total Tokens",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "LLMUsageResponse"
+      },
+      "LoginRequest": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "LoginRequest"
+      },
+      "MeResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "display_name",
+          "role",
+          "created_at"
+        ],
+        "title": "MeResponse"
+      },
       "OverallStatus": {
         "type": "string",
         "enum": [
@@ -46,6 +2256,535 @@
           "needs_configuration"
         ],
         "title": "OverallStatus"
+      },
+      "ProcessingStageResponse": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "detail",
+          "status"
+        ],
+        "title": "ProcessingStageResponse"
+      },
+      "RAGChunkResponse": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "source"
+        ],
+        "title": "RAGChunkResponse"
+      },
+      "RAGSearchRequest": {
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "top_k": {
+            "type": "integer",
+            "title": "Top K",
+            "default": 3
+          },
+          "source_filter": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Filter"
+          }
+        },
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "title": "RAGSearchRequest"
+      },
+      "RAGSearchResponse": {
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "chunks": {
+            "items": {
+              "$ref": "#/components/schemas/RAGChunkResponse"
+            },
+            "type": "array",
+            "title": "Chunks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "query",
+          "chunks"
+        ],
+        "title": "RAGSearchResponse"
+      },
+      "RecognitionCandidateResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "course": {
+            "type": "string",
+            "title": "Course"
+          },
+          "candidateType": {
+            "$ref": "#/components/schemas/RecognitionCandidateType"
+          },
+          "confidence": {
+            "type": "integer",
+            "title": "Confidence"
+          },
+          "risk": {
+            "$ref": "#/components/schemas/RecognitionCandidateRisk"
+          },
+          "sourceNode": {
+            "type": "string",
+            "title": "Sourcenode"
+          },
+          "relation": {
+            "type": "string",
+            "title": "Relation"
+          },
+          "targetNode": {
+            "type": "string",
+            "title": "Targetnode"
+          },
+          "explanation": {
+            "type": "string",
+            "title": "Explanation"
+          },
+          "processorVersion": {
+            "type": "string",
+            "title": "Processorversion"
+          },
+          "generatedAt": {
+            "type": "string",
+            "title": "Generatedat"
+          },
+          "reviewStatus": {
+            "$ref": "#/components/schemas/CandidateReviewStatus"
+          },
+          "impact": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Impact"
+          },
+          "conflictMessage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conflictmessage"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/CandidateEvidenceResponse"
+            },
+            "type": "array",
+            "title": "Evidence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "course",
+          "candidateType",
+          "confidence",
+          "risk",
+          "sourceNode",
+          "relation",
+          "targetNode",
+          "explanation",
+          "processorVersion",
+          "generatedAt",
+          "reviewStatus",
+          "impact",
+          "evidence"
+        ],
+        "title": "RecognitionCandidateResponse"
+      },
+      "RecognitionCandidateRisk": {
+        "type": "string",
+        "enum": [
+          "highImpact",
+          "lowConfidence",
+          "conflict",
+          "normal"
+        ],
+        "title": "RecognitionCandidateRisk"
+      },
+      "RecognitionCandidateType": {
+        "type": "string",
+        "enum": [
+          "关系候选",
+          "映射候选",
+          "节点候选"
+        ],
+        "title": "RecognitionCandidateType"
+      },
+      "RegisterRequest": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "admin",
+              "teacher"
+            ],
+            "title": "Role",
+            "default": "teacher"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "RegisterRequest"
+      },
+      "RelationItemResponse": {
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "title": "Source Id"
+          },
+          "target_id": {
+            "type": "string",
+            "title": "Target Id"
+          },
+          "relation_type": {
+            "type": "string",
+            "title": "Relation Type",
+            "default": "SUPPORTS"
+          },
+          "strength": {
+            "type": "string",
+            "title": "Strength",
+            "default": "medium"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence",
+            "default": 0.8
+          },
+          "reasoning": {
+            "type": "string",
+            "title": "Reasoning",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_id",
+          "target_id"
+        ],
+        "title": "RelationItemResponse"
+      },
+      "ReportChapterItemResponse": {
+        "properties": {
+          "requirement_code": {
+            "type": "string",
+            "title": "Requirement Code"
+          },
+          "chapter_title": {
+            "type": "string",
+            "title": "Chapter Title"
+          },
+          "standard_ref": {
+            "type": "string",
+            "title": "Standard Ref"
+          },
+          "narrative": {
+            "type": "string",
+            "title": "Narrative"
+          }
+        },
+        "type": "object",
+        "required": [
+          "requirement_code",
+          "chapter_title",
+          "standard_ref",
+          "narrative"
+        ],
+        "title": "ReportChapterItemResponse"
+      },
+      "ReviewDecisionItem": {
+        "properties": {
+          "relationId": {
+            "type": "string",
+            "title": "Relationid"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "rejected"
+            ],
+            "title": "Decision"
+          },
+          "strength": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "strong",
+                  "medium",
+                  "weak"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Strength"
+          }
+        },
+        "type": "object",
+        "required": [
+          "relationId",
+          "decision"
+        ],
+        "title": "ReviewDecisionItem"
+      },
+      "ReviewRequest": {
+        "properties": {
+          "decisions": {
+            "items": {
+              "$ref": "#/components/schemas/ReviewDecisionItem"
+            },
+            "type": "array",
+            "title": "Decisions"
+          }
+        },
+        "type": "object",
+        "title": "ReviewRequest"
+      },
+      "RunResponse": {
+        "properties": {
+          "runId": {
+            "type": "string",
+            "title": "Runid"
+          },
+          "goal": {
+            "type": "string",
+            "title": "Goal"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "plan": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Plan"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/AgentStepResponse"
+            },
+            "type": "array",
+            "title": "Steps"
+          },
+          "pendingReview": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Pendingreview"
+          },
+          "result": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Result"
+          },
+          "createdAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Createdat"
+          },
+          "updatedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updatedat"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "runId",
+          "goal",
+          "status"
+        ],
+        "title": "RunResponse"
+      },
+      "StartRunRequest": {
+        "properties": {
+          "goal": {
+            "type": "string",
+            "title": "Goal"
+          },
+          "materialCategory": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Materialcategory"
+          },
+          "materialName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Materialname"
+          }
+        },
+        "type": "object",
+        "required": [
+          "goal"
+        ],
+        "title": "StartRunRequest"
+      },
+      "SuggestionItemResponse": {
+        "properties": {
+          "target_code": {
+            "type": "string",
+            "title": "Target Code"
+          },
+          "target_name": {
+            "type": "string",
+            "title": "Target Name"
+          },
+          "root_cause": {
+            "type": "string",
+            "title": "Root Cause"
+          },
+          "suggestion": {
+            "type": "string",
+            "title": "Suggestion"
+          },
+          "expected_effect": {
+            "type": "string",
+            "title": "Expected Effect"
+          }
+        },
+        "type": "object",
+        "required": [
+          "target_code",
+          "target_name",
+          "root_cause",
+          "suggestion",
+          "expected_effect"
+        ],
+        "title": "SuggestionItemResponse"
       },
       "SystemComponentResponse": {
         "properties": {
@@ -114,6 +2853,240 @@
           "components"
         ],
         "title": "SystemStatusResponse"
+      },
+      "TeachingResourceResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "fileName": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "course": {
+            "type": "string",
+            "title": "Course"
+          },
+          "resourceType": {
+            "$ref": "#/components/schemas/TeachingResourceType"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "format": {
+            "type": "string",
+            "title": "Format"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TeachingResourceStatus"
+          },
+          "size": {
+            "type": "string",
+            "title": "Size"
+          },
+          "sensitivity": {
+            "$ref": "#/components/schemas/TeachingResourceSensitivity"
+          },
+          "updatedAt": {
+            "type": "string",
+            "title": "Updatedat"
+          },
+          "owner": {
+            "type": "string",
+            "title": "Owner"
+          },
+          "hash": {
+            "type": "string",
+            "title": "Hash"
+          },
+          "nextAction": {
+            "type": "string",
+            "title": "Nextaction"
+          },
+          "sourceCoverage": {
+            "type": "integer",
+            "title": "Sourcecoverage"
+          },
+          "evidenceFragments": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceFragmentResponse"
+            },
+            "type": "array",
+            "title": "Evidencefragments"
+          },
+          "processingStages": {
+            "items": {
+              "$ref": "#/components/schemas/ProcessingStageResponse"
+            },
+            "type": "array",
+            "title": "Processingstages"
+          },
+          "pageCount": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagecount"
+          },
+          "failureReason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failurereason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "fileName",
+          "course",
+          "resourceType",
+          "version",
+          "format",
+          "status",
+          "size",
+          "sensitivity",
+          "updatedAt",
+          "owner",
+          "hash",
+          "nextAction",
+          "sourceCoverage",
+          "evidenceFragments",
+          "processingStages"
+        ],
+        "title": "TeachingResourceResponse"
+      },
+      "TeachingResourceSensitivity": {
+        "type": "string",
+        "enum": [
+          "internal",
+          "restricted"
+        ],
+        "title": "TeachingResourceSensitivity"
+      },
+      "TeachingResourceStatus": {
+        "type": "string",
+        "enum": [
+          "ready",
+          "processing",
+          "awaitingClassification",
+          "failed",
+          "quarantined"
+        ],
+        "title": "TeachingResourceStatus"
+      },
+      "TeachingResourceType": {
+        "type": "string",
+        "enum": [
+          "课程大纲",
+          "实验指导书",
+          "实验项目清单",
+          "评分表",
+          "学生报告",
+          "评价结果",
+          "改进记录"
+        ],
+        "title": "TeachingResourceType"
+      },
+      "ToolCallResponse": {
+        "properties": {
+          "tool": {
+            "type": "string",
+            "title": "Tool"
+          },
+          "agent": {
+            "type": "string",
+            "title": "Agent"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary",
+            "default": ""
+          },
+          "latencyMs": {
+            "type": "integer",
+            "title": "Latencyms",
+            "default": 0
+          },
+          "detail": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tool",
+          "agent",
+          "status"
+        ],
+        "title": "ToolCallResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
       }
     }
   }

@@ -18,7 +18,7 @@ describe('filterSupportPackages', () => {
 
   it('matches package id, title, course or template', () => {
     const result = filterSupportPackages(prototypeOnlySupportPackages, {
-      keyword: '数据库原理',
+      keyword: '创新训练',
       status: 'all',
       template: 'all',
     });

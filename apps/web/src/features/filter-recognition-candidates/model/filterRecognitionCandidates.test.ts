@@ -9,14 +9,14 @@ describe('filterRecognitionCandidates', () => {
       prototypeOnlyRecognitionCandidates,
       {
         candidateType: '关系候选',
-        course: '数据结构',
+        course: '数据结构与算法',
         keyword: '',
         risk: 'conflict',
       },
     );
 
     expect(candidates.map((candidate) => candidate.id)).toEqual([
-      'candidate-ds-sort-conflict',
+      'candidate-sort-conflict',
     ]);
   });
 
@@ -26,13 +26,13 @@ describe('filterRecognitionCandidates', () => {
       {
         candidateType: 'all',
         course: 'all',
-        keyword: '  PI-5 ',
+        keyword: '  C-05-01 ',
         risk: 'all',
       },
     );
 
     expect(candidates.map((candidate) => candidate.id)).toEqual([
-      'candidate-ds-performance-pi5',
+      'candidate-system-c0501',
     ]);
   });
 });
