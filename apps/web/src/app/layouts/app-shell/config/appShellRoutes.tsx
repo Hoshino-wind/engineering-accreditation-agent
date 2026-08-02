@@ -145,6 +145,7 @@ export const appShellMenuItems: MenuProps['items'] =
       icon: route.menuIcon,
       key: route.path,
       label: route.menuLabel,
+      title: route.menuLabel,
     })),
     key: group.key,
     label: group.label,

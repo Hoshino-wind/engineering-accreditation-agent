@@ -40,13 +40,13 @@
 }
 
 .graph-evidence-step--ready {
-  border-color: #a8dbc8;
-  background: #f4fbf8;
+  border-color: color-mix(in srgb, var(--app-success) 46%, var(--app-border));
+  background: var(--app-success-soft);
 }
 
 .graph-evidence-step--blocked {
-  border-color: #e6a9a9;
-  background: #fff7f7;
+  border-color: color-mix(in srgb, var(--app-error) 50%, var(--app-border));
+  background: var(--app-error-soft);
 }
 
 .graph-evidence-detail {
@@ -58,7 +58,7 @@
 
 .graph-evidence-detail > div {
   padding: 12px;
-  border-top: 2px solid #c4d9ea;
+  border-top: 2px solid var(--app-primary-border);
   background: var(--app-surface-soft);
 }
 

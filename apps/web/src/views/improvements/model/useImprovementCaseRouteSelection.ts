@@ -35,7 +35,20 @@ export function useImprovementCaseRouteSelection(
     void message.warning(
       `未找到指定改进问题 ${invalidCaseId}，已显示当前可处理问题`,
     );
-  }, [invalidCaseId, message]);
+    const nextSearchParams = new URLSearchParams(searchParams);
+    if (selectedCaseId) {
+      nextSearchParams.set(caseSearchParam, selectedCaseId);
+    } else {
+      nextSearchParams.delete(caseSearchParam);
+    }
+    setSearchParams(nextSearchParams, { replace: true });
+  }, [
+    invalidCaseId,
+    message,
+    searchParams,
+    selectedCaseId,
+    setSearchParams,
+  ]);
 
   const selectCase = useCallback(
     (caseId: string) => {

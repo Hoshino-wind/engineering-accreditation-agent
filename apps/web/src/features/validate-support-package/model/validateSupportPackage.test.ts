@@ -17,10 +17,17 @@ describe('validateSupportPackage', () => {
     expect(result.canSubmitForReview).toBe(false);
     expect(result.canExport).toBe(false);
     expect(
+      result.checks.find((check) => check.id === 'evaluation'),
+    ).toMatchObject({
+      ownerModule: 'M6',
+      sourceObjectId: 'eval-2026-071',
+      status: 'blocked',
+    });
+    expect(
       result.checks.find((check) => check.id === 'improvement'),
     ).toMatchObject({
       ownerModule: 'M7',
-      ownerObjectId: 'qi-2026-017',
+      sourceObjectId: 'qi-2026-017',
       status: 'blocked',
     });
   });
@@ -51,6 +58,20 @@ describe('validateSupportPackage', () => {
 
     expect(result.blockedCount).toBe(0);
     expect(result.canExport).toBe(true);
+  });
+
+  it('rejects a truncated or non-SHA-256 content hash', () => {
+    const result = validateSupportPackage({
+      ...approvedPackage,
+      contentHash: 'sha256:0037…b921',
+    });
+
+    expect(
+      result.checks.find((check) => check.id === 'content-hash'),
+    ).toMatchObject({
+      status: 'blocked',
+    });
+    expect(result.canExport).toBe(false);
   });
 
   it('requires a new package version after approved content changes', () => {

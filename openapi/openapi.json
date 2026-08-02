@@ -6,6 +6,435 @@
     "version": "0.1.0"
   },
   "paths": {
+    "/api/v1/evaluations/objects": {
+      "get": {
+        "tags": [
+          "evaluations"
+        ],
+        "summary": "列出评价对象及其展示运行摘要",
+        "operationId": "list_evaluation_objects_api_v1_evaluations_objects_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationObjectListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/evaluations/runs/{run_id}/reference": {
+      "get": {
+        "tags": [
+          "evaluations"
+        ],
+        "summary": "读取评价运行的权威对象引用",
+        "operationId": "get_evaluation_run_reference_api_v1_evaluations_runs__run_id__reference_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160,
+              "pattern": "^.*\\S.*$",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationRunReferenceResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "评价运行不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationRunReferenceNotFoundResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/evaluations/runs/{run_id}": {
+      "get": {
+        "tags": [
+          "evaluations"
+        ],
+        "summary": "读取评价运行及其确定性计算明细",
+        "operationId": "get_evaluation_run_api_v1_evaluations_runs__run_id__get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160,
+              "pattern": "^.*\\S.*$",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationRunDetailResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "评价运行不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationRunReferenceNotFoundResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/evaluations/runs/{run_id}/preflight": {
+      "get": {
+        "tags": [
+          "evaluations"
+        ],
+        "summary": "读取精确评价运行的结构化输入预检报告",
+        "operationId": "get_evaluation_preflight_api_v1_evaluations_runs__run_id__preflight_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160,
+              "pattern": "^.*\\S.*$",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationPreflightResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "评价运行不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationRunReferenceNotFoundResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/evaluations/runs": {
+      "post": {
+        "tags": [
+          "evaluations"
+        ],
+        "summary": "基于已就绪的不可变输入快照创建试点重算运行",
+        "operationId": "create_evaluation_run_api_v1_evaluations_runs_post",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 160,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{7,159}$",
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEvaluationRunRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "试点重算运行已创建或按幂等键恢复",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationRunCreationResponse"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "description": "新运行的权威详情地址",
+                "schema": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "评价对象或来源运行不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationRunCreationErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "来源快照不可执行或幂等键冲突",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationRunCreationErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/evaluations/score-import-batches": {
+      "post": {
+        "tags": [
+          "evaluations"
+        ],
+        "summary": "捕获不可变的本地试点汇总评分批次",
+        "operationId": "create_score_import_batch_api_v1_evaluations_score_import_batches_post",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 160,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{7,159}$",
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateScoreImportBatchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "试点汇总评分批次已创建或按幂等键恢复",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateScoreImportBatchResponse"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "description": "评分批次的权威详情地址",
+                "schema": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoreImportErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoreImportErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoreImportErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/evaluations/score-import-batches/{batch_id}": {
+      "get": {
+        "tags": [
+          "evaluations"
+        ],
+        "summary": "读取不可变的本地试点汇总评分批次",
+        "operationId": "get_score_import_batch_api_v1_evaluations_score_import_batches__batch_id__get",
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160,
+              "pattern": "^.*\\S.*$",
+              "title": "Batch Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoreImportBatchResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoreImportErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoreImportErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/system/status": {
       "get": {
         "tags": [
@@ -428,6 +857,78 @@
         ],
         "title": "AbilityGraphStateContract"
       },
+      "AttainmentCalculationResponse": {
+        "properties": {
+          "blockers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Blockers"
+          },
+          "contributions": {
+            "items": {
+              "$ref": "#/components/schemas/AttainmentContributionResponse"
+            },
+            "type": "array",
+            "title": "Contributions"
+          },
+          "ready": {
+            "type": "boolean",
+            "title": "Ready"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EvaluationResultResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "weightTotal": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Weighttotal"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "blockers",
+          "contributions",
+          "ready",
+          "result",
+          "weightTotal"
+        ],
+        "title": "AttainmentCalculationResponse"
+      },
+      "AttainmentContributionResponse": {
+        "properties": {
+          "input": {
+            "$ref": "#/components/schemas/EvaluationInputResponse"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "input",
+          "value"
+        ],
+        "title": "AttainmentContributionResponse"
+      },
       "Body_upload_material_api_v1_materials_post": {
         "properties": {
           "file": {
@@ -463,6 +964,835 @@
           "not_configured"
         ],
         "title": "ComponentStatus"
+      },
+      "CreateEvaluationRunRequest": {
+        "properties": {
+          "evaluationObjectId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Evaluationobjectid"
+          },
+          "sourceRunId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Sourcerunid"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "evaluationObjectId",
+          "sourceRunId"
+        ],
+        "title": "CreateEvaluationRunRequest"
+      },
+      "CreateScoreImportBatchRequest": {
+        "properties": {
+          "evaluationObjectId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Evaluationobjectid"
+          },
+          "baseRunId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Baserunid"
+          },
+          "profile": {
+            "type": "string",
+            "const": "local-pilot-aggregate:v1",
+            "title": "Profile"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ScoreImportCandidateItemRequest"
+            },
+            "type": "array",
+            "maxItems": 200,
+            "minItems": 1,
+            "title": "Items"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "evaluationObjectId",
+          "baseRunId",
+          "profile",
+          "items"
+        ],
+        "title": "CreateScoreImportBatchRequest"
+      },
+      "CreateScoreImportBatchResponse": {
+        "properties": {
+          "idempotentReplay": {
+            "type": "boolean",
+            "title": "Idempotentreplay"
+          },
+          "batch": {
+            "$ref": "#/components/schemas/ScoreImportBatchResponse"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "idempotentReplay",
+          "batch"
+        ],
+        "title": "CreateScoreImportBatchResponse"
+      },
+      "EvaluationEvidenceReferenceResponse": {
+        "properties": {
+          "coordinate": {
+            "type": "string",
+            "title": "Coordinate"
+          },
+          "hash": {
+            "type": "string",
+            "title": "Hash"
+          },
+          "id": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "coordinate",
+          "hash",
+          "id",
+          "name",
+          "version"
+        ],
+        "title": "EvaluationEvidenceReferenceResponse"
+      },
+      "EvaluationInputResponse": {
+        "properties": {
+          "evidenceName": {
+            "type": "string",
+            "title": "Evidencename"
+          },
+          "id": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "scoreRate": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scorerate"
+          },
+          "weight": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Weight"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "evidenceName",
+          "id",
+          "label",
+          "weight"
+        ],
+        "title": "EvaluationInputResponse"
+      },
+      "EvaluationInputSnapshotResponse": {
+        "properties": {
+          "createdAt": {
+            "type": "string",
+            "title": "Createdat"
+          },
+          "hash": {
+            "type": "string",
+            "title": "Hash"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "createdAt",
+          "hash"
+        ],
+        "title": "EvaluationInputSnapshotResponse"
+      },
+      "EvaluationObjectIdentityResponse": {
+        "properties": {
+          "evaluationObjectId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Evaluationobjectid"
+          },
+          "course": {
+            "type": "string",
+            "title": "Course"
+          },
+          "objectiveCode": {
+            "type": "string",
+            "title": "Objectivecode"
+          },
+          "objectiveName": {
+            "type": "string",
+            "title": "Objectivename"
+          },
+          "abilityCode": {
+            "type": "string",
+            "title": "Abilitycode"
+          },
+          "abilityName": {
+            "type": "string",
+            "title": "Abilityname"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "evaluationObjectId",
+          "course",
+          "objectiveCode",
+          "objectiveName",
+          "abilityCode",
+          "abilityName"
+        ],
+        "title": "EvaluationObjectIdentityResponse"
+      },
+      "EvaluationObjectListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EvaluationObjectSummaryResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "EvaluationObjectListResponse"
+      },
+      "EvaluationObjectSummaryResponse": {
+        "properties": {
+          "evaluationObjectId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Evaluationobjectid"
+          },
+          "course": {
+            "type": "string",
+            "title": "Course"
+          },
+          "objectiveCode": {
+            "type": "string",
+            "title": "Objectivecode"
+          },
+          "objectiveName": {
+            "type": "string",
+            "title": "Objectivename"
+          },
+          "abilityCode": {
+            "type": "string",
+            "title": "Abilitycode"
+          },
+          "abilityName": {
+            "type": "string",
+            "title": "Abilityname"
+          },
+          "presentedRunId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Presentedrunid"
+          },
+          "readinessStatus": {
+            "type": "string",
+            "enum": [
+              "ready",
+              "blocked"
+            ],
+            "title": "Readinessstatus"
+          },
+          "approvalStatus": {
+            "type": "string",
+            "enum": [
+              "not_submitted",
+              "pending",
+              "approved",
+              "rejected"
+            ],
+            "title": "Approvalstatus"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EvaluationResultResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "evaluationObjectId",
+          "course",
+          "objectiveCode",
+          "objectiveName",
+          "abilityCode",
+          "abilityName",
+          "presentedRunId",
+          "readinessStatus",
+          "approvalStatus",
+          "result"
+        ],
+        "title": "EvaluationObjectSummaryResponse"
+      },
+      "EvaluationPreflightCheckResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pass",
+              "blocked"
+            ],
+            "title": "Status"
+          },
+          "owner": {
+            "type": "string",
+            "enum": [
+              "score_input",
+              "ability_graph",
+              "evaluation_policy",
+              "evaluation_owner"
+            ],
+            "title": "Owner"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "none",
+              "prepare_score_data",
+              "repair_graph_relation",
+              "review_evaluation_policy",
+              "inspect_input_snapshot"
+            ],
+            "title": "Action"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "detail",
+          "status",
+          "owner",
+          "action"
+        ],
+        "title": "EvaluationPreflightCheckResponse"
+      },
+      "EvaluationPreflightMissingInputResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "evidenceName": {
+            "type": "string",
+            "title": "Evidencename"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "evidenceName"
+        ],
+        "title": "EvaluationPreflightMissingInputResponse"
+      },
+      "EvaluationPreflightResponse": {
+        "properties": {
+          "scope": {
+            "type": "string",
+            "const": "pilot_snapshot",
+            "title": "Scope",
+            "default": "pilot_snapshot"
+          },
+          "reportVersion": {
+            "type": "string",
+            "const": "evaluation-preflight:v1",
+            "title": "Reportversion"
+          },
+          "runId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Runid"
+          },
+          "evaluationObjectId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Evaluationobjectid"
+          },
+          "inputSnapshotHash": {
+            "type": "string",
+            "title": "Inputsnapshothash"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ready",
+              "blocked"
+            ],
+            "title": "Status"
+          },
+          "blockers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Blockers"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/EvaluationPreflightCheckResponse"
+            },
+            "type": "array",
+            "title": "Checks"
+          },
+          "missingInputs": {
+            "items": {
+              "$ref": "#/components/schemas/EvaluationPreflightMissingInputResponse"
+            },
+            "type": "array",
+            "title": "Missinginputs"
+          },
+          "passedCheckCount": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Passedcheckcount"
+          },
+          "blockedCheckCount": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Blockedcheckcount"
+          },
+          "reportHash": {
+            "type": "string",
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "title": "Reporthash"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "reportVersion",
+          "runId",
+          "evaluationObjectId",
+          "inputSnapshotHash",
+          "status",
+          "blockers",
+          "checks",
+          "missingInputs",
+          "passedCheckCount",
+          "blockedCheckCount",
+          "reportHash"
+        ],
+        "title": "EvaluationPreflightResponse"
+      },
+      "EvaluationReadinessCheckResponse": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          },
+          "id": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pass",
+              "blocked"
+            ],
+            "title": "Status"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "detail",
+          "id",
+          "label",
+          "status"
+        ],
+        "title": "EvaluationReadinessCheckResponse"
+      },
+      "EvaluationResultResponse": {
+        "properties": {
+          "score": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Score"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "achieved",
+              "not_achieved"
+            ],
+            "title": "Outcome"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "score",
+          "outcome"
+        ],
+        "title": "EvaluationResultResponse"
+      },
+      "EvaluationRunCreationErrorDetail": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "evaluation_object_not_found",
+              "evaluation_source_run_not_found",
+              "evaluation_source_run_mismatch",
+              "evaluation_source_run_not_ready",
+              "evaluation_run_idempotency_conflict"
+            ],
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "evaluationObjectId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evaluationobjectid"
+          },
+          "sourceRunId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sourcerunid"
+          },
+          "blockers": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blockers"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "EvaluationRunCreationErrorDetail"
+      },
+      "EvaluationRunCreationErrorResponse": {
+        "properties": {
+          "detail": {
+            "$ref": "#/components/schemas/EvaluationRunCreationErrorDetail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "EvaluationRunCreationErrorResponse"
+      },
+      "EvaluationRunCreationResponse": {
+        "properties": {
+          "idempotentReplay": {
+            "type": "boolean",
+            "title": "Idempotentreplay"
+          },
+          "sourceRunId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Sourcerunid"
+          },
+          "run": {
+            "$ref": "#/components/schemas/EvaluationRunDetailResponse"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "idempotentReplay",
+          "sourceRunId",
+          "run"
+        ],
+        "title": "EvaluationRunCreationResponse"
+      },
+      "EvaluationRunDetailResponse": {
+        "properties": {
+          "runId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Runid"
+          },
+          "sourceRunId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sourcerunid"
+          },
+          "evaluationObject": {
+            "$ref": "#/components/schemas/EvaluationObjectIdentityResponse"
+          },
+          "approvalStatus": {
+            "type": "string",
+            "enum": [
+              "not_submitted",
+              "pending",
+              "approved",
+              "rejected"
+            ],
+            "title": "Approvalstatus"
+          },
+          "graphVersion": {
+            "type": "string",
+            "title": "Graphversion"
+          },
+          "policyVersion": {
+            "type": "string",
+            "title": "Policyversion"
+          },
+          "programVersion": {
+            "type": "string",
+            "title": "Programversion"
+          },
+          "scoreSnapshot": {
+            "type": "string",
+            "title": "Scoresnapshot"
+          },
+          "studentCount": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Studentcount"
+          },
+          "threshold": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Threshold"
+          },
+          "inputSnapshot": {
+            "$ref": "#/components/schemas/EvaluationInputSnapshotResponse"
+          },
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/EvaluationInputResponse"
+            },
+            "type": "array",
+            "title": "Inputs"
+          },
+          "readinessChecks": {
+            "items": {
+              "$ref": "#/components/schemas/EvaluationReadinessCheckResponse"
+            },
+            "type": "array",
+            "title": "Readinesschecks"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/EvaluationEvidenceReferenceResponse"
+            },
+            "type": "array",
+            "title": "Evidence"
+          },
+          "calculation": {
+            "$ref": "#/components/schemas/AttainmentCalculationResponse"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "runId",
+          "evaluationObject",
+          "approvalStatus",
+          "graphVersion",
+          "policyVersion",
+          "programVersion",
+          "scoreSnapshot",
+          "studentCount",
+          "threshold",
+          "inputSnapshot",
+          "inputs",
+          "readinessChecks",
+          "evidence",
+          "calculation"
+        ],
+        "title": "EvaluationRunDetailResponse"
+      },
+      "EvaluationRunReferenceNotFoundDetail": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "const": "evaluation_run_not_found",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "runId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Runid"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "message",
+          "runId"
+        ],
+        "title": "EvaluationRunReferenceNotFoundDetail"
+      },
+      "EvaluationRunReferenceNotFoundResponse": {
+        "properties": {
+          "detail": {
+            "$ref": "#/components/schemas/EvaluationRunReferenceNotFoundDetail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "EvaluationRunReferenceNotFoundResponse"
+      },
+      "EvaluationRunReferenceResponse": {
+        "properties": {
+          "runId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Runid"
+          },
+          "evaluationObjectId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Evaluationobjectid"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "runId",
+          "evaluationObjectId"
+        ],
+        "title": "EvaluationRunReferenceResponse"
       },
       "EvidenceFragmentResponse": {
         "properties": {
@@ -1458,6 +2788,403 @@
           "state"
         ],
         "title": "SaveGraphDraftRequest"
+      },
+      "ScoreImportBatchResponse": {
+        "properties": {
+          "batchId": {
+            "type": "string",
+            "title": "Batchid"
+          },
+          "scope": {
+            "type": "string",
+            "const": "local_pilot_aggregate",
+            "title": "Scope"
+          },
+          "schemaVersion": {
+            "type": "string",
+            "const": "score-import-batch:v1",
+            "title": "Schemaversion"
+          },
+          "profile": {
+            "type": "string",
+            "const": "local-pilot-aggregate:v1",
+            "title": "Profile"
+          },
+          "recordGranularity": {
+            "type": "string",
+            "const": "aggregate",
+            "title": "Recordgranularity",
+            "default": "aggregate"
+          },
+          "formalUsable": {
+            "type": "boolean",
+            "const": false,
+            "title": "Formalusable",
+            "default": false
+          },
+          "evaluationObjectId": {
+            "type": "string",
+            "title": "Evaluationobjectid"
+          },
+          "baseRunId": {
+            "type": "string",
+            "title": "Baserunid"
+          },
+          "baseContextDigest": {
+            "type": "string",
+            "title": "Basecontextdigest"
+          },
+          "sourceKind": {
+            "type": "string",
+            "const": "structured_json",
+            "title": "Sourcekind"
+          },
+          "candidateItems": {
+            "items": {
+              "$ref": "#/components/schemas/ScoreImportCandidateItemResponse"
+            },
+            "type": "array",
+            "title": "Candidateitems"
+          },
+          "records": {
+            "items": {
+              "$ref": "#/components/schemas/ScoreRecordResponse"
+            },
+            "type": "array",
+            "title": "Records"
+          },
+          "contentDigest": {
+            "type": "string",
+            "title": "Contentdigest"
+          },
+          "createdAt": {
+            "type": "string",
+            "title": "Createdat"
+          },
+          "validationReport": {
+            "$ref": "#/components/schemas/ScoreValidationReportResponse"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "batchId",
+          "scope",
+          "schemaVersion",
+          "profile",
+          "evaluationObjectId",
+          "baseRunId",
+          "baseContextDigest",
+          "sourceKind",
+          "candidateItems",
+          "records",
+          "contentDigest",
+          "createdAt",
+          "validationReport"
+        ],
+        "title": "ScoreImportBatchResponse"
+      },
+      "ScoreImportCandidateItemRequest": {
+        "properties": {
+          "inputId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Inputid"
+          },
+          "earnedPointsTotal": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 1,
+            "pattern": "^-?(0|[1-9][0-9]{0,17})(\\.[0-9]{1,6})?$",
+            "title": "Earnedpointstotal"
+          },
+          "possiblePointsTotal": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 1,
+            "pattern": "^-?(0|[1-9][0-9]{0,17})(\\.[0-9]{1,6})?$",
+            "title": "Possiblepointstotal"
+          },
+          "observedStudentCount": {
+            "type": "integer",
+            "maximum": 9.223372036854776e+18,
+            "minimum": 0.0,
+            "title": "Observedstudentcount"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "inputId",
+          "earnedPointsTotal",
+          "possiblePointsTotal",
+          "observedStudentCount"
+        ],
+        "title": "ScoreImportCandidateItemRequest"
+      },
+      "ScoreImportCandidateItemResponse": {
+        "properties": {
+          "inputId": {
+            "type": "string",
+            "title": "Inputid"
+          },
+          "earnedPointsTotal": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Earnedpointstotal"
+          },
+          "possiblePointsTotal": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Possiblepointstotal"
+          },
+          "observedStudentCount": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observedstudentcount"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "inputId",
+          "earnedPointsTotal",
+          "possiblePointsTotal",
+          "observedStudentCount"
+        ],
+        "title": "ScoreImportCandidateItemResponse"
+      },
+      "ScoreImportErrorDetail": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "pilot_score_batch_capture_disabled",
+              "evaluation_object_not_found",
+              "score_import_base_run_not_found",
+              "score_import_base_run_mismatch",
+              "score_import_base_run_does_not_need_score_data",
+              "score_import_idempotency_conflict",
+              "score_import_batch_conflict",
+              "score_import_batch_not_found"
+            ],
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "evaluationObjectId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evaluationobjectid"
+          },
+          "baseRunId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baserunid"
+          },
+          "batchId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Batchid"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "ScoreImportErrorDetail"
+      },
+      "ScoreImportErrorResponse": {
+        "properties": {
+          "detail": {
+            "$ref": "#/components/schemas/ScoreImportErrorDetail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "ScoreImportErrorResponse"
+      },
+      "ScoreRecordResponse": {
+        "properties": {
+          "recordId": {
+            "type": "string",
+            "title": "Recordid"
+          },
+          "inputId": {
+            "type": "string",
+            "title": "Inputid"
+          },
+          "earnedPointsTotal": {
+            "type": "string",
+            "title": "Earnedpointstotal"
+          },
+          "possiblePointsTotal": {
+            "type": "string",
+            "title": "Possiblepointstotal"
+          },
+          "observedStudentCount": {
+            "type": "integer",
+            "title": "Observedstudentcount"
+          },
+          "scoreRate": {
+            "type": "string",
+            "title": "Scorerate"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "recordId",
+          "inputId",
+          "earnedPointsTotal",
+          "possiblePointsTotal",
+          "observedStudentCount",
+          "scoreRate"
+        ],
+        "title": "ScoreRecordResponse"
+      },
+      "ScoreValidationCheckResponse": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pass",
+              "blocked"
+            ],
+            "title": "Status"
+          },
+          "affectedInputIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Affectedinputids"
+          },
+          "expected": {
+            "type": "string",
+            "title": "Expected"
+          },
+          "observed": {
+            "type": "string",
+            "title": "Observed"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "status",
+          "affectedInputIds",
+          "expected",
+          "observed"
+        ],
+        "title": "ScoreValidationCheckResponse"
+      },
+      "ScoreValidationReportResponse": {
+        "properties": {
+          "reportId": {
+            "type": "string",
+            "title": "Reportid"
+          },
+          "reportVersion": {
+            "type": "string",
+            "title": "Reportversion"
+          },
+          "validatorVersion": {
+            "type": "string",
+            "title": "Validatorversion"
+          },
+          "validationStatus": {
+            "type": "string",
+            "enum": [
+              "blocked",
+              "pilot_ready"
+            ],
+            "title": "Validationstatus"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/ScoreValidationCheckResponse"
+            },
+            "type": "array",
+            "title": "Checks"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Limitations"
+          },
+          "reportDigest": {
+            "type": "string",
+            "title": "Reportdigest"
+          },
+          "createdAt": {
+            "type": "string",
+            "title": "Createdat"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "reportId",
+          "reportVersion",
+          "validatorVersion",
+          "validationStatus",
+          "checks",
+          "limitations",
+          "reportDigest",
+          "createdAt"
+        ],
+        "title": "ScoreValidationReportResponse"
       },
       "SystemComponentResponse": {
         "properties": {

@@ -2,6 +2,7 @@
   font-family: var(--app-font-family);
   color: var(--app-text);
   background: var(--app-bg);
+  color-scheme: light;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 }
@@ -31,6 +32,11 @@ body {
   background: var(--app-layout-background);
 }
 
+::selection {
+  color: var(--app-text);
+  background: var(--app-selection-bg);
+}
+
 button,
 input,
 select,
@@ -39,13 +45,19 @@ textarea {
 }
 
 :focus-visible {
-  outline: 3px solid var(--app-focus-ring);
+  outline: 2px solid var(--app-focus-ring);
   outline-offset: 2px;
 }
 
 .ant-card {
   border-color: var(--app-border);
+  background: var(--app-surface-glass);
   box-shadow: var(--app-card-shadow);
+  backdrop-filter: blur(16px) saturate(120%);
+}
+
+.ant-card .ant-card-head {
+  border-bottom-color: var(--app-border-soft);
 }
 
 .ant-alert {
@@ -60,6 +72,37 @@ textarea {
   transition:
     background-color 160ms ease,
     box-shadow 160ms ease;
+}
+
+.ant-table-wrapper .ant-table,
+.ant-table-wrapper .ant-table-container {
+  background: transparent;
+}
+
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-select .ant-select-selector,
+.ant-input-number,
+.ant-picker {
+  background: color-mix(in srgb, var(--app-surface) 76%, transparent) !important;
+  backdrop-filter: blur(10px);
+}
+
+.ant-progress .ant-progress-inner {
+  background: color-mix(in srgb, var(--app-border) 58%, transparent);
+}
+
+.ant-modal-content,
+.ant-drawer-content {
+  border: 1px solid var(--app-border);
+  background: var(--app-surface-glass-strong) !important;
+  box-shadow: var(--app-floating-shadow);
+  backdrop-filter: blur(22px) saturate(130%);
+}
+
+* {
+  scrollbar-color: var(--app-border-strong) transparent;
+  scrollbar-width: thin;
 }
 
 @media (prefers-reduced-motion: reduce) {

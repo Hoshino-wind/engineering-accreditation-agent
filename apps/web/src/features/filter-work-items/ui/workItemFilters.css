@@ -1,12 +1,17 @@
 .work-item-filters {
   display: flex;
-  margin-bottom: 12px;
+  margin-bottom: 0;
 }
 
 .work-item-filters .ant-input-affix-wrapper {
-  width: 300px;
+  width: min(320px, 36vw);
 }
 
 .work-item-filters .ant-select {
   width: 116px;
+}
+
+.work-item-filters :is(.ant-select-selector, .ant-input-affix-wrapper) {
+  border-color: var(--app-border);
+  box-shadow: none;
 }

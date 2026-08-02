@@ -1,0 +1,102 @@
+.attainment-preflight-drawer-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.attainment-preflight-drawer-content .ant-descriptions-item-label,
+.attainment-preflight-drawer-content .ant-descriptions-item-content {
+  font-size: 12px;
+}
+
+.attainment-preflight-drawer-content h5.ant-typography {
+  margin: 0;
+}
+
+.attainment-preflight-section-title {
+  margin-bottom: 10px;
+}
+
+.attainment-preflight-section-title .ant-tag {
+  margin-inline-end: 0;
+}
+
+.attainment-preflight-check-list,
+.attainment-preflight-missing-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.attainment-preflight-check,
+.attainment-preflight-missing-list article {
+  padding: 12px 14px;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--app-radius-small);
+  background: var(--app-surface);
+}
+
+.attainment-preflight-check--blocked {
+  border-color: color-mix(
+    in srgb,
+    var(--app-error) 34%,
+    var(--app-border)
+  );
+  background: var(--app-error-soft);
+}
+
+.attainment-preflight-check-heading,
+.attainment-preflight-missing-list article > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.attainment-preflight-check-heading .ant-tag,
+.attainment-preflight-missing-list .ant-tag {
+  margin-inline-end: 0;
+}
+
+.attainment-preflight-check-icon--pass {
+  color: var(--app-success);
+}
+
+.attainment-preflight-check-icon--blocked {
+  color: var(--app-error);
+}
+
+.attainment-preflight-check .ant-typography.ant-typography-secondary {
+  margin: 7px 0 0 22px;
+  font-size: 12px;
+}
+
+.attainment-preflight-check > .ant-btn,
+.attainment-preflight-check-guidance {
+  margin: 9px 0 0 22px;
+}
+
+.attainment-preflight-check-guidance {
+  display: block;
+  color: var(--app-text-secondary);
+  font-size: 12px;
+}
+
+.attainment-preflight-missing-list article {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.attainment-preflight-missing-list article > .ant-typography {
+  font-size: 12px;
+}
+
+.attainment-preflight-score-action {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.attainment-preflight-score-action > .ant-btn {
+  align-self: flex-start;
+}

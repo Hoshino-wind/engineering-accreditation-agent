@@ -1,54 +1,54 @@
 export const colorPrimitives = {
   transparent: 'transparent',
   white: '#ffffff',
-  layoutBase: '#f3f9ff',
-  layoutAccent: '#ecfaf4',
-  siderStart: '#f6fbff',
-  siderEnd: '#eefaf5',
-  blue50: '#eaf5ff',
-  blue100: '#dcecff',
-  blue200: '#83b5ef',
-  blue500: '#2f73da',
-  blue600: '#1d5fbf',
-  blue700: '#1e5fae',
-  green50: '#effaf5',
-  green100: '#ddf6ea',
-  green200: '#bde8d4',
-  green500: '#2e9b76',
-  green700: '#237b60',
-  amber50: '#fffbed',
-  amber100: '#fff7e6',
-  amber200: '#efd79a',
-  amber500: '#d58a18',
-  amber800: '#6f5520',
-  amber700: '#756643',
-  red50: '#fff1f0',
-  red500: '#d84f57',
-  indigo50: '#f0f5ff',
-  indigo500: '#2f54eb',
-  purple50: '#f9f0ff',
-  purple500: '#722ed1',
-  slate25: '#f7fbfe',
-  slate50: '#f5faff',
-  slate75: '#eef7ff',
-  slate100: '#e8f0f5',
-  slate150: '#e5eef4',
-  slate200: '#dce8f0',
-  slate250: '#cfe0eb',
-  slate500: '#7c92a6',
-  slate600: '#60758a',
-  slate650: '#49647d',
-  slate700: '#35516b',
-  slate900: '#17324d',
-  shadowBase: '#305c80',
-  floatingShadowBase: '#44708e',
+  layoutBase: '#edf7ff',
+  layoutAccent: '#f9fcff',
+  siderStart: '#f8fcff',
+  siderEnd: '#e6f3ff',
+  blue50: '#edf6ff',
+  blue100: '#dbeeff',
+  blue200: '#8fc4ff',
+  blue500: '#1f79f4',
+  blue600: '#0f63d8',
+  blue700: '#0a4ca8',
+  green50: '#e8faf5',
+  green100: '#d5f4eb',
+  green200: '#8edbc7',
+  green500: '#18b890',
+  green700: '#08775f',
+  amber50: '#fff8e8',
+  amber100: '#fff0cf',
+  amber200: '#f2c879',
+  amber500: '#ed8b19',
+  amber800: '#7d4807',
+  amber700: '#a35d08',
+  red50: '#fff0f2',
+  red500: '#e44f68',
+  indigo50: '#eef0ff',
+  indigo500: '#5e6ee8',
+  purple50: '#f5efff',
+  purple500: '#8c62dc',
+  slate25: '#f9fcff',
+  slate50: '#f3f9ff',
+  slate75: '#eaf4fc',
+  slate100: '#dfeefa',
+  slate150: '#d3e4f0',
+  slate200: '#c1d7e8',
+  slate250: '#9fbfd6',
+  slate500: '#708da5',
+  slate600: '#526f88',
+  slate650: '#3e5d77',
+  slate700: '#234666',
+  slate900: '#09284f',
+  shadowBase: '#315f86',
+  floatingShadowBase: '#2878d5',
 } as const;
 
 export const dimensionPrimitives = {
   desktopMinWidth: 1180,
   desktopTargetWidth: 1920,
-  sidebarWidth: 216,
-  headerHeight: 58,
+  sidebarWidth: 234,
+  headerHeight: 52,
   workbenchMaxWidth: 1720,
   workbenchHeaderHeight: 50,
   summaryCardHeight: 82,
@@ -59,7 +59,7 @@ export const radiusPrimitives = {
   small: 6,
   medium: 8,
   large: 10,
-  extraLarge: 12,
+  extraLarge: 16,
 } as const;
 
 export const typographyPrimitives = {
@@ -81,24 +81,59 @@ function withAlpha(hex: string, alphaPercent: number) {
 }
 
 export const effectPrimitives = {
-  layoutBackground: `radial-gradient(circle at 92% 4%, ${withAlpha(
-    colorPrimitives.green100,
-    72,
-  )}, ${colorPrimitives.transparent} 28rem), linear-gradient(135deg, ${
+  layoutBackground: `radial-gradient(circle at 60% 10%, ${colorPrimitives.transparent} 0, ${
+    colorPrimitives.transparent
+  } 156px, ${withAlpha(colorPrimitives.white, 72)} 157px, ${
+    colorPrimitives.transparent
+  } 159px), linear-gradient(130deg, ${colorPrimitives.transparent} 0%, ${
+    colorPrimitives.transparent
+  } 53%, ${withAlpha(colorPrimitives.blue500, 3)} 53.1%, ${
+    colorPrimitives.transparent
+  } 53.25%), radial-gradient(circle at 78% -8%, ${withAlpha(
+    colorPrimitives.blue200,
+    34,
+  )} 0, ${colorPrimitives.transparent} 34rem), radial-gradient(circle at 6% 86%, ${withAlpha(
+    colorPrimitives.green200,
+    18,
+  )} 0, ${colorPrimitives.transparent} 30rem), linear-gradient(${withAlpha(
+    colorPrimitives.blue500,
+    3,
+  )} 1px, ${colorPrimitives.transparent} 1px), linear-gradient(90deg, ${withAlpha(
+    colorPrimitives.blue500,
+    3,
+  )} 1px, ${colorPrimitives.transparent} 1px), linear-gradient(135deg, ${
     colorPrimitives.layoutBase
   } 0%, ${colorPrimitives.layoutAccent} 100%)`,
-  siderBackground: `linear-gradient(180deg, ${colorPrimitives.siderStart} 0%, ${colorPrimitives.siderEnd} 100%)`,
+  siderBackground: `linear-gradient(180deg, ${withAlpha(
+    colorPrimitives.siderStart,
+    88,
+  )} 0%, ${withAlpha(colorPrimitives.siderEnd, 72)} 100%)`,
   surfaceGlass: withAlpha(colorPrimitives.white, 72),
-  surfaceGlassStrong: withAlpha(colorPrimitives.white, 88),
-  focusRing: withAlpha(colorPrimitives.blue500, 28),
-  primaryShadow: `0 6px 16px ${withAlpha(colorPrimitives.blue500, 18)}`,
-  cardShadow: `0 4px 16px ${withAlpha(colorPrimitives.shadowBase, 4)}`,
-  floatingShadow: `0 8px 24px ${withAlpha(
-    colorPrimitives.floatingShadowBase,
-    8,
-  )}`,
-  workbenchShadow: `0 10px 28px ${withAlpha(
+  surfaceGlassStrong: withAlpha(colorPrimitives.white, 90),
+  focusRing: withAlpha(colorPrimitives.blue500, 30),
+  primaryShadow: `0 0 0 1px ${withAlpha(
+    colorPrimitives.blue500,
+    24,
+  )}, 0 8px 22px ${withAlpha(
+    colorPrimitives.blue500,
+    18,
+  )}, inset 0 1px 0 ${withAlpha(colorPrimitives.white, 72)}`,
+  cardShadow: `0 0 0 1px ${withAlpha(
+    colorPrimitives.blue200,
+    28,
+  )}, 0 8px 24px ${withAlpha(
     colorPrimitives.shadowBase,
-    8,
-  )}`,
+    10,
+  )}, inset 0 1px 0 ${withAlpha(colorPrimitives.white, 88)}`,
+  floatingShadow: `0 18px 48px ${withAlpha(
+    colorPrimitives.shadowBase,
+    14,
+  )}, 0 0 0 1px ${withAlpha(
+    colorPrimitives.blue200,
+    22,
+  )}, inset 0 1px 0 ${withAlpha(colorPrimitives.white, 82)}`,
+  workbenchShadow: `0 16px 42px ${withAlpha(
+    colorPrimitives.shadowBase,
+    11,
+  )}, inset 0 1px 0 ${withAlpha(colorPrimitives.white, 86)}`,
 } as const;

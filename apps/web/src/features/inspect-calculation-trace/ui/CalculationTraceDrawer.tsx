@@ -115,6 +115,12 @@ export function CalculationTraceDrawer({
                 span: 2,
               },
               {
+                key: 'run',
+                label: '评价运行',
+                children: evaluation.runId,
+                span: 2,
+              },
+              {
                 key: 'graph',
                 label: '图谱版本',
                 children: evaluation.graphVersion,
@@ -216,7 +222,7 @@ export function CalculationTraceDrawer({
                 ))
               ) : (
                 <Typography.Text type="secondary">
-                  当前原型未展开该对象的证据明细。
+                  当前试点读模型未展开该运行的证据明细。
                 </Typography.Text>
               )}
             </div>

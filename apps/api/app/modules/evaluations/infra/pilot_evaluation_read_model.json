@@ -1,0 +1,515 @@
+{
+  "schema_version": 1,
+  "objects": [
+    {
+      "evaluation_object_id": "evaluation-ct3",
+      "display_order": 1,
+      "course": "数据结构",
+      "objective_code": "CT-3",
+      "objective_name": "算法设计正确性",
+      "ability_code": "BA-2",
+      "ability_name": "算法分析与设计能力",
+      "presented_run_id": "eval-2026-066"
+    },
+    {
+      "evaluation_object_id": "evaluation-ct4",
+      "display_order": 2,
+      "course": "软件工程",
+      "objective_code": "CT-4",
+      "objective_name": "系统实现与调试能力",
+      "ability_code": "BA-4",
+      "ability_name": "系统实现与调试能力",
+      "presented_run_id": "eval-2026-067"
+    },
+    {
+      "evaluation_object_id": "evaluation-ct2",
+      "display_order": 3,
+      "course": "离散数学",
+      "objective_code": "CT-2",
+      "objective_name": "问题建模能力",
+      "ability_code": "BA-1",
+      "ability_name": "离散建模与问题求解能力",
+      "presented_run_id": "eval-2026-069"
+    },
+    {
+      "evaluation_object_id": "evaluation-ct5",
+      "display_order": 4,
+      "course": "软件工程",
+      "objective_code": "CT-5",
+      "objective_name": "团队协作与沟通能力",
+      "ability_code": "BA-6",
+      "ability_name": "团队协作与沟通能力",
+      "presented_run_id": "eval-2026-068"
+    },
+    {
+      "evaluation_object_id": "evaluation-ct1",
+      "display_order": 5,
+      "course": "计算机组成原理",
+      "objective_code": "CT-1",
+      "objective_name": "体系结构分析能力",
+      "ability_code": "BA-3",
+      "ability_name": "体系结构分析能力",
+      "presented_run_id": "eval-2026-070"
+    },
+    {
+      "evaluation_object_id": "evaluation-ct6",
+      "display_order": 6,
+      "course": "计算机网络",
+      "objective_code": "CT-6",
+      "objective_name": "工程规范与伦理",
+      "ability_code": "BA-5",
+      "ability_name": "工程规范与职业伦理",
+      "presented_run_id": "eval-2026-071"
+    }
+  ],
+  "runs": [
+    {
+      "run_id": "eval-2026-066",
+      "evaluation_object_id": "evaluation-ct3",
+      "approval_status": "pending",
+      "graph_version": "图谱 v0.3",
+      "policy_version": "policy v1.2",
+      "program_version": "evaluator 0.8.0",
+      "score_snapshot": "2026-07-28",
+      "student_count": 42,
+      "threshold": 0.7,
+      "input_snapshot": {
+        "created_at": "2026-07-28 09:42",
+        "digest": "sha256:2eb7…87c1"
+      },
+      "inputs": [
+        {
+          "evidence_name": "实验报告评分汇总表 v1.4",
+          "input_id": "input-correctness",
+          "label": "实验报告正确性",
+          "score_rate": 0.86,
+          "weight": 0.6
+        },
+        {
+          "evidence_name": "算法效率评分汇总表 v1.2",
+          "input_id": "input-efficiency",
+          "label": "算法效率与复杂度",
+          "score_rate": 0.76,
+          "weight": 0.4
+        }
+      ],
+      "readiness_checks": [
+        {
+          "detail": "4 条正式评分关系已发布",
+          "check_id": "relations",
+          "label": "正式关系完整",
+          "status": "pass"
+        },
+        {
+          "detail": "0.60 + 0.40 = 1.00",
+          "check_id": "weights",
+          "label": "权重合计 100%",
+          "status": "pass"
+        },
+        {
+          "detail": "42 / 42 名学生数据可用",
+          "check_id": "scores",
+          "label": "评分数据完整",
+          "status": "pass"
+        },
+        {
+          "detail": "无重复、越界或异常记录",
+          "check_id": "exceptions",
+          "label": "异常记录 0 条",
+          "status": "pass"
+        }
+      ],
+      "evidence": [
+        {
+          "coordinate": "实验 2 / Rubric 评分项 3",
+          "digest": "sha256:13ce…b240",
+          "evidence_id": "evidence-score-ct3-1",
+          "name": "实验报告评分汇总表",
+          "version": "v1.4"
+        },
+        {
+          "coordinate": "实验 3 / Rubric 评分项 2",
+          "digest": "sha256:ac91…7f08",
+          "evidence_id": "evidence-score-ct3-2",
+          "name": "算法效率评分汇总表",
+          "version": "v1.2"
+        }
+      ]
+    },
+    {
+      "run_id": "eval-2026-067",
+      "evaluation_object_id": "evaluation-ct4",
+      "approval_status": "approved",
+      "graph_version": "图谱 v0.3",
+      "policy_version": "policy v1.2",
+      "program_version": "evaluator 0.8.0",
+      "score_snapshot": "2026-07-27",
+      "student_count": 38,
+      "threshold": 0.7,
+      "input_snapshot": {
+        "created_at": "2026-07-27 16:20",
+        "digest": "sha256:4d1a…9c22"
+      },
+      "inputs": [
+        {
+          "evidence_name": "项目迭代评分表 v2.0",
+          "input_id": "input-implementation",
+          "label": "系统实现质量",
+          "score_rate": 0.8,
+          "weight": 0.7
+        },
+        {
+          "evidence_name": "调试记录评分表 v1.1",
+          "input_id": "input-debugging",
+          "label": "测试与调试能力",
+          "score_rate": 0.73,
+          "weight": 0.3
+        }
+      ],
+      "readiness_checks": [
+        {
+          "detail": "关系、权重、评分和异常校验均通过",
+          "check_id": "ready",
+          "label": "全部输入就绪",
+          "status": "pass"
+        }
+      ],
+      "evidence": []
+    },
+    {
+      "run_id": "eval-2026-069",
+      "evaluation_object_id": "evaluation-ct2",
+      "approval_status": "approved",
+      "graph_version": "图谱 v0.3",
+      "policy_version": "policy v1.2",
+      "program_version": "evaluator 0.8.0",
+      "score_snapshot": "2026-07-27",
+      "student_count": 45,
+      "threshold": 0.7,
+      "input_snapshot": {
+        "created_at": "2026-07-27 14:10",
+        "digest": "sha256:781e…4aa9"
+      },
+      "inputs": [
+        {
+          "evidence_name": "建模作业评分汇总 v1.0",
+          "input_id": "input-model",
+          "label": "问题建模",
+          "score_rate": 0.72,
+          "weight": 0.5
+        },
+        {
+          "evidence_name": "证明题评分汇总 v1.0",
+          "input_id": "input-reasoning",
+          "label": "逻辑推理",
+          "score_rate": 0.76,
+          "weight": 0.5
+        }
+      ],
+      "readiness_checks": [
+        {
+          "detail": "关系、权重、评分和异常校验均通过",
+          "check_id": "ready",
+          "label": "全部输入就绪",
+          "status": "pass"
+        }
+      ],
+      "evidence": []
+    },
+    {
+      "run_id": "eval-2026-068",
+      "evaluation_object_id": "evaluation-ct5",
+      "approval_status": "not_submitted",
+      "graph_version": "图谱 v0.3",
+      "policy_version": "policy v1.2",
+      "program_version": "evaluator 0.8.0",
+      "score_snapshot": "2026-07-28",
+      "student_count": 36,
+      "threshold": 0.7,
+      "input_snapshot": {
+        "created_at": "2026-07-28 08:36",
+        "digest": "sha256:8d09…17b3"
+      },
+      "inputs": [
+        {
+          "evidence_name": "团队互评汇总 v1.0",
+          "input_id": "input-teamwork",
+          "label": "团队协作",
+          "score_rate": null,
+          "weight": 0.5
+        },
+        {
+          "evidence_name": "汇报评分表 v1.1",
+          "input_id": "input-communication",
+          "label": "表达与沟通",
+          "score_rate": 0.79,
+          "weight": 0.5
+        }
+      ],
+      "readiness_checks": [
+        {
+          "detail": "团队互评汇总缺少 6 名学生记录",
+          "check_id": "scores",
+          "label": "评分数据不完整",
+          "status": "blocked"
+        },
+        {
+          "detail": "两项评分权重合计 100%",
+          "check_id": "weights",
+          "label": "权重合计 100%",
+          "status": "pass"
+        }
+      ],
+      "evidence": []
+    },
+    {
+      "run_id": "eval-2026-070",
+      "evaluation_object_id": "evaluation-ct1",
+      "approval_status": "not_submitted",
+      "graph_version": "图谱 v0.3",
+      "policy_version": "policy v1.2",
+      "program_version": "evaluator 0.8.0",
+      "score_snapshot": "2026-07-28",
+      "student_count": 41,
+      "threshold": 0.7,
+      "input_snapshot": {
+        "created_at": "2026-07-28 08:10",
+        "digest": "sha256:9fa4…226d"
+      },
+      "inputs": [
+        {
+          "evidence_name": "体系结构实验评分表 v1.0",
+          "input_id": "input-architecture",
+          "label": "体系结构分析",
+          "score_rate": 0.81,
+          "weight": 1
+        }
+      ],
+      "readiness_checks": [
+        {
+          "detail": "评分项尚未关联正式能力节点",
+          "check_id": "relations",
+          "label": "正式关系不完整",
+          "status": "blocked"
+        },
+        {
+          "detail": "评分数据与样本范围完整",
+          "check_id": "scores",
+          "label": "评分数据完整",
+          "status": "pass"
+        }
+      ],
+      "evidence": []
+    },
+    {
+      "run_id": "eval-2026-071",
+      "evaluation_object_id": "evaluation-ct6",
+      "approval_status": "pending",
+      "graph_version": "图谱 v0.3",
+      "policy_version": "policy v1.2",
+      "program_version": "evaluator 0.8.0",
+      "score_snapshot": "2026-05-12",
+      "student_count": 40,
+      "threshold": 0.7,
+      "input_snapshot": {
+        "created_at": "2026-05-12 11:05",
+        "digest": "sha256:cd51…641e"
+      },
+      "inputs": [
+        {
+          "evidence_name": "网络工程案例评分表 v1.3",
+          "input_id": "input-standard",
+          "label": "工程规范应用",
+          "score_rate": 0.7,
+          "weight": 0.6
+        },
+        {
+          "evidence_name": "伦理分析报告评分表 v1.0",
+          "input_id": "input-ethics",
+          "label": "伦理风险分析",
+          "score_rate": 0.65,
+          "weight": 0.4
+        }
+      ],
+      "readiness_checks": [
+        {
+          "detail": "关系、权重、评分和异常校验均通过",
+          "check_id": "ready",
+          "label": "全部输入就绪",
+          "status": "pass"
+        }
+      ],
+      "evidence": []
+    },
+    {
+      "run_id": "eval-2026-072",
+      "evaluation_object_id": "evaluation-ct6",
+      "approval_status": "pending",
+      "graph_version": "图谱 v0.4",
+      "policy_version": "policy v1.2",
+      "program_version": "evaluator 0.8.0",
+      "score_snapshot": "2026-07-20",
+      "student_count": 40,
+      "threshold": 0.75,
+      "input_snapshot": {
+        "created_at": "2026-07-20 15:30",
+        "digest": "sha256:13a7…90de"
+      },
+      "inputs": [
+        {
+          "evidence_name": "网络工程案例评分表 v2.0",
+          "input_id": "input-standard",
+          "label": "工程规范应用",
+          "score_rate": 0.75,
+          "weight": 0.6
+        },
+        {
+          "evidence_name": "伦理分析报告评分表 v1.1",
+          "input_id": "input-ethics",
+          "label": "伦理风险分析",
+          "score_rate": 0.7,
+          "weight": 0.4
+        }
+      ],
+      "readiness_checks": [
+        {
+          "detail": "关系、权重、评分和异常校验均通过",
+          "check_id": "ready",
+          "label": "全部输入就绪",
+          "status": "pass"
+        }
+      ],
+      "evidence": []
+    }
+  ],
+  "calculation_snapshots": {
+    "eval-2026-066": {
+      "blockers": [],
+      "contributions": [
+        {
+          "input_id": "input-correctness",
+          "value": "0.516"
+        },
+        {
+          "input_id": "input-efficiency",
+          "value": "0.304"
+        }
+      ],
+      "ready": true,
+      "result": {
+        "score": "0.820",
+        "outcome": "achieved"
+      },
+      "weight_total": "1.000"
+    },
+    "eval-2026-067": {
+      "blockers": [],
+      "contributions": [
+        {
+          "input_id": "input-implementation",
+          "value": "0.560"
+        },
+        {
+          "input_id": "input-debugging",
+          "value": "0.219"
+        }
+      ],
+      "ready": true,
+      "result": {
+        "score": "0.779",
+        "outcome": "achieved"
+      },
+      "weight_total": "1.000"
+    },
+    "eval-2026-069": {
+      "blockers": [],
+      "contributions": [
+        {
+          "input_id": "input-model",
+          "value": "0.360"
+        },
+        {
+          "input_id": "input-reasoning",
+          "value": "0.380"
+        }
+      ],
+      "ready": true,
+      "result": {
+        "score": "0.740",
+        "outcome": "achieved"
+      },
+      "weight_total": "1.000"
+    },
+    "eval-2026-068": {
+      "blockers": [
+        "团队互评汇总缺少 6 名学生记录",
+        "团队协作缺少有效得分率"
+      ],
+      "contributions": [
+        {
+          "input_id": "input-teamwork",
+          "value": null
+        },
+        {
+          "input_id": "input-communication",
+          "value": "0.395"
+        }
+      ],
+      "ready": false,
+      "result": null,
+      "weight_total": "1.000"
+    },
+    "eval-2026-070": {
+      "blockers": [
+        "评分项尚未关联正式能力节点"
+      ],
+      "contributions": [
+        {
+          "input_id": "input-architecture",
+          "value": "0.810"
+        }
+      ],
+      "ready": false,
+      "result": null,
+      "weight_total": "1.000"
+    },
+    "eval-2026-071": {
+      "blockers": [],
+      "contributions": [
+        {
+          "input_id": "input-standard",
+          "value": "0.420"
+        },
+        {
+          "input_id": "input-ethics",
+          "value": "0.260"
+        }
+      ],
+      "ready": true,
+      "result": {
+        "score": "0.680",
+        "outcome": "not_achieved"
+      },
+      "weight_total": "1.000"
+    },
+    "eval-2026-072": {
+      "blockers": [],
+      "contributions": [
+        {
+          "input_id": "input-standard",
+          "value": "0.450"
+        },
+        {
+          "input_id": "input-ethics",
+          "value": "0.280"
+        }
+      ],
+      "ready": true,
+      "result": {
+        "score": "0.730",
+        "outcome": "not_achieved"
+      },
+      "weight_total": "1.000"
+    }
+  }
+}

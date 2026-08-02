@@ -4,6 +4,125 @@
  */
 
 export interface paths {
+    "/api/v1/evaluations/objects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 列出评价对象及其展示运行摘要 */
+        get: operations["list_evaluation_objects_api_v1_evaluations_objects_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/evaluations/runs/{run_id}/reference": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 读取评价运行的权威对象引用 */
+        get: operations["get_evaluation_run_reference_api_v1_evaluations_runs__run_id__reference_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/evaluations/runs/{run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 读取评价运行及其确定性计算明细 */
+        get: operations["get_evaluation_run_api_v1_evaluations_runs__run_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/evaluations/runs/{run_id}/preflight": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 读取精确评价运行的结构化输入预检报告 */
+        get: operations["get_evaluation_preflight_api_v1_evaluations_runs__run_id__preflight_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/evaluations/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 基于已就绪的不可变输入快照创建试点重算运行 */
+        post: operations["create_evaluation_run_api_v1_evaluations_runs_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/evaluations/score-import-batches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 捕获不可变的本地试点汇总评分批次 */
+        post: operations["create_score_import_batch_api_v1_evaluations_score_import_batches_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/evaluations/score-import-batches/{batch_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 读取不可变的本地试点汇总评分批次 */
+        get: operations["get_score_import_batch_api_v1_evaluations_score_import_batches__batch_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/system/status": {
         parameters: {
             query?: never;
@@ -167,6 +286,24 @@ export interface components {
             schemaVersionId: "teaching-graph-schema@2";
             version: components["schemas"]["GraphVersionContract"];
         };
+        /** AttainmentCalculationResponse */
+        AttainmentCalculationResponse: {
+            /** Blockers */
+            blockers: string[];
+            /** Contributions */
+            contributions: components["schemas"]["AttainmentContributionResponse"][];
+            /** Ready */
+            ready: boolean;
+            result: components["schemas"]["EvaluationResultResponse"] | null;
+            /** Weighttotal */
+            weightTotal: number;
+        };
+        /** AttainmentContributionResponse */
+        AttainmentContributionResponse: {
+            input: components["schemas"]["EvaluationInputResponse"];
+            /** Value */
+            value: number | null;
+        };
         /** Body_upload_material_api_v1_materials_post */
         Body_upload_material_api_v1_materials_post: {
             /**
@@ -190,6 +327,294 @@ export interface components {
          * @enum {string}
          */
         ComponentStatus: "operational" | "configured" | "not_configured";
+        /** CreateEvaluationRunRequest */
+        CreateEvaluationRunRequest: {
+            /** Evaluationobjectid */
+            evaluationObjectId: string;
+            /** Sourcerunid */
+            sourceRunId: string;
+        };
+        /** CreateScoreImportBatchRequest */
+        CreateScoreImportBatchRequest: {
+            /** Evaluationobjectid */
+            evaluationObjectId: string;
+            /** Baserunid */
+            baseRunId: string;
+            /**
+             * Profile
+             * @constant
+             */
+            profile: "local-pilot-aggregate:v1";
+            /** Items */
+            items: components["schemas"]["ScoreImportCandidateItemRequest"][];
+        };
+        /** CreateScoreImportBatchResponse */
+        CreateScoreImportBatchResponse: {
+            /** Idempotentreplay */
+            idempotentReplay: boolean;
+            batch: components["schemas"]["ScoreImportBatchResponse"];
+        };
+        /** EvaluationEvidenceReferenceResponse */
+        EvaluationEvidenceReferenceResponse: {
+            /** Coordinate */
+            coordinate: string;
+            /** Hash */
+            hash: string;
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Version */
+            version: string;
+        };
+        /** EvaluationInputResponse */
+        EvaluationInputResponse: {
+            /** Evidencename */
+            evidenceName: string;
+            /** Id */
+            id: string;
+            /** Label */
+            label: string;
+            /** Scorerate */
+            scoreRate?: number | null;
+            /** Weight */
+            weight: number;
+        };
+        /** EvaluationInputSnapshotResponse */
+        EvaluationInputSnapshotResponse: {
+            /** Createdat */
+            createdAt: string;
+            /** Hash */
+            hash: string;
+        };
+        /** EvaluationObjectIdentityResponse */
+        EvaluationObjectIdentityResponse: {
+            /** Evaluationobjectid */
+            evaluationObjectId: string;
+            /** Course */
+            course: string;
+            /** Objectivecode */
+            objectiveCode: string;
+            /** Objectivename */
+            objectiveName: string;
+            /** Abilitycode */
+            abilityCode: string;
+            /** Abilityname */
+            abilityName: string;
+        };
+        /** EvaluationObjectListResponse */
+        EvaluationObjectListResponse: {
+            /** Items */
+            items: components["schemas"]["EvaluationObjectSummaryResponse"][];
+            /** Total */
+            total: number;
+        };
+        /** EvaluationObjectSummaryResponse */
+        EvaluationObjectSummaryResponse: {
+            /** Evaluationobjectid */
+            evaluationObjectId: string;
+            /** Course */
+            course: string;
+            /** Objectivecode */
+            objectiveCode: string;
+            /** Objectivename */
+            objectiveName: string;
+            /** Abilitycode */
+            abilityCode: string;
+            /** Abilityname */
+            abilityName: string;
+            /** Presentedrunid */
+            presentedRunId: string;
+            /**
+             * Readinessstatus
+             * @enum {string}
+             */
+            readinessStatus: "ready" | "blocked";
+            /**
+             * Approvalstatus
+             * @enum {string}
+             */
+            approvalStatus: "not_submitted" | "pending" | "approved" | "rejected";
+            result: components["schemas"]["EvaluationResultResponse"] | null;
+        };
+        /** EvaluationPreflightCheckResponse */
+        EvaluationPreflightCheckResponse: {
+            /** Id */
+            id: string;
+            /** Label */
+            label: string;
+            /** Detail */
+            detail: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pass" | "blocked";
+            /**
+             * Owner
+             * @enum {string}
+             */
+            owner: "score_input" | "ability_graph" | "evaluation_policy" | "evaluation_owner";
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "none" | "prepare_score_data" | "repair_graph_relation" | "review_evaluation_policy" | "inspect_input_snapshot";
+        };
+        /** EvaluationPreflightMissingInputResponse */
+        EvaluationPreflightMissingInputResponse: {
+            /** Id */
+            id: string;
+            /** Label */
+            label: string;
+            /** Evidencename */
+            evidenceName: string;
+        };
+        /** EvaluationPreflightResponse */
+        EvaluationPreflightResponse: {
+            /**
+             * Scope
+             * @default pilot_snapshot
+             * @constant
+             */
+            scope: "pilot_snapshot";
+            /**
+             * Reportversion
+             * @constant
+             */
+            reportVersion: "evaluation-preflight:v1";
+            /** Runid */
+            runId: string;
+            /** Evaluationobjectid */
+            evaluationObjectId: string;
+            /** Inputsnapshothash */
+            inputSnapshotHash: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "ready" | "blocked";
+            /** Blockers */
+            blockers: string[];
+            /** Checks */
+            checks: components["schemas"]["EvaluationPreflightCheckResponse"][];
+            /** Missinginputs */
+            missingInputs: components["schemas"]["EvaluationPreflightMissingInputResponse"][];
+            /** Passedcheckcount */
+            passedCheckCount: number;
+            /** Blockedcheckcount */
+            blockedCheckCount: number;
+            /** Reporthash */
+            reportHash: string;
+        };
+        /** EvaluationReadinessCheckResponse */
+        EvaluationReadinessCheckResponse: {
+            /** Detail */
+            detail: string;
+            /** Id */
+            id: string;
+            /** Label */
+            label: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pass" | "blocked";
+        };
+        /** EvaluationResultResponse */
+        EvaluationResultResponse: {
+            /** Score */
+            score: number;
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "achieved" | "not_achieved";
+        };
+        /** EvaluationRunCreationErrorDetail */
+        EvaluationRunCreationErrorDetail: {
+            /**
+             * Code
+             * @enum {string}
+             */
+            code: "evaluation_object_not_found" | "evaluation_source_run_not_found" | "evaluation_source_run_mismatch" | "evaluation_source_run_not_ready" | "evaluation_run_idempotency_conflict";
+            /** Message */
+            message: string;
+            /** Evaluationobjectid */
+            evaluationObjectId?: string | null;
+            /** Sourcerunid */
+            sourceRunId?: string | null;
+            /** Blockers */
+            blockers?: string[] | null;
+        };
+        /** EvaluationRunCreationErrorResponse */
+        EvaluationRunCreationErrorResponse: {
+            detail: components["schemas"]["EvaluationRunCreationErrorDetail"];
+        };
+        /** EvaluationRunCreationResponse */
+        EvaluationRunCreationResponse: {
+            /** Idempotentreplay */
+            idempotentReplay: boolean;
+            /** Sourcerunid */
+            sourceRunId: string;
+            run: components["schemas"]["EvaluationRunDetailResponse"];
+        };
+        /** EvaluationRunDetailResponse */
+        EvaluationRunDetailResponse: {
+            /** Runid */
+            runId: string;
+            /** Sourcerunid */
+            sourceRunId?: string | null;
+            evaluationObject: components["schemas"]["EvaluationObjectIdentityResponse"];
+            /**
+             * Approvalstatus
+             * @enum {string}
+             */
+            approvalStatus: "not_submitted" | "pending" | "approved" | "rejected";
+            /** Graphversion */
+            graphVersion: string;
+            /** Policyversion */
+            policyVersion: string;
+            /** Programversion */
+            programVersion: string;
+            /** Scoresnapshot */
+            scoreSnapshot: string;
+            /** Studentcount */
+            studentCount: number;
+            /** Threshold */
+            threshold: number;
+            inputSnapshot: components["schemas"]["EvaluationInputSnapshotResponse"];
+            /** Inputs */
+            inputs: components["schemas"]["EvaluationInputResponse"][];
+            /** Readinesschecks */
+            readinessChecks: components["schemas"]["EvaluationReadinessCheckResponse"][];
+            /** Evidence */
+            evidence: components["schemas"]["EvaluationEvidenceReferenceResponse"][];
+            calculation: components["schemas"]["AttainmentCalculationResponse"];
+        };
+        /** EvaluationRunReferenceNotFoundDetail */
+        EvaluationRunReferenceNotFoundDetail: {
+            /**
+             * Code
+             * @constant
+             */
+            code: "evaluation_run_not_found";
+            /** Message */
+            message: string;
+            /** Runid */
+            runId: string;
+        };
+        /** EvaluationRunReferenceNotFoundResponse */
+        EvaluationRunReferenceNotFoundResponse: {
+            detail: components["schemas"]["EvaluationRunReferenceNotFoundDetail"];
+        };
+        /** EvaluationRunReferenceResponse */
+        EvaluationRunReferenceResponse: {
+            /** Runid */
+            runId: string;
+            /** Evaluationobjectid */
+            evaluationObjectId: string;
+        };
         /** EvidenceFragmentResponse */
         EvidenceFragmentResponse: {
             /** Id */
@@ -545,6 +970,153 @@ export interface components {
             expectedRevision: number;
             state: components["schemas"]["AbilityGraphStateContract"];
         };
+        /** ScoreImportBatchResponse */
+        ScoreImportBatchResponse: {
+            /** Batchid */
+            batchId: string;
+            /**
+             * Scope
+             * @constant
+             */
+            scope: "local_pilot_aggregate";
+            /**
+             * Schemaversion
+             * @constant
+             */
+            schemaVersion: "score-import-batch:v1";
+            /**
+             * Profile
+             * @constant
+             */
+            profile: "local-pilot-aggregate:v1";
+            /**
+             * Recordgranularity
+             * @default aggregate
+             * @constant
+             */
+            recordGranularity: "aggregate";
+            /**
+             * Formalusable
+             * @default false
+             * @constant
+             */
+            formalUsable: false;
+            /** Evaluationobjectid */
+            evaluationObjectId: string;
+            /** Baserunid */
+            baseRunId: string;
+            /** Basecontextdigest */
+            baseContextDigest: string;
+            /**
+             * Sourcekind
+             * @constant
+             */
+            sourceKind: "structured_json";
+            /** Candidateitems */
+            candidateItems: components["schemas"]["ScoreImportCandidateItemResponse"][];
+            /** Records */
+            records: components["schemas"]["ScoreRecordResponse"][];
+            /** Contentdigest */
+            contentDigest: string;
+            /** Createdat */
+            createdAt: string;
+            validationReport: components["schemas"]["ScoreValidationReportResponse"];
+        };
+        /** ScoreImportCandidateItemRequest */
+        ScoreImportCandidateItemRequest: {
+            /** Inputid */
+            inputId: string;
+            /** Earnedpointstotal */
+            earnedPointsTotal: string;
+            /** Possiblepointstotal */
+            possiblePointsTotal: string;
+            /** Observedstudentcount */
+            observedStudentCount: number;
+        };
+        /** ScoreImportCandidateItemResponse */
+        ScoreImportCandidateItemResponse: {
+            /** Inputid */
+            inputId: string;
+            /** Earnedpointstotal */
+            earnedPointsTotal: string | null;
+            /** Possiblepointstotal */
+            possiblePointsTotal: string | null;
+            /** Observedstudentcount */
+            observedStudentCount: number | null;
+        };
+        /** ScoreImportErrorDetail */
+        ScoreImportErrorDetail: {
+            /**
+             * Code
+             * @enum {string}
+             */
+            code: "pilot_score_batch_capture_disabled" | "evaluation_object_not_found" | "score_import_base_run_not_found" | "score_import_base_run_mismatch" | "score_import_base_run_does_not_need_score_data" | "score_import_idempotency_conflict" | "score_import_batch_conflict" | "score_import_batch_not_found";
+            /** Message */
+            message: string;
+            /** Evaluationobjectid */
+            evaluationObjectId?: string | null;
+            /** Baserunid */
+            baseRunId?: string | null;
+            /** Batchid */
+            batchId?: string | null;
+        };
+        /** ScoreImportErrorResponse */
+        ScoreImportErrorResponse: {
+            detail: components["schemas"]["ScoreImportErrorDetail"];
+        };
+        /** ScoreRecordResponse */
+        ScoreRecordResponse: {
+            /** Recordid */
+            recordId: string;
+            /** Inputid */
+            inputId: string;
+            /** Earnedpointstotal */
+            earnedPointsTotal: string;
+            /** Possiblepointstotal */
+            possiblePointsTotal: string;
+            /** Observedstudentcount */
+            observedStudentCount: number;
+            /** Scorerate */
+            scoreRate: string;
+        };
+        /** ScoreValidationCheckResponse */
+        ScoreValidationCheckResponse: {
+            /** Code */
+            code: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pass" | "blocked";
+            /** Affectedinputids */
+            affectedInputIds: string[];
+            /** Expected */
+            expected: string;
+            /** Observed */
+            observed: string;
+        };
+        /** ScoreValidationReportResponse */
+        ScoreValidationReportResponse: {
+            /** Reportid */
+            reportId: string;
+            /** Reportversion */
+            reportVersion: string;
+            /** Validatorversion */
+            validatorVersion: string;
+            /**
+             * Validationstatus
+             * @enum {string}
+             */
+            validationStatus: "blocked" | "pilot_ready";
+            /** Checks */
+            checks: components["schemas"]["ScoreValidationCheckResponse"][];
+            /** Limitations */
+            limitations: string[];
+            /** Reportdigest */
+            reportDigest: string;
+            /** Createdat */
+            createdAt: string;
+        };
         /** SystemComponentResponse */
         SystemComponentResponse: {
             /** Key */
@@ -594,6 +1166,314 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    list_evaluation_objects_api_v1_evaluations_objects_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvaluationObjectListResponse"];
+                };
+            };
+        };
+    };
+    get_evaluation_run_reference_api_v1_evaluations_runs__run_id__reference_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvaluationRunReferenceResponse"];
+                };
+            };
+            /** @description 评价运行不存在 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvaluationRunReferenceNotFoundResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_evaluation_run_api_v1_evaluations_runs__run_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvaluationRunDetailResponse"];
+                };
+            };
+            /** @description 评价运行不存在 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvaluationRunReferenceNotFoundResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_evaluation_preflight_api_v1_evaluations_runs__run_id__preflight_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvaluationPreflightResponse"];
+                };
+            };
+            /** @description 评价运行不存在 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvaluationRunReferenceNotFoundResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_evaluation_run_api_v1_evaluations_runs_post: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateEvaluationRunRequest"];
+            };
+        };
+        responses: {
+            /** @description 试点重算运行已创建或按幂等键恢复 */
+            201: {
+                headers: {
+                    /** @description 新运行的权威详情地址 */
+                    Location?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvaluationRunCreationResponse"];
+                };
+            };
+            /** @description 评价对象或来源运行不存在 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvaluationRunCreationErrorResponse"];
+                };
+            };
+            /** @description 来源快照不可执行或幂等键冲突 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvaluationRunCreationErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_score_import_batch_api_v1_evaluations_score_import_batches_post: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateScoreImportBatchRequest"];
+            };
+        };
+        responses: {
+            /** @description 试点汇总评分批次已创建或按幂等键恢复 */
+            201: {
+                headers: {
+                    /** @description 评分批次的权威详情地址 */
+                    Location?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateScoreImportBatchResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScoreImportErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScoreImportErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScoreImportErrorResponse"];
+                };
+            };
+        };
+    };
+    get_score_import_batch_api_v1_evaluations_score_import_batches__batch_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                batch_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScoreImportBatchResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScoreImportErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScoreImportErrorResponse"];
+                };
+            };
+        };
+    };
     get_system_status_api_v1_system_status_get: {
         parameters: {
             query?: never;

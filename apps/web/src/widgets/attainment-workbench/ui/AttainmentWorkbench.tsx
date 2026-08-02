@@ -1,51 +1,138 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { App } from 'antd';
 
 import {
-  prototypeOnlyAttainmentEvaluations,
-  type AttainmentEvaluationItem,
+  type AttainmentEvaluationSummary,
+  useAttainmentEvaluationRunQuery,
 } from '../../../entities/attainment-evaluation';
-import { recordWorkflowEvent } from '../../../entities/workflow-event';
-import { calculateAttainment } from '../../../features/calculate-attainment';
 import { useAttainmentEvaluationFilters } from '../../../features/filter-attainment-evaluations';
 import { CalculationTraceDrawer } from '../../../features/inspect-calculation-trace';
 import { useEvaluationReviewDrafts } from '../../../features/review-attainment-result';
 import { EvaluationCalculationPanel } from './EvaluationCalculationPanel';
 import { EvaluationConfigurationPanel } from './EvaluationConfigurationPanel';
 import { EvaluationObjectQueue } from './EvaluationObjectQueue';
+import { EvaluationRunStateCard } from './EvaluationRunStateCard';
 
 import './attainmentWorkbench.css';
 
-export function AttainmentWorkbench() {
-  const { message } = App.useApp();
-  const filters = useAttainmentEvaluationFilters(
-    prototypeOnlyAttainmentEvaluations,
-  );
-  const reviewDrafts = useEvaluationReviewDrafts();
-  const [selectedEvaluationId, setSelectedEvaluationId] = useState(
-    prototypeOnlyAttainmentEvaluations[0]?.id,
-  );
-  const [traceDrawerOpen, setTraceDrawerOpen] = useState(false);
-  const selectedEvaluation =
-    filters.evaluations.find(
-      (evaluation) => evaluation.id === selectedEvaluationId,
-    ) ??
-    filters.evaluations[0] ??
-    null;
-  const calculation = useMemo(
-    () =>
-      selectedEvaluation
-        ? calculateAttainment(selectedEvaluation)
-        : null,
-    [selectedEvaluation],
-  );
-  const selectedDraft = selectedEvaluation
-    ? reviewDrafts.getDraft(selectedEvaluation.id)
-    : { note: '' };
+interface AttainmentWorkbenchProps {
+  evaluations: AttainmentEvaluationSummary[];
+  onNavigateToAbilityGraph: () => void;
+  onRecoverPresentedRun: () => void;
+  onSelectedEvaluationChange: (
+    evaluation: AttainmentEvaluationSummary,
+  ) => void;
+  selectedEvaluationId?: string;
+  selectedRunId?: string;
+}
 
-  const handleSelect = (evaluation: AttainmentEvaluationItem) => {
-    setSelectedEvaluationId(evaluation.id);
-  };
+export function AttainmentWorkbench({
+  evaluations,
+  onNavigateToAbilityGraph,
+  onRecoverPresentedRun,
+  onSelectedEvaluationChange,
+  selectedEvaluationId,
+  selectedRunId,
+}: AttainmentWorkbenchProps) {
+  const { message } = App.useApp();
+  const filters = useAttainmentEvaluationFilters(evaluations);
+  const reviewDrafts = useEvaluationReviewDrafts(evaluations);
+  const [traceDrawerOpen, setTraceDrawerOpen] = useState(false);
+  const previousRouteSelectedEvaluationId = useRef<string | undefined>(
+    undefined,
+  );
+  const selectedSummary = evaluations.find(
+    (evaluation) => evaluation.id === selectedEvaluationId,
+  );
+  const runQuery = useAttainmentEvaluationRunQuery(
+    selectedRunId,
+    Boolean(selectedSummary),
+  );
+  const runMatchesSelection = Boolean(
+    runQuery.data &&
+      runQuery.data.runId === selectedRunId &&
+      runQuery.data.id === selectedEvaluationId,
+  );
+  const selectedEvaluation = runMatchesSelection
+    ? (runQuery.data ?? null)
+    : null;
+  const shouldRecoverRun =
+    runQuery.isSuccess &&
+    Boolean(selectedSummary) &&
+    !runMatchesSelection &&
+    selectedRunId !== selectedSummary?.presentedRunId;
+
+  useEffect(() => {
+    if (!shouldRecoverRun) {
+      return;
+    }
+    void message.warning(
+      '指定运行不属于当前评价对象或已不可用，已恢复该对象的展示运行',
+    );
+    onRecoverPresentedRun();
+  }, [
+    message,
+    onRecoverPresentedRun,
+    shouldRecoverRun,
+  ]);
+
+  useEffect(() => {
+    const routeSelectionChanged =
+      previousRouteSelectedEvaluationId.current !== selectedEvaluationId;
+    previousRouteSelectedEvaluationId.current = selectedEvaluationId;
+
+    if (
+      !selectedEvaluationId ||
+      filters.evaluations.some(
+        (evaluation) => evaluation.id === selectedEvaluationId,
+      )
+    ) {
+      return;
+    }
+
+    if (
+      routeSelectionChanged &&
+      evaluations.some(
+        (evaluation) => evaluation.id === selectedEvaluationId,
+      )
+    ) {
+      filters.setCourse('all');
+      filters.setKeyword('');
+      filters.setStatus('all');
+      return;
+    }
+
+    if (filters.evaluations.length === 0) {
+      filters.setCourse('all');
+      filters.setKeyword('');
+      filters.setStatus('all');
+      return;
+    }
+
+    const nextVisibleEvaluation = filters.evaluations[0];
+    if (nextVisibleEvaluation) {
+      onSelectedEvaluationChange(nextVisibleEvaluation);
+    }
+  }, [
+    evaluations,
+    filters.evaluations,
+    filters.setCourse,
+    filters.setKeyword,
+    filters.setStatus,
+    onSelectedEvaluationChange,
+    selectedEvaluationId,
+  ]);
+
+  const selectedDraft = selectedEvaluation
+    ? reviewDrafts.getDraft(selectedEvaluation.runId)
+    : { note: '' };
+  const runError =
+    runQuery.isError
+      ? '无法读取权威评价运行，请检查服务后重试。'
+      : runQuery.isSuccess && !selectedEvaluation && !shouldRecoverRun
+        ? '未找到当前评价对象的展示运行。'
+        : undefined;
+  const runLoading = runQuery.isPending || shouldRecoverRun;
 
   return (
     <>
@@ -57,52 +144,69 @@ export function AttainmentWorkbench() {
           keyword={filters.keyword}
           onCourseChange={filters.setCourse}
           onKeywordChange={filters.setKeyword}
-          onSelect={handleSelect}
+          onSelect={onSelectedEvaluationChange}
           onStatusChange={filters.setStatus}
-          selectedEvaluationId={selectedEvaluation?.id}
+          selectedEvaluationId={selectedEvaluationId}
           status={filters.status}
+          totalCount={evaluations.length}
         />
-        <EvaluationCalculationPanel
-          calculation={calculation}
-          evaluation={selectedEvaluation}
-          onInspectTrace={() => setTraceDrawerOpen(true)}
-        />
-        <EvaluationConfigurationPanel
-          calculation={calculation}
-          draft={selectedDraft}
-          evaluation={selectedEvaluation}
-          onDecisionChange={(decision) => {
-            if (selectedEvaluation) {
-              reviewDrafts.setDecision(selectedEvaluation.id, decision);
+        {selectedEvaluation ? (
+          <EvaluationCalculationPanel
+            calculation={selectedEvaluation.calculation}
+            evaluation={selectedEvaluation}
+            onInspectTrace={() => setTraceDrawerOpen(true)}
+            presentedRunId={
+              selectedSummary?.presentedRunId ??
+              selectedEvaluation.runId
             }
-          }}
-          onInspectTrace={() => setTraceDrawerOpen(true)}
-          onNoteChange={(note) => {
-            if (selectedEvaluation) {
-              reviewDrafts.setNote(selectedEvaluation.id, note);
-            }
-          }}
-          onSubmit={() => {
-            if (!selectedEvaluation || !selectedDraft.decision) {
-              return;
-            }
-            recordWorkflowEvent({
-              action: '提交达成度复核',
-              actor: '当前用户',
-              module: 'M6',
-              objectId: selectedEvaluation.id,
-              status:
-                selectedDraft.decision === 'recalculate'
-                  ? 'pending'
-                  : 'success',
-              summary: `${selectedEvaluation.objectiveCode} ${selectedEvaluation.objectiveName}：${selectedDraft.decision}`,
-            });
-            void message.success('复核结果已保存，并写入治理中心审计轨迹');
-          }}
-        />
+          />
+        ) : (
+          <EvaluationRunStateCard
+            className="evaluation-calculation-panel"
+            error={runError}
+            loading={runLoading}
+            onRetry={() => {
+              void runQuery.refetch();
+            }}
+            title="计算过程与结果"
+          />
+        )}
+        {selectedEvaluation ? (
+          <EvaluationConfigurationPanel
+            calculation={selectedEvaluation.calculation}
+            draft={selectedDraft}
+            evaluation={selectedEvaluation}
+            onDecisionChange={(decision) => {
+              reviewDrafts.setDecision(
+                selectedEvaluation.runId,
+                decision,
+              );
+            }}
+            onInspectTrace={() => setTraceDrawerOpen(true)}
+            onNavigateToAbilityGraph={onNavigateToAbilityGraph}
+            onNoteChange={(note) => {
+              reviewDrafts.setNote(selectedEvaluation.runId, note);
+            }}
+            onSubmit={() => {
+              void message.info(
+                '复核草稿已保存在本机；正式提交将在审批用例接入后开放',
+              );
+            }}
+          />
+        ) : (
+          <EvaluationRunStateCard
+            className="evaluation-configuration-panel"
+            error={runError}
+            loading={runLoading}
+            onRetry={() => {
+              void runQuery.refetch();
+            }}
+            title="输入快照与复核"
+          />
+        )}
       </section>
       <CalculationTraceDrawer
-        calculation={calculation}
+        calculation={selectedEvaluation?.calculation ?? null}
         evaluation={selectedEvaluation}
         onClose={() => setTraceDrawerOpen(false)}
         open={traceDrawerOpen}

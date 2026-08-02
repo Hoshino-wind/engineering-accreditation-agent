@@ -1,6 +1,6 @@
 import {
   ArrowRightOutlined,
-  InfoCircleOutlined,
+  ExclamationOutlined,
 } from '@ant-design/icons';
 import {
   Alert,
@@ -14,6 +14,7 @@ import {
 import { useNavigate } from 'react-router';
 
 import {
+  getNextGraphPipelineStage,
   getPrimaryGraphPipelineStage,
   GraphPipeline,
 } from '../../../widgets/graph-pipeline';
@@ -29,6 +30,7 @@ const { Paragraph, Title } = Typography;
 export function OverviewPage() {
   const navigate = useNavigate();
   const primaryStage = getPrimaryGraphPipelineStage();
+  const nextStage = getNextGraphPipelineStage(primaryStage);
 
   return (
     <div className="overview-page">
@@ -54,14 +56,39 @@ export function OverviewPage() {
 
       <Alert
         className="overview-notice"
-        description={
-          primaryStage
-            ? `${primaryStage.description}。完成后系统会按“正式图谱—能力诊断—达成度评价—教学改进”继续给出下一步。`
-            : '当前主流程没有待处理阻断，可以进入正式图谱核对已发布事实。'
-        }
-        icon={<InfoCircleOutlined />}
+        icon={<ExclamationOutlined />}
         showIcon
-        title={`当前下一步：${primaryStage?.title ?? '核对正式图谱'}`}
+        title={
+          <div className="overview-notice-flow">
+            <div className="overview-notice-segment">
+              <span className="overview-notice-label">当前步骤</span>
+              <Space align="center" size={8}>
+                <strong>{primaryStage?.title ?? '核对正式图谱'}</strong>
+                <Tag color="orange">阻断中</Tag>
+              </Space>
+              <span className="overview-notice-detail">
+                {primaryStage?.description ?? '当前主流程没有待处理阻断'}
+              </span>
+            </div>
+            <ArrowRightOutlined
+              aria-hidden
+              className="overview-notice-connector"
+            />
+            <div className="overview-notice-segment">
+              <span className="overview-notice-label">下一步</span>
+              <strong>{nextStage?.title ?? '正式图谱'}</strong>
+              <span className="overview-notice-detail">
+                完成当前审核后，将继续进入正式能力图谱构建阶段。
+              </span>
+            </div>
+            <Button
+              onClick={() => navigate(primaryStage?.route ?? '/graph')}
+            >
+              进入{primaryStage?.title ?? '正式图谱'}
+              <ArrowRightOutlined aria-hidden />
+            </Button>
+          </div>
+        }
         type="warning"
       />
 

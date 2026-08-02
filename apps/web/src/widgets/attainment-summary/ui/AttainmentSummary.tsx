@@ -1,12 +1,64 @@
+import {
+  AppstoreOutlined,
+  BlockOutlined,
+  CheckCircleOutlined,
+  FlagOutlined,
+} from '@ant-design/icons';
 import { Card, Col, Row, Space, Statistic, Typography } from 'antd';
 
-import { prototypeOnlyAttainmentSummary } from '../model/prototypeOnlyAttainmentSummary';
+import type { AttainmentEvaluationSummary } from '../../../entities/attainment-evaluation';
+import { buildAttainmentSummary } from '../model/buildAttainmentSummary';
 
+interface AttainmentSummaryProps {
+  evaluations: AttainmentEvaluationSummary[];
+}
 
-export function AttainmentSummary() {
+export function AttainmentSummary({
+  evaluations,
+}: AttainmentSummaryProps) {
+  const summary = buildAttainmentSummary(evaluations);
+  const items = [
+    {
+      detail: '当前评价对象总数',
+      icon: AppstoreOutlined,
+      key: 'evaluations',
+      label: '评价对象',
+      suffix: '项',
+      tone: 'green',
+      value: summary.totalCount,
+    },
+    {
+      detail: '可参与计算的对象数量',
+      icon: CheckCircleOutlined,
+      key: 'ready',
+      label: '输入就绪',
+      suffix: '项',
+      tone: 'blue',
+      value: summary.readyCount,
+    },
+    {
+      detail: '存在阻断问题的对象数量',
+      icon: BlockOutlined,
+      key: 'blocked',
+      label: '阻断问题',
+      suffix: '项',
+      tone: 'red',
+      value: summary.blockedCount,
+    },
+    {
+      detail: '已达成目标 / 就绪目标',
+      icon: FlagOutlined,
+      key: 'achieved',
+      label: '已达标目标',
+      suffix: `/ ${summary.readyCount}`,
+      tone: 'green',
+      value: summary.achievedCount,
+    },
+  ] as const;
+
   return (
     <Row className="attainment-summary" gutter={16}>
-      {prototypeOnlyAttainmentSummary.map((item) => (
+      {items.map((item) => (
         <Col key={item.key} span={6}>
           <Card size="small">
             <Space align="start" size={12}>

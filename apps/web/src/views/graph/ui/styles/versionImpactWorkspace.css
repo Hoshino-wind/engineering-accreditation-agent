@@ -90,11 +90,11 @@
 }
 
 .graph-change-review--done {
-  color: #218466;
+  color: var(--app-success-text);
 }
 
 .graph-change-review--pending {
-  color: #c97810;
+  color: var(--app-warning-text-secondary);
 }
 
 .graph-change-detail > .ant-card-body,

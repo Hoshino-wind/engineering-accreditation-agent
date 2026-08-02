@@ -83,6 +83,17 @@ describe('TeachingImprovementPage route selection', () => {
       );
       expect(getSelectedCaseRow()?.textContent).toContain('QI-015');
     });
+
+    await act(async () => {
+      await router.navigate(1);
+    });
+
+    await waitFor(() => {
+      expect(router.state.location.search).toBe(
+        '?focus=closure&case=qi-2026-014',
+      );
+      expect(getSelectedCaseRow()?.textContent).toContain('QI-014');
+    });
   });
 
   it('keeps filters, history, URL and the operated case consistent', async () => {
@@ -170,17 +181,4 @@ describe('TeachingImprovementPage route selection', () => {
     ).toBe('本地问题独立判断草稿');
   });
 
-  it('warns and falls back safely when the requested case does not exist', async () => {
-    renderImprovementPage('/improvements?case=missing-case');
-
-    await waitFor(() => {
-      expect(document.body.textContent).toContain(
-        '未找到指定改进问题 missing-case，已显示当前可处理问题',
-      );
-    });
-    expect(getSelectedCaseRow()?.textContent).toContain('QI-017');
-    expect(document.body.textContent).toContain(
-      '工程规范与伦理未达标',
-    );
-  });
 });

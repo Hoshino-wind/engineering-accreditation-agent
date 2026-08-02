@@ -15,7 +15,7 @@ export interface SupportValidationCheck {
   id: SupportValidationCheckId;
   label: string;
   ownerModule?: 'M2' | 'M3' | 'M5' | 'M6' | 'M7';
-  ownerObjectId?: string;
+  sourceObjectId?: string;
   status: 'pass' | 'blocked';
 }
 
@@ -31,6 +31,8 @@ export interface SupportPackageValidation {
 export function validateSupportPackage(
   supportPackage: SupportPackage,
 ): SupportPackageValidation {
+  const hasCompleteContentHash =
+    /^sha256:[0-9a-f]{64}$/.test(supportPackage.contentHash);
   const graphSnapshot = supportPackage.sourceSnapshots.find(
     (source) => source.module === 'M2',
   );
@@ -98,10 +100,12 @@ export function validateSupportPackage(
       status: supportPackage.sensitiveContentCheck,
     },
     {
-      detail: supportPackage.contentHash || '尚未生成内容哈希',
+      detail: hasCompleteContentHash
+        ? supportPackage.contentHash
+        : '尚未生成可校验的完整 SHA-256 内容哈希',
       id: 'content-hash',
-      label: '内容哈希已生成',
-      status: supportPackage.contentHash ? 'pass' : 'blocked',
+      label: '完整内容哈希已生成',
+      status: hasCompleteContentHash ? 'pass' : 'blocked',
     },
     {
       detail:
@@ -114,6 +118,7 @@ export function validateSupportPackage(
           ? '评价运行已经批准'
           : '评价运行尚未批准',
       ownerModule: 'M6',
+      sourceObjectId: evaluationSnapshot?.objectId,
       status:
         evaluationSnapshot?.state === 'formal' ? 'pass' : 'blocked',
     },
@@ -128,7 +133,7 @@ export function validateSupportPackage(
           ? '改进问题已经闭环'
           : '改进问题尚未关闭',
       ownerModule: 'M7',
-      ownerObjectId: improvementSnapshot?.objectId,
+      sourceObjectId: improvementSnapshot?.objectId,
       status:
         improvementSnapshot?.state === 'confirmed'
           ? 'pass'

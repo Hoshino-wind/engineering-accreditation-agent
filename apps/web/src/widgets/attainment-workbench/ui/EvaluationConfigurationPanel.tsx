@@ -20,6 +20,7 @@ import {
   EvaluationReviewControls,
   type EvaluationReviewDraft,
 } from '../../../features/review-attainment-result';
+import { AttainmentInputResolutionAction } from './AttainmentInputResolutionAction';
 
 interface EvaluationConfigurationPanelProps {
   calculation: AttainmentCalculation | null;
@@ -27,6 +28,7 @@ interface EvaluationConfigurationPanelProps {
   evaluation: AttainmentEvaluationItem | null;
   onDecisionChange: (decision: EvaluationReviewDecision) => void;
   onInspectTrace: () => void;
+  onNavigateToAbilityGraph: () => void;
   onNoteChange: (note: string) => void;
   onSubmit: () => void;
 }
@@ -37,6 +39,7 @@ export function EvaluationConfigurationPanel({
   evaluation,
   onDecisionChange,
   onInspectTrace,
+  onNavigateToAbilityGraph,
   onNoteChange,
   onSubmit,
 }: EvaluationConfigurationPanelProps) {
@@ -45,7 +48,7 @@ export function EvaluationConfigurationPanel({
       <Card
         className="evaluation-configuration-panel"
         size="small"
-        title="评价配置与确认"
+        title="输入快照与复核"
       >
         <Empty
           description="请选择一项评价对象"
@@ -59,7 +62,7 @@ export function EvaluationConfigurationPanel({
     <Card
       className="evaluation-configuration-panel"
       size="small"
-      title="评价配置与确认"
+      title="输入快照与复核"
     >
       <section className="evaluation-source-version">
         <Typography.Text strong>来源与版本</Typography.Text>
@@ -67,6 +70,20 @@ export function EvaluationConfigurationPanel({
           bordered
           column={1}
           items={[
+            {
+              key: 'run',
+              label: '评价运行',
+              children: evaluation.runId,
+            },
+            ...(evaluation.sourceRunId
+              ? [
+                  {
+                    key: 'source-run',
+                    label: '来源运行',
+                    children: evaluation.sourceRunId,
+                  },
+                ]
+              : []),
             {
               key: 'graph',
               label: '图谱版本',
@@ -111,6 +128,16 @@ export function EvaluationConfigurationPanel({
             </div>
           ))}
         </div>
+        {!calculation.ready ? (
+          <AttainmentInputResolutionAction
+            block
+            evaluation={evaluation}
+            key={evaluation.runId}
+            onNavigateToAbilityGraph={onNavigateToAbilityGraph}
+            size="small"
+            type="default"
+          />
+        ) : null}
         <Button
           block
           icon={<EyeOutlined />}

@@ -96,6 +96,13 @@ export function ImprovementWorkbench({
       return;
     }
 
+    if (filters.cases.length === 0) {
+      filters.setKeyword('');
+      filters.setSource('all');
+      filters.setStatus('all');
+      return;
+    }
+
     const nextVisibleCase = filters.cases[0];
     if (nextVisibleCase) {
       onSelectedCaseIdChange(nextVisibleCase.id);

@@ -16,7 +16,7 @@ infra/
 openapi/     # 固定版本的服务端契约
 ```
 
-当前公开垂直切片包括系统状态、本地教学材料和 M2 能力图谱：
+当前公开垂直切片包括系统状态、本地教学材料、M2 能力图谱，以及 M6 评价权威读取与就绪快照试点重算：
 
 - `GET /api/v1/system/status`
 - `POST /api/v1/materials`
@@ -28,8 +28,17 @@ openapi/     # 固定版本的服务端契约
 - `POST /api/v1/teaching-graph/workspace/publish`
 - `POST /api/v1/teaching-graph/workspace/revisions`
 - `GET /api/v1/teaching-graph/audit-events`
+- `GET /api/v1/evaluations/objects`
+- `POST /api/v1/evaluations/runs`
+- `GET /api/v1/evaluations/runs/{run_id}`
+- `GET /api/v1/evaluations/runs/{run_id}/reference`
+- `GET /api/v1/evaluations/runs/{run_id}/preflight`
+- `POST /api/v1/evaluations/score-import-batches`
+- `GET /api/v1/evaluations/score-import-batches/{batch_id}`
 
-M2、M3 均通过生成契约和 TanStack Query 访问本地 API。图谱工作区保存在 `.local-data/teaching-graph.sqlite3`，材料元数据保存在 `.local-data/materials.sqlite3`，材料原件保存在 `.local-data/objects`。M2 首次连接时使用显式命名的 `prototypeOnly` 图谱初始化服务端工作区，此后草稿、快照和审计均以服务端为准。其他模块的试点数据仍来自显式命名的 `prototypeOnly` 文件，用户操作草稿保存在浏览器。
+M2、M3、M6 均通过生成契约和 TanStack Query 访问本地 API。图谱工作区保存在 `.local-data/teaching-graph.sqlite3`，材料元数据保存在 `.local-data/materials.sqlite3`，材料原件保存在 `.local-data/objects`，M6 对象队列、运行详情、不可变计算快照、运行引用、来源血缘、试点汇总评分批次和幂等命令保存在 `.local-data/evaluation-read-model.sqlite3`。M2 首次连接时使用显式命名的 `prototypeOnly` 图谱初始化服务端工作区，此后草稿、快照和审计均以服务端为准。M6 的评价对象、运行输入/快照/证据和已固定的 `Decimal` 计算结果以服务端契约为准；输入预检按精确运行只读派生，固定使用 `scope=pilot_snapshot` 和 `reportVersion=evaluation-preflight:v1`，不会写入该 SQLite 仓储。桌面端就绪运行可基于既有快照创建同步试点重算，且不更新队列 `presentedRunId`；阻断运行的主操作为“处理输入问题”。
+
+试点汇总评分批次由 `EA_ENABLE_PILOT_SCORE_BATCH_CAPTURE=true` 显式开启，并且只允许 development/test；staging/production 强制拒绝。它只接收评分项级汇总已得分、汇总可得分和观察样本数，不接收文件、姓名、学号或逐人成绩。响应固定 `formalUsable=false`，创建批次不会修改旧运行、队列焦点或预检，也不会自动创建新运行。前端复核决定仍只是浏览器本地草稿；正式评分文件血缘、学生明细、字段映射、操作者、OIDC/RBAC、审计、策略和正式运行/审批写流程尚未接通。其他未接入 API 的模块数据仍来自显式命名的 `prototypeOnly` 文件，用户操作草稿保存在浏览器。
 
 管理端以 1920×1080 PC 屏幕为主要设计和验收基准，不实现移动端导航或移动端页面重排。1440 像素宽的桌面窗口保留基础可用布局。
 
@@ -49,6 +58,14 @@ make generate-contracts
 ```
 
 根据 `.env.example` 创建本地 `.env`。不要把真实学生数据、学校密钥或模型凭据写入仓库。
+
+如需验证 M6 的合成汇总批次，显式设置：
+
+```bash
+EA_ENABLE_PILOT_SCORE_BATCH_CAPTURE=true
+```
+
+该开关只用于无个人明细的本地合成数据，不授权真实成绩处理。
 
 不配置外部基础设施也可以运行 M3。普通文本和带文本层文档使用本地解析；图片和扫描 PDF 需要配置：
 
@@ -141,7 +158,7 @@ infrastructure → application/domain ports
 - 个人信息检测、脱敏和向量化流水线。
 - ClamAV 病毒库安装与自动更新（代码会在本机可用时调用）。
 - DeepSeek-OCR 服务部署和真实模型密钥（仅提供适配器与配置）。
-- 评价策略、确定性计算和评价快照。
+- 正式评价策略管理，以及正式输入快照、评价运行与审批写流程。
 - OIDC 接入后的正式关系角色授权与组织数据范围。
 - M2 PostgreSQL 关系化投影、数据库级业务约束和 Alembic 迁移。
 - M5—M8 对 M2 影响待办的真实跨模块消费。

@@ -51,7 +51,7 @@
 }
 
 .graph-alignment-object--primary {
-  border-color: #9dc5ed;
+  border-color: var(--app-primary-border);
   background: var(--app-primary-surface);
 }
 
@@ -75,8 +75,8 @@
   justify-content: center;
   gap: 8px;
   padding: 12px;
-  border: 1px dashed #e6a9a9;
+  border: 1px dashed color-mix(in srgb, var(--app-error) 50%, var(--app-border));
   border-radius: var(--app-radius-medium);
   color: var(--app-text);
-  background: #fff7f7;
+  background: var(--app-error-soft);
 }

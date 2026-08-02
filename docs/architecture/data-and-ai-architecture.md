@@ -54,7 +54,7 @@
 - 评价结构：`AssessmentTask`、`RubricCriterion`；
 - 资源支撑：`TeachingResource`，其权威内容与版本归 M3，M2 固定版本引用。
 
-可观察行为、能力领域、认知层级、难度和资源类型是节点属性。专业、培养方案、评价周期和教学班是范围上下文；材料版本和证据片段是来源引用；识别候选、诊断发现、评价结果、改进问题/措施和支撑包是应用记录。后三类都不是主图节点。
+可观察行为、能力领域、认知层级、难度和资源类型是节点属性。专业、培养方案、评价周期和教学班是范围上下文；材料版本和证据片段是来源引用；识别候选、诊断发现、`EvaluationObject`、评价运行与结果、改进问题/措施和支撑包是应用记录。后三类都不是主图节点。
 
 ### 2.3 教学资源与证据
 
@@ -71,7 +71,7 @@
 
 原始文件存入 S3 兼容对象存储；PostgreSQL 只保存业务元数据、对象键、哈希、来源坐标和权限信息。
 
-本地开发阶段使用等价端口的轻量适配器：SQLite 保存材料元数据和 M2 图谱工作区，本地内容寻址目录保存原件，FastAPI 后台任务执行扫描和解析。M2 图谱草稿使用聚合状态存储，正式快照与审计事件追加写入，并用修订号防止并发覆盖。领域与应用层不依赖这些实现，试点部署可替换为 PostgreSQL、S3/MinIO 和 Celery，而不改变公开契约。
+本地开发阶段使用等价端口的轻量适配器：SQLite 保存材料元数据、M2 图谱工作区和 M6 评价试点仓储，本地内容寻址目录保存原件，FastAPI 后台任务执行扫描和解析。M2 图谱草稿使用聚合状态存储，正式快照与审计事件追加写入，并用修订号防止并发覆盖；M6 为评价对象、运行详情和不可变计算快照保存版本化 payload 与内部 SHA-256 完整性哈希，并允许从既有就绪快照同步追加重算运行。运行、计算、引用、`sourceRunId` 血缘与幂等命令在同一事务内持久化，`presentedRunId` 保持不变。输入预检不创建新的持久化对象，只在读取时从不可变运行快照派生。这仍不是包含评分导入、策略、审批、权限和审计的正式运行写模型。领域与应用层不依赖这些实现，试点部署可替换为 PostgreSQL、S3/MinIO 和 Celery，而不改变公开契约。
 
 ### 2.4 智能识别与人工审核
 
@@ -104,9 +104,14 @@
 - `EvaluationPolicyVersion`：公式、权重、阈值和缺失处理策略。
 - `EvaluationInputSnapshot`：图谱版本、关系集合、数据范围和输入哈希。
 - `DataValidationReport`：样本、缺失、异常和映射校验结果。
+- `EvaluationObject`：M6 拥有的稳定评价目标；一个对象可以对应多个历史运行。
 - `EvaluationRun`：一次不可变评价执行。
 - `EvaluationResult`：各层级结果、中间值和结论。
 - `EvaluationApproval`：复核和批准记录。
+
+当前 M6 契约把对象队列和运行详情分开：`GET /api/v1/evaluations/objects` 在对象摘要上显式给出 `presentedRunId`，`GET /api/v1/evaluations/runs/{run_id}` 按不可变运行 ID 返回输入快照与计算明细。`GET /api/v1/evaluations/runs/{run_id}/preflight` 纯派生该运行的来源检查、计算派生阻断和缺失输入，固定输出 `scope=pilot_snapshot`、`reportVersion=evaluation-preflight:v1`，并为同一规范化报告生成确定性 `reportHash`。`POST /api/v1/evaluations/runs` 只以 `evaluationObjectId`、精确 `sourceRunId` 和 `Idempotency-Key` 表达创建意图，由服务端生成运行身份、时间、当前程序版本、完整试点输入摘要和确定性计算快照。`presentedRunId` 只决定队列默认展示的运行；创建新运行不改变该指针，也不删除、合并或重新绑定其他历史运行。
+
+预检检查的责任和动作采用稳定枚举：`score_input / prepare_score_data`、`ability_graph / repair_graph_relation`、`evaluation_policy / review_evaluation_policy`、`evaluation_owner / inspect_input_snapshot`，通过项使用 `action=none`。这些值支持当前规则下的修复导航，但不代表已经创建责任分派、审批或审计记录；即使用户从 `prepare_score_data` 创建了本地试点汇总批次，原预检和原运行仍不改变。`repair_graph_relation` 也没有携带正式图谱目标身份，不能据此猜测具体节点或关系。
 
 ### 2.7 教学优化与持续改进
 
@@ -202,9 +207,9 @@ RubricCriterion CONTRIBUTES_TO CourseOutcome
 | --- | --- | --- |
 | M2 | 图谱 Schema、语义节点版本、关系版本、发布快照和审核决定 | 图谱修订生命周期；单项审核决定；节点/关系效力 |
 | M3 | 教学资源/材料稳定身份与版本、处理产物和证据片段 | 材料处理状态；教学资源生命周期；当前有效版本 |
-| M6 | 计分配置、权重、阈值、评分输入、评价策略、运行和结果 | 输入就绪度；运行状态；达成结论；审批状态 |
+| M6 | 评价对象、计分配置、权重、阈值、评分输入、评价策略、运行和结果 | 输入就绪度；运行状态；达成结论；审批状态 |
 
-M2 通过 `teaching_resource_version_id` 引用 M3，通过 `graph_node_version_id` 和 `graph_edge_version_id` 向 M6 提供正式结构。M3 不发布能力关系；M6 不修改图谱，也不把 `blocked`、`failed`、`not_achieved` 和 `rejected` 压缩为同一状态枚举。
+M2 通过 `teaching_resource_version_id` 引用 M3，通过 `graph_node_version_id` 和 `graph_edge_version_id` 向 M6 提供正式结构。M3 不发布能力关系；M6 不修改图谱，也不把 `blocked`、`failed`、`not_achieved` 和 `rejected` 压缩为同一状态枚举。`blocked` 只属于输入就绪度；被阻断的运行读模型必须使 `result=null`，因而不产生 `outcome`。
 
 ### 3.5 存储选择
 
@@ -253,6 +258,16 @@ pgvector 只保存经过授权的脱敏片段向量，用于相似内容召回�
 不同专业可使用不同的版本化策略，例如加权平均法、阈值达标人数比例、直接与间接评价组合、多课程加权聚合。策略发布后不可原地修改。
 
 大模型不得参与正式数值计算、补全缺失成绩或覆盖确定性规则结果。
+
+当前试点仓储的加权贡献、权重闭合容差、三位小数四舍五入和阈值比较已在后端纯领域规则中使用 `Decimal` 执行，前端只映射并展示 OpenAPI 结果，不作为评价算法的执行边界。
+
+`evaluation-preflight:v1` 在请求时读取不可变运行快照，保留快照中的来源就绪检查，并从缺失得分率、权重总和及计算阻断补充结构化检查和 `missingInputs`。其 `reportHash` 是当前规则版本下派生报告的确定性指纹，不持久化为审计快照，也不替代评分原件、学生明细、文件字段映射或输入快照的内容验签。
+
+试点 seed 中展示为 `sha256:xxxx…xxxx` 的输入/证据哈希是截断界面值，不是可用于业务内容重新校验的完整哈希。新建试点运行会对当前可用的来源 payload 生成完整输入摘要；SQLite 仓储另行保存的 payload SHA-256 只用于内部持久化完整性检查，这些字段用途不同，不得混用或充当正式原始证据验签。
+
+当前第一条评分数据写边界是默认关闭的 `local_pilot_aggregate` 汇总批次捕获。它按 `profile=local-pilot-aggregate:v1` 把精确对象、精确基准运行、候选输入集合、汇总已得分/可得分、观察样本数、内容哈希、稳定校验事实和幂等意图追加为不可变 `ScoreImportBatch`；完整性、唯一性与范围由校验报告判定，`validationStatus` 为 `blocked | pilot_ready`，整批通过后才生成规范 `ScoreRecord`，且固定 `formalUsable=false`。首次创建和同键同请求回放都返回 `201`，通过 `idempotentReplay` 区分。该批次不携带文件、个人记录、正式范围或操作者，不会被现有评价运行自动消费，也不改变历史预检。
+
+正式数据写边界仍必须补齐工作空间、评价周期、课程/教学班范围、来源文件与内容哈希、字段映射、身份、RBAC、审批和审计，再由独立用例创建引用批次的新 `EvaluationInputSnapshot`。当前预检接口不得接收临时汇总分数，试点批次也不能被描述为已实现正式评分导入、学生级明细权限或不可变业务审计。
 
 ### 4.3 可复现要求
 
@@ -321,7 +336,7 @@ workspace_id / evaluation_cycle_id
   → recognition_run_id / candidate_review_decision_id
   → graph_schema_version_id / graph_node_version_id / graph_edge_version_id / graph_version_snapshot_id
   → graph_analysis_run_id / diagnostic_finding_id
-  → evaluation_policy_version_id / evaluation_input_snapshot_id / evaluation_run_id
+  → evaluation_object_id / evaluation_policy_version_id / evaluation_input_snapshot_id / evaluation_run_id
   → quality_issue_id / improvement_action_id
   → changed_object_version_id / updated_graph_version_id
   → reevaluation_id

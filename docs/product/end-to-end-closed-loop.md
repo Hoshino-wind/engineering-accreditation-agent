@@ -11,7 +11,7 @@
 
 > 一项能力结论可以分别追溯到认证要求、能力/技能/知识结构、课程目标与实验、教学资源、评分项和原始证据；一项教学改进可以追溯到问题、措施、实际变更、图谱或评价策略更新和复评结果。
 
-主图只表达稳定教学语义和结构。材料与证据、识别候选、诊断、评价运行、改进记录和支撑包属于各模块业务记录，通过稳定 ID 引用图谱，不进入主图。唯一节点与关系定义见 [ADR-001](../architecture/decisions/001-experimental-teaching-ontology.md)。
+主图只表达稳定教学语义和结构。材料与证据、识别候选、诊断、M6 的 `EvaluationObject` 与评价运行、改进记录和支撑包属于各模块业务记录，通过稳定 ID 引用图谱，不进入主图。唯一节点与关系定义见 [ADR-001](../architecture/decisions/001-experimental-teaching-ontology.md)。
 
 ## 2. 图谱构建闭环
 
@@ -87,6 +87,7 @@ flowchart LR
 | 教学变更 → M3/M2/M6 | 资源与材料回 M3，教学语义与关系回 M2，计分配置与策略回 M6；不得跨模块代写 |
 | 新图谱/策略 → M6 | 影响关系已重新确认，`ASSESSES` 与 `CONTRIBUTES_TO` 可用，评价输入校验通过 |
 | 复评 → 关闭 | 实际结果与目标完成比较，关闭决定获批准 |
+| M8 阻断 → M6 | 运行权威引用与当前对象队列一致，深链同时携带 `evaluation_object_id` 和 `evaluation_run_id`；不可用时回退到模块页而不猜测归属 |
 
 ## 4. 独立状态轴
 
@@ -101,7 +102,7 @@ flowchart LR
 | M6 | 输入就绪度；评价运行状态；达成结论；审批状态 |
 | M7 | 问题状态；措施执行状态；复评状态；有效性结论 |
 
-例如“输入阻断”“运行失败”“未达成”“审批驳回”是四种不同事实，不能都成为一次评价运行的互斥状态。
+例如“输入阻断”“运行失败”“未达成”“审批驳回”是四种不同事实，不能都成为一次评价运行的互斥状态。输入阻断时 M6 的 `result` 和达成 `outcome` 均为空，不能将阻断解释为“未达成”。
 
 ## 5. 核心追溯链
 
@@ -112,14 +113,20 @@ workspace_id / evaluation_cycle_id
   → recognition_run_id / candidate_review_decision_id
   → graph_schema_version_id / graph_node_version_id / graph_edge_version_id / graph_version_snapshot_id
   → graph_analysis_run_id / diagnostic_finding_id
-  → evaluation_policy_version_id / evaluation_input_snapshot_id / evaluation_run_id
+  → evaluation_object_id / evaluation_policy_version_id / evaluation_input_snapshot_id / evaluation_run_id
   → quality_issue_id / improvement_action_id
   → changed_object_version_id / updated_graph_version_id
   → reevaluation_id
   → support_package_id
 ```
 
-所有正式版本和运行快照不原地覆盖。
+`evaluation_object_id` 标识跨运行稳定的评价目标；一个评价对象可以关联多个历史 `evaluation_run_id`，每次运行固定当次策略版本和输入快照。对象队列上的 `presented_run_id` 只是当前默认展示运行，不可用于删除、覆盖或重新绑定历史运行。所有正式版本和运行快照不原地覆盖。
+
+当前试点中，`evaluation-ct6` 的队列展示运行是 `eval-2026-071`（`2026-05-12` 基线 `0.68`），同一对象还保留 `2026-07-20` 的复评运行 `eval-2026-072`（`0.73`）。`presented_run_id` 是当前认证阻断工作流的显式队列焦点，不代表按时间推断的最新运行。M7 问题 `QI-2026-017` 必须用 `071` 作为基线、`072` 作为复评，不得用同一运行同时表示两个时点。M8 对当前基线阻断的精确导航为：
+
+```text
+/evaluations?evaluation=evaluation-ct6&run=eval-2026-071
+```
 
 ## 6. 关键回退路径
 

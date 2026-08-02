@@ -76,7 +76,7 @@ export function SupportValidationPanel({
               {check.status === 'blocked' && check.ownerModule ? (
                 <SupportBlockerLink
                   module={check.ownerModule}
-                  objectId={check.ownerObjectId}
+                  sourceObjectId={check.sourceObjectId}
                 />
               ) : (
                 <Typography.Text type="secondary">

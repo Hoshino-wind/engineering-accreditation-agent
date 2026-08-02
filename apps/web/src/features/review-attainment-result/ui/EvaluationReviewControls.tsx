@@ -28,6 +28,7 @@ export function EvaluationReviewControls({
   onSubmit,
 }: EvaluationReviewControlsProps) {
   const blocked = blockers.length > 0;
+  const locked = evaluation.approvalStatus === 'approved';
 
   return (
     <section className="evaluation-review-controls">
@@ -46,10 +47,18 @@ export function EvaluationReviewControls({
           type="error"
         />
       ) : null}
+      {locked ? (
+        <Alert
+          description="已批准的运行快照不可修改；如需调整，请创建新的评价运行。"
+          showIcon
+          title="当前运行只读"
+          type="info"
+        />
+      ) : null}
 
       <Radio.Group
         block
-        disabled={blocked || evaluation.status === 'approved'}
+        disabled={blocked || locked}
         onChange={(event) =>
           onDecisionChange(event.target.value as EvaluationReviewDecision)
         }
@@ -70,7 +79,7 @@ export function EvaluationReviewControls({
 
       <Typography.Text strong>复核说明</Typography.Text>
       <TextArea
-        disabled={blocked || evaluation.status === 'approved'}
+        disabled={blocked || locked}
         maxLength={500}
         onChange={(event) => onNoteChange(event.target.value)}
         placeholder="说明复核依据、发现的问题或重算建议（非必填）"
@@ -82,14 +91,14 @@ export function EvaluationReviewControls({
         block
         disabled={
           blocked ||
-          evaluation.status === 'approved' ||
+          locked ||
           !draft.decision
         }
         onClick={onSubmit}
         size="small"
         type="primary"
       >
-        提交确认
+        保存本地草稿
       </Button>
     </section>
   );

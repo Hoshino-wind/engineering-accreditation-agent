@@ -161,9 +161,11 @@ M6 的评分项配置引用 M2 `RubricCriterion` 节点版本；它不拥有评�
 | M6 | 输入就绪度 | `unchecked → blocked / ready` |
 | M6 | 运行状态 | `draft → queued → running → succeeded / failed` |
 | M6 | 达成结论 | `achieved / partially_achieved / not_achieved / not_applicable` |
-| M6 | 审批状态 | `pending → approved / rejected → superseded` |
+| M6 | 审批状态 | `not_submitted → pending → approved / rejected` |
 
 禁止把处理进度、业务结论和审批结果压缩进一个 `status` 字段。
+
+M6 的 `blocked` 只表示输入尚不就绪；此时 `EvaluationResult` 和达成结论均不存在，读契约必须返回 `result=null`，不得将其投影为 `not_achieved`。当前试点 v1 读契约的达成结论只开放 `achieved / not_achieved`；未来引入 `partially_achieved` 或 `not_applicable` 时必须同步演进公开契约，不可仅在前端自行派生。
 
 ## 9. 来源、版本与信任属性
 

@@ -1,5 +1,5 @@
 import type {
-  AttainmentEvaluationItem,
+  AttainmentEvaluationSummary,
   EvaluationItemStatus,
 } from '../../../entities/attainment-evaluation';
 
@@ -10,7 +10,7 @@ export interface AttainmentEvaluationFilters {
 }
 
 export function filterAttainmentEvaluations(
-  evaluations: AttainmentEvaluationItem[],
+  evaluations: AttainmentEvaluationSummary[],
   filters: AttainmentEvaluationFilters,
 ) {
   const keyword = filters.keyword.trim().toLocaleLowerCase('zh-CN');

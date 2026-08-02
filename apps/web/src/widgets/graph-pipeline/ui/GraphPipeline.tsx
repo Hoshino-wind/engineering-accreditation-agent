@@ -1,8 +1,16 @@
-import { WarningOutlined } from '@ant-design/icons';
-import { Card, Progress, Space, Tag, Typography } from 'antd';
+import {
+  ApartmentOutlined,
+  BarChartOutlined,
+  FileDoneOutlined,
+  FileSearchOutlined,
+  FolderOpenOutlined,
+  RobotOutlined,
+  ToolOutlined,
+} from '@ant-design/icons';
+import { Card, Progress, Typography } from 'antd';
+import type { ReactNode } from 'react';
 
 import {
-  getPrimaryGraphPipelineStage,
   prototypeOnlyGraphPipeline,
   type GraphPipelineStageStatus,
 } from '../model/prototypeOnlyGraphPipeline';
@@ -30,30 +38,47 @@ const statusPresentation: Record<
   },
 };
 
-export function GraphPipeline() {
-  const primaryStage = getPrimaryGraphPipelineStage();
+const stageIcons: Record<string, ReactNode> = {
+  diagnosis: <FileSearchOutlined />,
+  evaluation: <BarChartOutlined />,
+  graph: <ApartmentOutlined />,
+  improvement: <ToolOutlined />,
+  recognition: <RobotOutlined />,
+  resources: <FolderOpenOutlined />,
+  support: <FileDoneOutlined />,
+};
 
+export function GraphPipeline() {
   return (
     <Card
       className="graph-pipeline"
-      extra={<Tag color="blue">图谱版本 v0.3</Tag>}
       size="small"
-      title="图谱建设与应用主线"
     >
       <div className="graph-pipeline-grid">
         {prototypeOnlyGraphPipeline.map((stage, index) => {
           const presentation = statusPresentation[stage.status];
 
           return (
-            <section className="graph-pipeline-stage" key={stage.key}>
+            <section
+              className={`graph-pipeline-stage graph-pipeline-stage--${stage.status}`}
+              key={stage.key}
+            >
               <div className="graph-pipeline-stage-header">
-                <Tag>第 {index + 1} 步</Tag>
-                <Typography.Text type="secondary">
-                  {presentation.label}
-                </Typography.Text>
+                <span
+                  className="graph-pipeline-step-number"
+                  aria-label={`第 ${index + 1} 步`}
+                >
+                  {index + 1}
+                </span>
               </div>
+              <span aria-hidden className="graph-pipeline-stage-icon">
+                {stageIcons[stage.key]}
+              </span>
               <Typography.Text className="graph-pipeline-stage-title" strong>
                 {stage.title}
+              </Typography.Text>
+              <Typography.Text className="graph-pipeline-stage-status">
+                {presentation.label}
               </Typography.Text>
               <Typography.Text
                 className="graph-pipeline-stage-description"
@@ -75,13 +100,6 @@ export function GraphPipeline() {
           );
         })}
       </div>
-      <Space className="graph-pipeline-blocker" size={8}>
-        <WarningOutlined aria-hidden />
-        <Typography.Text>
-          当前下一步：{primaryStage?.title ?? '检查工作状态'}。
-          {primaryStage?.description ?? '暂无待处理事项'}
-        </Typography.Text>
-      </Space>
     </Card>
   );
 }

@@ -1,44 +1,42 @@
-import {
-  InfoCircleOutlined,
-  PlayCircleOutlined,
-} from '@ant-design/icons';
-import { useState } from 'react';
+import { InfoCircleOutlined } from '@ant-design/icons';
 import {
   Alert,
-  App,
   Button,
+  Card,
+  Empty,
+  Skeleton,
   Space,
   Tag,
-  Tooltip,
   Typography,
 } from 'antd';
+import { useNavigate } from 'react-router';
 
-import { recordWorkflowEvent } from '../../../entities/workflow-event';
+import { useAttainmentEvaluationObjectsQuery } from '../../../entities/attainment-evaluation';
 import { AttainmentSummary } from '../../../widgets/attainment-summary';
-import { AttainmentWorkbench } from '../../../widgets/attainment-workbench';
-
+import {
+  AttainmentPrimaryAction,
+  AttainmentWorkbench,
+} from '../../../widgets/attainment-workbench';
+import { useAttainmentEvaluationRouteSelection } from '../model/useAttainmentEvaluationRouteSelection';
 
 const { Paragraph, Title } = Typography;
 
 export function AttainmentEvaluationPage() {
-  const { message } = App.useApp();
-  const [running, setRunning] = useState(false);
-
-  const handleRun = () => {
-    setRunning(true);
-    window.setTimeout(() => {
-      recordWorkflowEvent({
-        action: '运行达成度评价',
-        actor: '当前用户',
-        module: 'M6',
-        objectId: 'evaluation-run-local',
-        status: 'success',
-        summary: '按版本化确定性策略完成 4 个就绪对象计算',
-      });
-      setRunning(false);
-      void message.success('评价运行完成：4 个对象已更新，2 个保持阻断');
-    }, 650);
-  };
+  const navigate = useNavigate();
+  const objectsQuery = useAttainmentEvaluationObjectsQuery();
+  const evaluations = objectsQuery.data?.items ?? [];
+  const routeSelection = useAttainmentEvaluationRouteSelection(
+    evaluations,
+    objectsQuery.isSuccess,
+  );
+  const readyCount = evaluations.filter(
+    (evaluation) => evaluation.readinessStatus === 'ready',
+  ).length;
+  const blockedCount = evaluations.length - readyCount;
+  const selectedEvaluation = evaluations.find(
+    (evaluation) =>
+      evaluation.id === routeSelection.selectedEvaluationId,
+  );
 
   return (
     <div className="attainment-evaluation-page">
@@ -47,35 +45,108 @@ export function AttainmentEvaluationPage() {
           <Space align="center" size={10}>
             <Title level={2}>达成度评价与统计</Title>
             <Tag color="geekblue">确定性计算</Tag>
-            <Tag>试点示例数据</Tag>
+            <Tag>服务端试点评价</Tag>
           </Space>
           <Paragraph type="secondary">
             固定图谱、策略、评分数据和样本范围，生成可复算的课程目标与能力达成结果。
           </Paragraph>
         </div>
-        <Tooltip title="使用当前版本化策略计算就绪对象">
-          <Button
-            icon={<PlayCircleOutlined />}
-            loading={running}
-            onClick={handleRun}
-            type="primary"
-          >
-            运行评价
-          </Button>
-        </Tooltip>
+        <AttainmentPrimaryAction
+          evaluation={selectedEvaluation}
+          onCreated={(run) => {
+            routeSelection.selectRun(run.id, run.runId);
+          }}
+          onNavigateToAbilityGraph={() => {
+            void navigate('/graph');
+          }}
+          sourceRunId={routeSelection.selectedRunId}
+        />
       </div>
 
       <Alert
         className="attainment-evaluation-notice"
-        description="本次评价共 6 个评价对象，其中 4 个输入就绪、2 个被阻断；请优先处理阻断问题。正式数值仅由版本化确定性策略计算，AI 不参与数值生成。页面业务数量均为试点示例数据。"
+        description={
+          objectsQuery.isSuccess
+            ? `当前服务端试点评价共 ${evaluations.length} 个评价对象，其中 ${readyCount} 个输入就绪、${blockedCount} 个被阻断；数值由版本化确定性规则生成，AI 不参与数值计算。`
+            : '正在读取服务端评价对象、展示运行和确定性计算结果。'
+        }
         icon={<InfoCircleOutlined />}
         showIcon
         title="当前重点：先处理缺失输入，再确认可运行范围"
         type="warning"
       />
 
-      <AttainmentSummary />
-      <AttainmentWorkbench />
+      {objectsQuery.isPending ? (
+        <Card>
+          <Skeleton active paragraph={{ rows: 12 }} />
+        </Card>
+      ) : null}
+
+      {objectsQuery.isError && !objectsQuery.data ? (
+        <Alert
+          action={
+            <Button
+              onClick={() => {
+                void objectsQuery.refetch();
+              }}
+              size="small"
+            >
+              重试
+            </Button>
+          }
+          description="无法读取评价对象权威读模型，当前页面不会回退到前端原型数据。"
+          showIcon
+          title="评价对象读取失败"
+          type="error"
+        />
+      ) : null}
+
+      {objectsQuery.isError && objectsQuery.data ? (
+        <Alert
+          action={
+            <Button
+              onClick={() => {
+                void objectsQuery.refetch();
+              }}
+              size="small"
+            >
+              重新刷新
+            </Button>
+          }
+          description="当前继续展示最近一次成功读取的数据。"
+          showIcon
+          title="评价对象刷新失败"
+          type="warning"
+        />
+      ) : null}
+
+      {objectsQuery.isSuccess && evaluations.length === 0 ? (
+        <Card>
+          <Empty description="当前周期暂无评价对象" />
+        </Card>
+      ) : null}
+
+      {evaluations.length > 0 ? (
+        <>
+          <AttainmentSummary evaluations={evaluations} />
+          <AttainmentWorkbench
+            evaluations={evaluations}
+            onRecoverPresentedRun={
+              routeSelection.recoverPresentedRun
+            }
+            onNavigateToAbilityGraph={() => {
+              void navigate('/graph');
+            }}
+            onSelectedEvaluationChange={
+              routeSelection.selectEvaluation
+            }
+            selectedEvaluationId={
+              routeSelection.selectedEvaluationId
+            }
+            selectedRunId={routeSelection.selectedRunId}
+          />
+        </>
+      ) : null}
     </div>
   );
 }

@@ -31,6 +31,7 @@
 | `EvaluationPolicyVersion` | 公式、权重、阈值和缺失处理策略 |
 | `EvaluationInputSnapshot` | 本次计算使用的版本和输入哈希 |
 | `DataValidationReport` | 样本、缺失、异常和映射校验结果 |
+| `EvaluationObject` | M6 拥有的稳定评价目标，使用不透明且不可复用的对象 ID |
 | `EvaluationRun` | 一次不可变评价执行 |
 | `EvaluationResult` | 各层级结果、中间值和结论 |
 | `EvaluationApproval` | 复核和批准记录 |
@@ -50,19 +51,22 @@
 
 ## 6. 状态与规则
 
+M6 不使用一个混合 `status` 表达全部事实，至少保持以下状态轴独立：
+
 ```text
-draft
-  → validating
-  → blocked / ready
-  → running
-  → awaiting_review
-  → approved
-  → superseded
+输入就绪度：unchecked → ready / blocked
+运行状态：draft → queued → running → succeeded / failed
+达成结论：achieved / not_achieved
+审批状态：not_submitted → pending → approved / rejected
 ```
 
 - 校验失败的运行不得进入正式计算或批准状态。
 - 策略版本发布后不可原地修改。
 - 评价运行保存输入哈希、图谱版本、策略版本和程序版本。
+- 一个 `EvaluationObject` 可以产生多个 `EvaluationRun`；每个运行只能归属一个评价对象，历史运行不得重新绑定。
+- `presentedRunId` 是评价对象队列当前显式选定的展示运行，不等同于根据编号或时间猜测的“最新运行”，也不覆盖同一对象的其他历史运行。
+- 运行和对象 ID 只做区分大小写的精确匹配，不依据课程、分数、前缀或字符串规律推断。
+- 输入阻断时不生成正式计算结果：读契约的 `result` 为 `null`，因而不存在 `outcome`；`blocked` 不是达成结论。
 - 正式运行批准后不可修改；修正输入需创建新运行。
 - 学生明细遵循更严格的数据范围和导出权限。
 - 日志不记录不必要的个人成绩明细。
@@ -129,12 +133,46 @@ draft
 
 ## 11. 当前实现边界
 
-当前 PC 原型已实现：
+当前 1920×1080 PC 工作台已把“评价对象队列 + 运行详情 + 确定性计算结果”收口为 M6 服务端权威读取，并接通输入预检、就绪快照试点重算和默认关闭的试点汇总评分批次捕获：
 
-- 6 个显式标记的试点评价对象及组合筛选；
-- 4 个就绪对象、2 个阻断对象的输入状态；
-- 一套可人工复算的加权达成度计算与单元测试；
-- 图谱、策略、程序、评分快照和输入哈希追溯；
-- 完整计算明细抽屉，以及结果确认/申请重算的本地草稿。
+- `GET /api/v1/evaluations/objects` 返回稳定排序的评价对象摘要，每个对象显式给出 `presentedRunId`、`readinessStatus`、`approvalStatus` 和可空 `result`。
+- `GET /api/v1/evaluations/runs/{run_id}` 返回精确运行及其对象身份、版本快照、输入、就绪检查、证据和计算明细。
+- `GET /api/v1/evaluations/runs/{run_id}/reference` 保留为跨模块的运行→对象权威引用查询，不依赖课程名、分数或 ID 规律猜测归属。
+- `GET /api/v1/evaluations/runs/{run_id}/preflight` 从该不可变运行快照只读派生结构化预检报告；响应固定标记 `scope=pilot_snapshot` 与 `reportVersion=evaluation-preflight:v1`，保留来源就绪检查，并补充由缺失得分率、权重闭合和计算阻断推导的检查、`missingInputs`、检查计数及确定性 `reportHash`。
+- `POST /api/v1/evaluations/runs` 只接受 `evaluationObjectId` 与精确 `sourceRunId`，并要求 `Idempotency-Key`；它基于既有、不可变且已就绪的来源快照同步创建一条试点重算运行，不是任意输入的正式运行创建接口。
+- `POST /api/v1/evaluations/score-import-batches` 只在 `EA_ENABLE_PILOT_SCORE_BATCH_CAPTURE=true` 且环境为 development/test 时接受固定结构的评分项候选汇总数据；它要求精确对象、精确基准运行和 `Idempotency-Key`，由校验报告判定输入集合是否完整、唯一且落在基准范围内，不接受文件、学生标识、个人成绩行、权重、策略或审批字段。阻断批次仍以 `201` 不可变保存，但不生成规范记录。
+- `GET /api/v1/evaluations/score-import-batches/{batch_id}` 在相同功能开关与环境门禁下，按不透明批次 ID 读取已追加的不可变试点批次和校验报告；接口不提供列表、修改、删除或重新校验命令。
+- 试点数据已包含一个评价对象对应多个运行的情形；对象列表只出现一次，历史运行通过运行 ID 精确读取。
+- 加权贡献、权重闭合、三位小数四舍五入、阈值比较和阻断规则由后端领域层使用 `Decimal` 明确定义；试点运行把当时程序版本生成的结果固化为计算快照，读取时不以当前代码重算。前端只展示服务端快照，不再承担正式算法。
+- 当 `readinessStatus=blocked` 时，服务端返回阻断原因与中间输入，但 `result=null`；前端不把阻断映射成“未达成”或其他达成结论。
+- 列表、详情和跨模块引用均通过 OpenAPI 生成客户端与 TanStack Query 读取；加载或服务异常时保留已请求的对象/运行地址，不在尚未获得权威列表时擅自回退。
 
-当前仍为原型数据。“运行评价”、复核提交、跨刷新草稿和 M9 审计轨迹已提供本地闭环；评分导入、服务端策略持久化、正式评价运行与审批、学生明细权限、导出和自动创建 M7 问题仍待后端接入。
+预检检查使用稳定的 `owner` / `action` 语义，而不要求前端解析中文阻断文案：评分输入、能力图谱、评价策略和评价负责人分别对应自身的处理责任；通过项的 `action=none`。这些动作只提供当前试点规则下的修复导航，其中能力图谱阻断只能进入 M2 图谱工作区，尚不能定位到正式图谱中的具体目标对象。
+
+对象级工作台地址同时承载对象和运行：
+
+```text
+/evaluations?evaluation=<evaluation_object_id>&run=<evaluation_run_id>
+```
+
+手工选择对象时在 URL 中同步选择其 `presentedRunId`；这只是页面默认运行选择，不会改写服务端队列焦点。直接访问非当前展示运行时保留精确 `run`，并明确区分左侧队列摘要与中、右侧指定运行快照。对象无效时在列表查询成功后才回退到实际可用对象；运行不存在或与对象不匹配时，明确提示并恢复该对象的 `presentedRunId`。复核草稿仍仅保存在当前浏览器，不写入 URL，并按不可变 `runId` 隔离；旧对象级草稿只迁移到该对象的 `presentedRunId`，不会复制到其他运行。
+
+桌面端主操作由精确运行的输入就绪度决定：就绪运行显示“运行评价”，并先展示不可编辑的来源确认弹层，固定对象、精确来源运行、图谱/策略/评分快照、样本、阈值和输入哈希后再发起创建；阻断运行改为显示“处理输入问题”并打开结构化预检，不再把一个不可执行的创建按钮当作入口。服务端生成运行 ID、时间、当前评价程序版本和计算快照；成功后页面精确进入新 `run`，但不更新对象的 `presentedRunId`。同一创建意图失败重试复用同一幂等键；同键同请求返回原运行，同键不同请求返回冲突。本阶段只实现桌面工作台，不增加移动端适配。
+
+### 11.1 试点持久化边界
+
+当前本地适配器将评价对象、运行详情和不可变计算快照作为版本化 payload 持久化到 `.local-data/evaluation-read-model.sqlite3`，并为这些 payload 保存真实 SHA-256 完整性校验值。运行引用映射以 `run_id` 为主键，并通过冲突检测禁止重新绑定归属，不伪装成带哈希的 payload。试点重算在同一事务中追加运行、计算快照、对象引用、`sourceRunId` 血缘和幂等命令记录，任一步失败都不留下部分运行；`run_id` 唯一、`evaluation_object_id` 非唯一，重复初始化不得改写既有对象、运行、计算快照或历史归属。
+
+种子运行展示的试点输入/证据哈希如 `sha256:cd51…641e` 是为界面演示保留的截断值，不是可供重新校验的真实业务内容哈希。新建试点运行会对当前可用的来源 payload 生成完整 SHA-256 输入摘要，但由于当前图谱、策略和证据仍只是试点引用，它同样不构成对正式原始业务内容的验签。这与 SQLite 内部对持久化 payload 的完整性哈希是不同用途的字段。
+
+该 SQLite 数据库现在是“权威读取 + 就绪快照重算追加”的本地试点仓储，不等同于完整评价运行写模型。预检报告在请求时从既有不可变运行快照和当前 `evaluation-preflight:v1` 规则纯派生，不另行持久化；其 `reportHash` 只能标识该派生报告，不是审批签名、原始评分内容验签或不可变审计快照。
+
+### 11.2 试点汇总评分批次边界
+
+当前 `ScoreImportBatch` 只表达 `scope=local_pilot_aggregate`、`profile=local-pilot-aggregate:v1`、`recordGranularity=aggregate` 的本地试点汇总数据捕获。请求逐项提交汇总已得分、汇总可得分和观察样本数，由服务端使用 `Decimal` 计算规范得分率；响应固定 `formalUsable=false`。批次、候选项、通过整批校验后生成的规范 `ScoreRecord`、结构化 `DataValidationReport` 和幂等命令在同一事务中追加；检查项状态只取 `pass | blocked`，整批 `validationStatus` 只取 `blocked | pilot_ready`，阻断批次不生成部分规范记录，修正必须创建新批次。首次创建与幂等回放均返回 `201`，由 `idempotentReplay` 区分。内容哈希与报告哈希只包含稳定机器事实，不把中文展示文案或创建时间混入内容语义。
+
+该切片不是文件导入、学生成绩系统或正式审计：它没有来源文件与字段映射血缘，没有 workspace/cycle/class 的正式授权范围，也没有可验证操作者、OIDC/RBAC、审批和保留策略。功能开关默认关闭，staging/production 即使误开也必须拒绝写入。前端只把它称为“试点汇总准备批次”，不能称为正式评分导入。
+
+创建批次不会修改基准运行、`presentedRunId` 或原预检，也不会创建 `EvaluationRun`、`EvaluationInputSnapshot` 或评价结果。后续必须由独立用例在正式身份、范围、来源与消费关系齐备后，创建引用批次的新输入快照；历史运行永不修补。
+
+当前仍未接入学生明细、CSV/XLSX 文件解析与字段映射、正式数据范围、操作者/RBAC、不可变业务审计、批次消费、策略管理、图谱与证据正式快照、正式图谱目标定位、异步运行状态和正式复核审批。新运行的审批状态固定为 `not_submitted`，创建也不会更新 `presentedRunId`。结果确认和申请重算仍只保存本地草稿，不代表已提交、已审批或已记入 M9 正式审计。

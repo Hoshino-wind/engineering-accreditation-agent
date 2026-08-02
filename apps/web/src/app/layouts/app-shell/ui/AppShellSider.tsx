@@ -1,6 +1,6 @@
 import {
+  DeploymentUnitOutlined,
   ExperimentOutlined,
-  SafetyCertificateOutlined,
 } from '@ant-design/icons';
 import { Layout, Menu, Typography } from 'antd';
 
@@ -19,9 +19,13 @@ export function AppShellSider({
   selectedPath,
 }: AppShellSiderProps) {
   return (
-    <Sider className="app-sider" width={appThemeTokens.layout.sidebarWidth}>
+    <Sider
+      className="app-sider"
+      theme="light"
+      width={appThemeTokens.layout.sidebarWidth}
+    >
       <div className="app-brand">
-        <SafetyCertificateOutlined aria-hidden />
+        <DeploymentUnitOutlined aria-hidden />
         <div>
           <div className="app-brand-title">工程认证智能体</div>
           <div className="app-brand-subtitle">实验教学能力图谱</div>

@@ -12,13 +12,19 @@
 }
 
 .candidate-review-controls .ant-radio-button-wrapper {
+  display: inline-flex;
   height: 32px;
-  padding-inline: 6px;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding-inline: 4px;
+  font-size: 12px;
   text-align: center;
+  white-space: nowrap;
 }
 
 .candidate-review-controls .ant-radio-button-wrapper .anticon {
-  margin-right: 3px;
+  margin-right: 0;
 }
 
 .candidate-review-controls .ant-alert {

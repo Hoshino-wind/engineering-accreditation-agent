@@ -41,7 +41,7 @@ app → views → widgets → features → entities → shared
 | `/resources` | M3 `TeachingResourcesPage`：材料治理与来源工作台 | 当前原型可用 |
 | `/recognition` | M4 `RecognitionReviewPage`：候选识别与人工审核工作台 | 当前原型可用 |
 | `/diagnostics` | M5 `GraphDiagnosticsPage`：图谱分析与一致性诊断工作台 | 当前原型可用 |
-| `/evaluations` | M6 `AttainmentEvaluationPage`：输入校验、确定性计算与结果复核工作台 | 当前原型可用 |
+| `/evaluations` | M6 `AttainmentEvaluationPage`：输入预检、确定性计算与结果复核工作台 | 服务端读取 + 输入预检 + 就绪快照试点重算 + 默认关闭的汇总批次捕获可用 |
 | `/improvements` | M7 `TeachingImprovementPage`：问题、实际变更、复评与关闭门槛工作台 | 当前原型可用 |
 | `/support` | M8 `AccreditationSupportPage`：版本快照、章节预览、校验和导出准备工作台 | 当前原型可用 |
 | `/governance` | M9 `GovernancePage`：用户角色、数据范围、审计与模型策略 | 本地交互原型可用 |
@@ -78,7 +78,7 @@ PC 端应用壳按以下所有权拆分：
 - 不伪装成持久化数据；
 - 对应 API 可用后由 TanStack Query 替换。
 
-当前原型数据包括图谱总览指标、图谱建设与应用主线、图谱质量门槛、试点发布门槛、最近业务活动、待处理事项，教学资源、处理流水线、来源片段、材料治理指标，识别候选、来源证据、影响范围和审核草稿，诊断发现、规则判定、覆盖路径、版本引用、影响范围和处置草稿，评价对象、评分输入、版本快照、就绪检查、证据引用和复核草稿，改进问题、来源事实、根因、措施、实际教学对象版本、图谱版本、复评运行和有效性草稿，以及认证支撑包、模板、来源快照、章节、正式结论引用、校验结果、审批快照和导出配置草稿。
+当前原型数据包括图谱总览指标、图谱建设与应用主线、图谱质量门槛、试点发布门槛、最近业务活动、待处理事项，教学资源、处理流水线、来源片段、材料治理指标，识别候选、来源证据、影响范围和审核草稿，诊断发现、规则判定、覆盖路径、版本引用、影响范围和处置草稿，M6 复核本地草稿，改进问题、来源事实、根因、措施、实际教学对象版本、图谱版本、复评运行和有效性草稿，以及认证支撑包、模板、来源快照、章节、正式结论引用、校验结果、审批快照和导出配置草稿。M6 评价对象、运行输入/快照/证据与计算结果已从前端原型迁入服务端；当前仅允许从既有就绪快照追加试点重算运行。
 
 M2 前端切片按以下所有权拆分：
 
@@ -92,15 +92,20 @@ M2 前端切片按以下所有权拆分：
 
 M6 前端切片按以下所有权拆分：
 
-- `entities/attainment-evaluation`：评价对象、输入、快照、就绪检查和展示状态；
-- `features/calculate-attainment`：无副作用的确定性加权计算与阻断规则；
+- `entities/attainment-evaluation`：评价对象摘要、运行详情、输入、快照、就绪/审批/达成状态轴、计算与预检展示模型，以及通过生成客户端读取对象队列、运行详情、运行权威引用和精确运行预检报告的 TanStack Query；
+- `entities/score-import-batch`：试点汇总评分批次、规范记录、校验报告和稳定限制码的前端展示模型；
+- `features/create-attainment-evaluation-run`：冻结对象与精确来源运行的确认意图、幂等创建命令、失败后同键重试，以及新运行查询缓存预置；
+- `features/inspect-attainment-input-preflight`：按服务端稳定 `owner` / `action` 展示阻断责任、缺失输入和下一步处理入口；只维护抽屉开关等局部交互状态，不解析中文阻断文案，也不伪造评分导入或正式图谱目标；
+- `features/capture-pilot-score-batch`：对精确评分阻断运行捕获完整的汇总已得分、汇总可得分和观察样本数；同一提交意图复用幂等键，结果明确展示 `formalUsable=false` 和限制项，不接收个人明细；
 - `features/filter-attainment-evaluations`：课程、状态和关键词筛选；
 - `features/inspect-calculation-trace`：输入快照、程序版本、中间值和证据追溯；
 - `features/review-attainment-result`：结果确认或申请重算的本地草稿；
-- `widgets/attainment-summary`、`widgets/attainment-workbench`：页面区块编排；
-- `views/evaluations`：路由页面组合。
+- `widgets/attainment-summary`、`widgets/attainment-workbench`：页面区块编排；其中工作台在 widget 层组合预检与汇总批次 feature，两个同层 feature 不互相依赖；
+- `views/evaluations`：路由页面组合，以及 `evaluation` + `run` 查询参数到精确评价对象/运行的页面级选择投影；列表加载或失败时不改写已请求地址。
 
-正式运行、审批和持久化仍归后端 `evaluations` 模块；前端禁用动作不得被理解为已接入 API。
+后端 `evaluations` 当前提供对象/运行/引用/预检四条权威读端点、一条受限运行写端点，以及试点汇总评分批次的创建与精确读取端点。`POST /api/v1/evaluations/score-import-batches` 与 `GET /api/v1/evaluations/score-import-batches/{batch_id}` 都只在 development/test 且显式开关开启时工作；GET 按不透明 ID 读取不可变批次。预检用例由 application 读取仓储快照、domain 合并来源检查与计算派生阻断、contracts 输出 `scope=pilot_snapshot`、`reportVersion=evaluation-preflight:v1`、稳定 `owner` / `action`、`missingInputs` 和确定性 `reportHash`；route 只处理 HTTP 映射。该查询不写仓储，报告和报告哈希都不是持久化审计快照。
+
+运行创建命令只接收对象 ID、来源运行 ID 和幂等键；评分批次命令另行接收固定 `local-pilot-aggregate:v1` 汇总结构，不与运行来源契约混用。领域层使用 `Decimal` 计算汇总得分率并生成与中文文案无关的内容/报告哈希；独立 SQLite 适配器在一个事务中追加批次、候选项、规范记录、校验报告和幂等命令，并禁止覆盖或删除。阻断运行返回 `result=null`，也不能作为试点重算来源；创建汇总批次同样不会修改它或使其变为 ready。学生明细、文件映射、正式范围、操作者、策略、正式运行生命周期、正式图谱目标定位、审批、RBAC 及不可变业务审计仍待接入，前端复核操作只是按运行隔离的本地草稿。
 
 M7 前端切片按以下所有权拆分：
 
@@ -122,7 +127,7 @@ M8 前端切片按以下所有权拆分：
 - `features/filter-support-packages`：模板、状态和关键词筛选；
 - `features/validate-support-package`：无副作用的 8 项复核/导出门槛及审批快照一致性判定；
 - `features/configure-support-export`：本地导出配置、复核提交、原型产物交付与工作流事件记录；
-- `features/resolve-support-package-blocker`：返回事实所属 M2/M3/M5/M6/M7 模块，并在目标标识已对齐时生成对象级处理地址；
+- `features/resolve-support-package-blocker`：返回事实所属 M2/M3/M5/M6/M7 模块；M6 同时核对运行权威引用与当前对象队列，引用确认运行归属且对象存在时生成携带 `evaluation` + `run` 的精确地址，允许回到已冻结的历史运行；加载/服务失败保留来源阻断项，对象不可用则回退模块地址，不猜测归属；M7 通过已对齐的问题 ID 生成对象级处理地址；
 - `features/inspect-support-evidence`：来源对象、冻结版本、内容哈希和章节结论引用追溯；
 - `widgets/support-summary`、`widgets/support-workbench`：页面区块编排；
 - `views/support`：路由页面组合。
@@ -155,7 +160,8 @@ app/
       application/     # 用例、端口、事务边界
       domain/          # 纯领域模型与规则
       infra/           # 该模块的端口实现与框架适配
-  main.py              # composition root，负责实例化和装配
+  factory.py           # composition root，负责实例化和装配
+  main.py              # 部署入口，只创建 ASGI 应用实例
 ```
 
 依赖规则：
@@ -164,7 +170,8 @@ app/
 - `application` 只依赖 domain 和自己定义的 ports。
 - `routes` 只依赖 application 与 contracts，不创建基础设施对象。
 - `infra` 实现 application ports，可以依赖 `core` 和外部库。
-- `main.py` 是唯一组合根，负责把配置、适配器、用例和路由连接起来。
+- `factory.py` 是唯一组合根，负责把配置、适配器、用例和路由连接起来；测试直接导入工厂，避免导入部署入口时写入默认本地数据目录。
+- `main.py` 只创建 ASGI 应用实例，供 Uvicorn 等部署运行时加载。
 - ORM 模型、Pydantic 契约和领域对象职责不同，不合并为同一个类。
 
 当前 `system` 模块用于验证以上完整链路；新业务能力按相同内部结构建立，不先创建没有用例的空目录。

@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     deepseek_ocr_model: str = "deepseek-ai/DeepSeek-OCR"
     deepseek_timeout_seconds: float = 60
     ocr_max_pdf_pages: int = 12
+    enable_pilot_score_batch_capture: bool = False
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
 
 

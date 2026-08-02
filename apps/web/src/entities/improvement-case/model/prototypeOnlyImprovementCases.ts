@@ -44,7 +44,7 @@ export const prototypeOnlyImprovementCases: ImprovementCase[] = [
       cycle: '2025—2026 学年第二学期',
       policyVersion: 'policy v1.2',
       result: 0.73,
-      runId: 'eval-2026-071',
+      runId: 'eval-2026-072',
       target: 0.75,
     },
     rootCause: {

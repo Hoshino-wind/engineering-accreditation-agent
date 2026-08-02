@@ -20,6 +20,7 @@ interface EvaluationCalculationPanelProps {
   calculation: AttainmentCalculation | null;
   evaluation: AttainmentEvaluationItem | null;
   onInspectTrace: () => void;
+  presentedRunId: string;
 }
 
 const contributionColumns: TableProps<AttainmentContribution>['columns'] = [
@@ -58,6 +59,7 @@ export function EvaluationCalculationPanel({
   calculation,
   evaluation,
   onInspectTrace,
+  presentedRunId,
 }: EvaluationCalculationPanelProps) {
   if (!evaluation || !calculation) {
     return (
@@ -74,19 +76,30 @@ export function EvaluationCalculationPanel({
     );
   }
 
+  const viewingNonPresentedRun =
+    evaluation.runId !== presentedRunId;
+
   return (
     <Card
       className="evaluation-calculation-panel"
       size="small"
       title="计算过程与结果"
     >
+      {viewingNonPresentedRun ? (
+        <Alert
+          description={`左侧队列展示运行 ${presentedRunId} 的摘要；当前中、右区域展示指定运行 ${evaluation.runId} 的不可变快照。`}
+          showIcon
+          title="正在查看非当前展示运行"
+          type="info"
+        />
+      ) : null}
       <section className="evaluation-result-strip">
         <div>
           <Typography.Text strong>
             {evaluation.objectiveCode} {evaluation.objectiveName}
           </Typography.Text>
           <Typography.Text type="secondary">
-            {evaluation.course}
+            {evaluation.course} · 运行 {evaluation.runId}
           </Typography.Text>
         </div>
         <div className="evaluation-result-stat">
@@ -105,18 +118,18 @@ export function EvaluationCalculationPanel({
           <Typography.Text type="secondary">达成结论</Typography.Text>
           <Tag
             color={
-              calculation.outcome === 'achieved'
+              !calculation.ready
+                ? 'error'
+                : calculation.outcome === 'achieved'
                 ? 'success'
-                : calculation.outcome === 'blocked'
-                  ? 'error'
-                  : 'warning'
+                : 'warning'
             }
           >
-            {calculation.outcome === 'achieved'
+            {!calculation.ready
+              ? '已阻断'
+              : calculation.outcome === 'achieved'
               ? '已达成'
-              : calculation.outcome === 'blocked'
-                ? '已阻断'
-                : '未达成'}
+              : '未达成'}
           </Tag>
         </div>
       </section>

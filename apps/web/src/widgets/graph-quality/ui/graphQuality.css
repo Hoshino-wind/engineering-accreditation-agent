@@ -3,12 +3,27 @@
   height: 100%;
 }
 
+.graph-quality {
+  box-shadow: none;
+}
+
+.graph-quality .ant-card-body {
+  padding: 16px 18px;
+}
+
 .graph-quality .ant-space {
   width: 100%;
 }
 
 .graph-quality-item {
   width: 100%;
+  padding-bottom: 13px;
+  border-bottom: 1px solid var(--app-border-soft);
+}
+
+.graph-quality-item:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
 }
 
 .graph-quality-header {
@@ -25,9 +40,10 @@
 }
 
 .graph-quality-item .ant-progress {
-  margin: 4px 0 1px;
+  margin: 6px 0 2px;
 }
 
 .graph-quality-item > .ant-typography {
+  color: var(--app-text-muted);
   font-size: 12px;
 }

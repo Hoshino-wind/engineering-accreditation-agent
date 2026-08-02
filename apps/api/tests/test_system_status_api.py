@@ -1,7 +1,6 @@
-from fastapi.testclient import TestClient
-
 from app.core.config import get_settings
-from app.main import create_app
+from app.factory import create_app
+from fastapi.testclient import TestClient
 
 
 def test_system_status_is_exposed_through_public_api() -> None:

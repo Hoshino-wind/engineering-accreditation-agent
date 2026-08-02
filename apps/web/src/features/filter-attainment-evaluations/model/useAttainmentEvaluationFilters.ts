@@ -1,13 +1,13 @@
 import { useMemo, useState } from 'react';
 
 import type {
-  AttainmentEvaluationItem,
+  AttainmentEvaluationSummary,
   EvaluationItemStatus,
 } from '../../../entities/attainment-evaluation';
 import { filterAttainmentEvaluations } from './filterAttainmentEvaluations';
 
 export function useAttainmentEvaluationFilters(
-  sourceEvaluations: AttainmentEvaluationItem[],
+  sourceEvaluations: AttainmentEvaluationSummary[],
 ) {
   const [course, setCourse] = useState('all');
   const [keyword, setKeyword] = useState('');

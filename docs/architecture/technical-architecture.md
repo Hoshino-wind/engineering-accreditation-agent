@@ -88,7 +88,8 @@ apps/
       shared/       # 通用组件、请求和工具
   api/
     app/
-      main.py
+      factory.py      # 应用组合根
+      main.py         # 部署入口
       core/         # 环境配置和应用级横切能力
       infrastructure/ # 跨模块基础设施适配器
       modules/      # 按领域模块组织；内部含 routes/contracts/application/domain/infra
@@ -125,7 +126,7 @@ docs/
 | `intelligence` | M3～M7 共用 | 解析、检索、模型适配、输出校验和质量评测 |
 | `audit` | M9 | 操作、下载、审批和模型调用审计 |
 
-每个模块内部按 `routes`、`contracts`、`application`、`domain` 和 `infra` 组织。`main.py` 是组合根；路由只处理协议和鉴权，应用层通过 ports 依赖外部能力，领域规则不放在路由、ORM 模型或 Celery 任务入口中。详细依赖方向见[代码架构约定](code-architecture.md)。
+每个模块内部按 `routes`、`contracts`、`application`、`domain` 和 `infra` 组织。`factory.py` 是可测试的组合根，`main.py` 只创建部署实例；路由只处理协议和鉴权，应用层通过 ports 依赖外部能力，领域规则不放在路由、ORM 模型或 Celery 任务入口中。详细依赖方向见[代码架构约定](code-architecture.md)。
 
 首期把课程、课程目标、实验、知识、技能、能力、Rubric 和评分项作为 `teaching_graph` 的正式节点管理，避免同一正式事实被多个模块同时拥有。若后续教务主数据接入形成独立生命周期，再通过明确 ADR 拆出教学目录模块。
 

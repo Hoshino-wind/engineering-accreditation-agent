@@ -20,6 +20,7 @@
   .ant-card {
   height: var(--app-summary-card-height);
   border-color: var(--app-border);
+  box-shadow: none;
 }
 
 :is(
@@ -31,7 +32,7 @@
     .support-summary
   )
   .ant-card-body {
-  padding: 10px 14px;
+  padding: 11px 14px;
 }
 
 :is(
@@ -108,7 +109,7 @@
   height: 36px;
   flex: none;
   place-items: center;
-  border-radius: var(--app-radius-small);
+  border-radius: 50%;
   font-size: 18px;
 }
 

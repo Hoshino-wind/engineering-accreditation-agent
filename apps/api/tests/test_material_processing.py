@@ -3,7 +3,6 @@ import io
 import zipfile
 
 import pytest
-
 from app.modules.materials.application import SecurityScanError
 from app.modules.materials.infra.security_scanner import LocalMaterialSecurityScanner
 

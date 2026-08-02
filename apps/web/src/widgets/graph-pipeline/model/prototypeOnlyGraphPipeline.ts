@@ -34,7 +34,7 @@ export const prototypeOnlyGraphPipeline: GraphPipelineStage[] = [
     description: '27 条能力与关系候选待确认',
     percent: 73,
     route: '/recognition',
-    status: 'active',
+    status: 'blocked',
   },
   {
     key: 'graph',
@@ -92,4 +92,15 @@ export function getPrimaryGraphPipelineStage(
   stages: GraphPipelineStage[] = prototypeOnlyGraphPipeline,
 ) {
   return stages.find((stage) => stage.status !== 'complete') ?? stages.at(-1);
+}
+
+export function getNextGraphPipelineStage(
+  currentStage: GraphPipelineStage | undefined,
+  stages: GraphPipelineStage[] = prototypeOnlyGraphPipeline,
+) {
+  const currentIndex = currentStage
+    ? stages.findIndex((stage) => stage.key === currentStage.key)
+    : -1;
+
+  return currentIndex >= 0 ? stages.at(currentIndex + 1) : undefined;
 }

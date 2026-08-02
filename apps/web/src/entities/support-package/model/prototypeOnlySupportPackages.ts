@@ -1,14 +1,26 @@
 import type {
   SupportPackage,
-  SupportPackageSection,
   SupportSourceSnapshot,
   SupportTemplateKind,
 } from './supportPackage';
+import { createPrototypeOnlySupportPackageSections } from './prototypeOnlySupportPackageSections';
 
 const templateNames: Record<SupportTemplateKind, string> = {
   capstone: '毕业设计能力支撑',
   'course-teaching': '课程教学能力支撑',
   'experiment-teaching': '实验教学能力达成与持续改进',
+};
+const prototypeContentHashes: Record<string, string> = {
+  'support-package-001':
+    'sha256:f8b086b12af5a2f5b5369bad76890012af270cd0c189977eb542b67385c39f9e',
+  'support-package-002':
+    'sha256:6a9f64ae5a4f0ded23cf08d4aa440e5c1082c460df4a3184497943a80454795c',
+  'support-package-003':
+    'sha256:252a00171ada97fc20455d97d20a40fd92df7431358ec901cdb726fba7f2445d',
+  'support-package-004':
+    'sha256:c0b55da831676e3dc967991fc0a95a032a43405b67826349056a546655e4da0f',
+  'support-package-005':
+    'sha256:b6d43bf3187ef29e54cca9a0422400a84441fc7e54b433145d710ac7fa9b0194',
 };
 
 function createSources(
@@ -65,75 +77,6 @@ function createSources(
   ];
 }
 
-function createSections(course: string): SupportPackageSection[] {
-  return [
-    {
-      claims: [
-        {
-          id: 'claim-graph-path',
-          referenceIds: ['G-CT6', 'E-RS18'],
-          text: `${course}已形成从毕业要求指标点到课程目标、实验项目和评分项的正式支撑路径。`,
-        },
-      ],
-      code: '1',
-      id: 'ability-graph',
-      referenceCount: 12,
-      status: 'ready',
-      summary:
-        '本章节基于能力图谱正式版本和课程目标，说明实验教学各环节与毕业要求指标点的对应关系。',
-      title: '能力图谱与课程目标',
-    },
-    {
-      claims: [
-        {
-          id: 'claim-resource-consistency',
-          referenceIds: ['RS-18', 'DF-013'],
-          text: '教学大纲、实验指导书和评分规则的关键名称与目标已经完成一致性核验。',
-        },
-      ],
-      code: '2',
-      id: 'resources',
-      referenceCount: 8,
-      status: 'ready',
-      summary:
-        '本章节固定教学材料版本，并汇总材料一致性诊断及处理结论。',
-      title: '教学资源与一致性',
-    },
-    {
-      claims: [
-        {
-          id: 'claim-attainment',
-          referenceIds: ['EVAL-071', 'POLICY-12'],
-          text: '达成度结果使用固定策略、输入快照和程序版本进行确定性计算。',
-        },
-      ],
-      code: '3',
-      id: 'attainment',
-      referenceCount: 4,
-      status: 'ready',
-      summary:
-        '本章节说明评价范围、确定性计算口径、达成结果和未达标项。',
-      title: '达成度评价与分析',
-    },
-    {
-      claims: [
-        {
-          id: 'claim-improvement',
-          referenceIds: ['QI-017', 'CHANGE-V20', 'REEVAL-071'],
-          text: '教学改进已经落实为实际对象新版本，并通过后续评价记录效果。',
-        },
-      ],
-      code: '4',
-      id: 'improvement',
-      referenceCount: 6,
-      status: 'ready',
-      summary:
-        '本章节汇总问题来源、原因、措施、实际教学变更、图谱更新和复评结论。',
-      title: '持续改进闭环',
-    },
-  ];
-}
-
 interface PackageSeed {
   approval?: SupportPackage['approval'];
   course: string;
@@ -149,7 +92,10 @@ interface PackageSeed {
 }
 
 function createPackage(seed: PackageSeed): SupportPackage {
-  const contentHash = `sha256:${seed.id.slice(-3)}7…b921`;
+  const contentHash = prototypeContentHashes[seed.id];
+  if (!contentHash) {
+    throw new Error(`缺少试点支撑包 ${seed.id} 的内容哈希`);
+  }
 
   return {
     approval: seed.approval,
@@ -160,7 +106,10 @@ function createPackage(seed: PackageSeed): SupportPackage {
     id: seed.id,
     permissionCheck: 'pass',
     scope: `${seed.course}实验教学`,
-    sections: createSections(seed.course),
+    sections: createPrototypeOnlySupportPackageSections(
+      seed.course,
+      seed.courseCode,
+    ),
     sensitiveContentCheck: 'pass',
     sourceSnapshots: createSources(
       seed.courseCode,
@@ -202,9 +151,29 @@ selectedPackage.sourceSnapshots = selectedPackage.sourceSnapshots.map(
         : source,
 );
 selectedPackage.sections = selectedPackage.sections.map((section) =>
-  ['attainment', 'improvement'].includes(section.id)
-    ? { ...section, status: 'blocked' as const }
-    : section,
+  section.id === 'attainment'
+    ? {
+        ...section,
+        claims: section.claims.map((claim) => ({
+          ...claim,
+          referenceIds: ['EVAL-071', 'POLICY-12'],
+        })),
+        status: 'blocked' as const,
+      }
+    : section.id === 'improvement'
+      ? {
+          ...section,
+          claims: section.claims.map((claim) => ({
+            ...claim,
+            referenceIds: [
+              'QI-017',
+              'CHANGE-V20',
+              'REEVAL-072',
+            ],
+          })),
+          status: 'blocked' as const,
+        }
+      : section,
 );
 
 export const prototypeOnlySupportPackages: SupportPackage[] = [
@@ -223,7 +192,8 @@ export const prototypeOnlySupportPackages: SupportPackage[] = [
     approval: {
       approvedAt: '2026-07-18 10:30',
       approver: '王老师',
-      snapshotHash: 'sha256:0037…b921',
+      snapshotHash:
+        'sha256:252a00171ada97fc20455d97d20a40fd92df7431358ec901cdb726fba7f2445d',
     },
     course: '软件工程',
     courseCode: 'software-engineering',
@@ -252,7 +222,8 @@ export const prototypeOnlySupportPackages: SupportPackage[] = [
     approval: {
       approvedAt: '2026-06-30 14:20',
       approver: '王老师',
-      snapshotHash: 'sha256:0057…b921',
+      snapshotHash:
+        'sha256:b6d43bf3187ef29e54cca9a0422400a84441fc7e54b433145d710ac7fa9b0194',
     },
     course: '数据库原理',
     courseCode: 'database',

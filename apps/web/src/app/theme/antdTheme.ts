@@ -14,8 +14,11 @@ export const antdTheme: ThemeConfig = {
     colorInfo: color.info,
     colorWarning: color.warning,
     colorError: color.error,
+    colorLink: color.primaryText,
+    colorBgBase: color.layout,
     colorBgLayout: color.layout,
     colorBgContainer: color.surface,
+    colorBgElevated: color.surface,
     colorBorder: color.border,
     colorBorderSecondary: color.borderSoft,
     colorText: color.text,
@@ -35,6 +38,7 @@ export const antdTheme: ThemeConfig = {
     },
     Card: {
       headerBg: color.transparent,
+      extraColor: color.textSecondary,
       headerFontSize: typography.bodySize,
     },
     Drawer: {
@@ -45,10 +49,11 @@ export const antdTheme: ThemeConfig = {
       hoverBorderColor: color.primaryHover,
     },
     Layout: {
-      bodyBg: color.layout,
-      headerBg: color.surface,
+      bodyBg: color.transparent,
+      headerBg: color.transparent,
       headerHeight: layout.headerHeight,
-      siderBg: color.surfaceSider,
+      lightSiderBg: color.transparent,
+      siderBg: color.transparent,
     },
     Menu: {
       groupTitleColor: color.textMuted,
@@ -72,6 +77,7 @@ export const antdTheme: ThemeConfig = {
       rowSelectedBg: color.selectionBackground,
       rowSelectedHoverBg: color.selectionHoverBackground,
       borderColor: color.borderTable,
+      footerBg: color.surfaceSoft,
       cellFontSize: 13,
       cellPaddingBlockSM: 8,
     },

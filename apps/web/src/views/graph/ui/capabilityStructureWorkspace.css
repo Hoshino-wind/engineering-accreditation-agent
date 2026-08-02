@@ -216,10 +216,10 @@
   align-items: center;
   gap: 2px 7px;
   padding: 6px 8px;
-  border: 1px dashed #e3b1b1;
+  border: 1px dashed color-mix(in srgb, var(--app-error) 54%, var(--app-border));
   border-radius: 7px;
-  color: #bd3e46;
-  background: #fff8f8;
+  color: var(--app-error);
+  background: var(--app-error-soft);
   font-size: 11px;
   line-height: 15px;
 }
@@ -232,9 +232,9 @@
 
 .capability-behavior--mapped {
   border-style: solid;
-  border-color: #b8d9cb;
+  border-color: color-mix(in srgb, var(--app-success) 46%, var(--app-border));
   color: var(--app-success);
-  background: #f4fbf8;
+  background: var(--app-success-soft);
 }
 
 .capability-path-list {
@@ -338,12 +338,12 @@
   padding: 11px 12px;
   border-bottom: 1px solid var(--app-border-soft);
   border-left: 3px solid var(--app-error);
-  background: #fffafa;
+  background: var(--app-error-soft);
 }
 
 .capability-evaluation-item--ready {
   border-left-color: var(--app-success);
-  background: #f7fcfa;
+  background: var(--app-success-soft);
 }
 
 .capability-evaluation-title > span {
@@ -361,7 +361,7 @@
 }
 
 .capability-evaluation-gap {
-  color: #bd3e46;
+  color: var(--app-error);
   font-size: 11px;
 }
 

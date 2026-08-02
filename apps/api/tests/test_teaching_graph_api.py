@@ -6,10 +6,9 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from fastapi.testclient import TestClient
-
 from app.core.config import get_settings
-from app.main import create_app
+from app.factory import create_app
+from fastapi.testclient import TestClient
 
 SCHEMA_VERSION_ID = "teaching-graph-schema@2"
 

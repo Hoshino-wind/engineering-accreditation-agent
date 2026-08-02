@@ -1,41 +1,92 @@
 .overview-metric-card {
+  position: relative;
   min-height: 112px;
-  border-top: 3px solid var(--app-primary-border);
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-top: 1px solid var(--app-border);
+  box-shadow: none;
 }
 
 .overview-metric-card .ant-card-body {
-  min-height: 106px;
-  padding: 14px 16px 12px;
+  min-height: 110px;
+  padding: 16px 18px 13px;
 }
 
-.overview-metric-card--warning {
-  border-top-color: var(--app-warning);
+.overview-metric-card::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+  background: var(--app-primary);
+  content: '';
 }
 
-.overview-metric-card--danger {
-  border-top-color: var(--app-error);
+.overview-metric-card--warning::before {
+  background: var(--app-warning);
+}
+
+.overview-metric-card--danger::before {
+  background: var(--app-error);
+}
+
+.overview-metric-card .ant-statistic {
+  min-width: 0;
 }
 
 .overview-metric-card .ant-statistic-title {
-  margin-bottom: 2px;
+  margin-bottom: 5px;
+  color: var(--app-text-secondary);
+  font-size: 12px;
+}
+
+.overview-metric-card .ant-statistic-content {
+  display: flex;
+  align-items: center;
+  font-variant-numeric: tabular-nums;
 }
 
 .overview-metric-card .ant-statistic-content-prefix {
-  margin-inline-end: 8px;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  margin-inline-end: 10px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--app-primary-soft);
   color: var(--app-primary);
-  font-size: 18px;
+  font-size: 17px;
+}
+
+.overview-metric-card .ant-statistic-content-value {
+  color: var(--app-text);
+  font-size: 30px;
+  font-weight: 650;
+  line-height: 38px;
+  letter-spacing: -0.02em;
+}
+
+.overview-metric-card .ant-statistic-content-suffix {
+  margin-inline-start: 4px;
+  color: var(--app-text-secondary);
+  font-size: 13px;
 }
 
 .overview-metric-card--warning .ant-statistic-content-prefix {
   color: var(--app-warning);
+  background: var(--app-warning-icon-soft);
 }
 
 .overview-metric-card--danger .ant-statistic-content-prefix {
   color: var(--app-error);
+  background: var(--app-error-soft);
 }
 
 .overview-metric-detail {
-  margin-top: 6px;
+  margin-top: 5px;
+  padding-left: 46px;
   color: var(--app-text-secondary);
   font-size: 12px;
+  line-height: 18px;
 }

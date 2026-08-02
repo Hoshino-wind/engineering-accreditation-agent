@@ -1,56 +1,52 @@
-import { Button } from 'antd';
+import { App, Button } from 'antd';
 import { useNavigate } from 'react-router';
 
 import type { SupportSourceModule } from '../../../entities/support-package';
-
-const moduleRoutes: Partial<Record<SupportSourceModule, string>> = {
-  M2: '/graph',
-  M3: '/resources',
-  M5: '/diagnostics',
-  M6: '/evaluations',
-  M7: '/improvements',
-};
+import { useSupportBlockerTarget } from '../model/useSupportBlockerTarget';
 
 interface SupportBlockerLinkProps {
   module: SupportSourceModule;
-  objectId?: string;
-}
-
-function resolveTargetRoute(
-  module: SupportSourceModule,
-  objectId?: string,
-) {
-  const targetRoute = moduleRoutes[module];
-
-  // M6 当前保存的是运行 ID，尚不能安全映射到评价对象；先只为 ID 已对齐的 M7 建立深链。
-  if (module !== 'M7' || !objectId?.trim()) {
-    return targetRoute;
-  }
-
-  const searchParams = new URLSearchParams({
-    case: objectId.trim(),
-  });
-  return `${targetRoute}?${searchParams.toString()}`;
+  sourceObjectId?: string;
 }
 
 export function SupportBlockerLink({
   module,
-  objectId,
+  sourceObjectId,
 }: SupportBlockerLinkProps) {
+  const { message } = App.useApp();
   const navigate = useNavigate();
-  const targetRoute = resolveTargetRoute(module, objectId);
+  const target = useSupportBlockerTarget(module, sourceObjectId);
 
+  const targetRoute = target.route;
   if (!targetRoute) {
     return null;
   }
 
   return (
     <Button
-      onClick={() => navigate(targetRoute)}
+      disabled={target.isLoading}
+      loading={target.isLoading}
+      onClick={() => {
+        if (target.kind === 'not-found') {
+          void message.info(
+            '未找到该评价运行，已打开 M6 评价对象列表',
+          );
+        } else if (target.kind === 'service-unavailable') {
+          void message.warning(
+            '评价运行定位服务暂不可用，已打开 M6 评价对象列表',
+          );
+        } else if (target.kind === 'object-unavailable') {
+          void message.warning(
+            '对应评价对象尚未载入当前工作台，已打开 M6 评价对象列表',
+          );
+        }
+        void navigate(targetRoute);
+      }}
       size="small"
       type="link"
     >
-      返回 {module}
+      {target.isLoading || target.kind === 'exact' ? '返回' : '打开'}{' '}
+      {module}
     </Button>
   );
 }

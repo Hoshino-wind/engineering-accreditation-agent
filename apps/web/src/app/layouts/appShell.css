@@ -2,23 +2,57 @@
   height: 100vh;
   min-height: 100vh;
   overflow: hidden;
+  gap: 18px;
+  padding: 14px;
   background: var(--app-layout-background);
+  background-size: auto, auto, auto, auto, 64px 64px, 64px 64px, auto;
+}
+
+.app-shell > .ant-layout {
+  height: calc(100vh - 28px);
+  min-width: 0;
+  background: transparent;
 }
 
 .app-sider {
   position: relative;
-  height: 100vh;
+  height: calc(100vh - 28px);
   overflow: hidden;
-  border-right: 1px solid var(--app-border);
+  border: 1px solid color-mix(in srgb, var(--app-primary-border) 50%, transparent);
+  border-radius: var(--app-radius-extra-large, 16px);
   background: var(--app-sider-background) !important;
+  box-shadow: var(--app-floating-shadow);
+  backdrop-filter: blur(22px) saturate(130%);
+}
+
+.app-sider::before {
+  position: absolute;
+  z-index: 0;
+  top: 22px;
+  bottom: 22px;
+  left: -1px;
+  width: 2px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    var(--app-primary) 22%,
+    color-mix(in srgb, var(--app-success) 75%, transparent) 68%,
+    transparent
+  );
+  box-shadow: 0 0 18px var(--app-primary);
+  content: '';
+  opacity: 0.58;
+  pointer-events: none;
 }
 
 .app-brand {
+  position: relative;
+  z-index: 1;
   display: flex;
-  height: 72px;
+  height: 74px;
   align-items: center;
   gap: 10px;
-  padding: 0 18px;
+  padding: 0 16px;
   border-bottom: 1px solid var(--app-border);
   color: var(--app-text);
   white-space: nowrap;
@@ -26,13 +60,15 @@
 
 .app-brand .anticon {
   color: var(--app-primary);
-  font-size: 24px;
+  font-size: 30px;
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--app-primary) 70%, transparent));
 }
 
 .app-brand-title {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 650;
   line-height: 22px;
+  letter-spacing: 0.02em;
 }
 
 .app-brand-subtitle {
@@ -42,33 +78,74 @@
 }
 
 .app-sider .ant-menu {
+  position: relative;
+  z-index: 1;
   overflow-y: auto;
-  height: calc(100vh - 72px - 90px);
-  padding-top: 8px;
+  height: calc(100vh - 28px - 74px - 84px);
+  padding: 8px 6px 0;
   border-inline-end: 0 !important;
   background: transparent;
 }
 
 .app-sider .ant-menu-item-group-title {
-  padding-top: 14px;
-  padding-bottom: 6px;
+  padding-top: 12px;
+  padding-bottom: 5px;
   color: var(--app-text-muted);
-  font-size: 12px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+.app-sider .ant-menu-item {
+  border: 1px solid transparent;
+  font-size: 13px;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.app-sider .ant-menu-item:hover {
+  border-color: color-mix(in srgb, var(--app-primary-border) 26%, transparent);
+  transform: translateX(2px);
+}
+
+.app-sider .ant-menu-item-selected {
+  border-color: color-mix(in srgb, var(--app-primary-border) 64%, transparent);
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--app-primary) 16%, transparent),
+      color-mix(in srgb, var(--app-primary) 6%, transparent)
+    ) !important;
+  box-shadow:
+    inset 3px 0 0 var(--app-primary),
+    0 0 20px color-mix(in srgb, var(--app-primary) 18%, transparent);
+}
+
+.app-sider .ant-menu-item .anticon {
+  color: var(--app-text-secondary);
+}
+
+.app-sider .ant-menu-item-selected .anticon {
+  color: var(--app-primary-text);
 }
 
 .app-sider-footer {
   position: absolute;
-  right: 16px;
-  bottom: 16px;
-  left: 16px;
+  z-index: 1;
+  right: 12px;
+  bottom: 12px;
+  left: 12px;
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 12px;
-  border: 1px solid var(--app-border-strong);
+  padding: 11px 12px;
+  border: 1px solid color-mix(in srgb, var(--app-primary-border) 34%, var(--app-border));
   border-radius: var(--app-radius-large);
-  background: var(--app-surface-glass);
+  background: color-mix(in srgb, var(--app-primary-surface) 45%, transparent);
   box-shadow: var(--app-floating-shadow);
+  backdrop-filter: blur(16px);
 }
 
 .app-sider-footer > .anticon {
@@ -93,12 +170,16 @@
   z-index: 10;
   display: flex;
   height: var(--app-header-height);
+  min-height: var(--app-header-height);
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
-  border-bottom: 1px solid var(--app-border);
-  background: var(--app-surface-glass-strong) !important;
-  backdrop-filter: blur(14px);
+  padding: 0 18px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-large);
+  background: var(--app-surface-glass) !important;
+  box-shadow: var(--app-card-shadow);
+  line-height: normal;
+  backdrop-filter: blur(18px) saturate(125%);
 }
 
 .app-header-actions {
@@ -110,6 +191,16 @@
   min-width: 0;
   align-items: center;
   gap: 6px;
+}
+
+.app-header .ant-breadcrumb,
+.app-header .ant-breadcrumb a,
+.app-header .ant-breadcrumb-link {
+  color: var(--app-text-secondary);
+}
+
+.app-header .ant-breadcrumb li:last-child .ant-breadcrumb-link {
+  color: var(--app-text);
 }
 
 .app-header-actions .ant-divider-vertical {
@@ -125,6 +216,22 @@
   color: var(--app-success-text);
 }
 
+.app-header-actions > .ant-btn,
+.app-header-actions .ant-btn {
+  color: var(--app-text-secondary);
+}
+
+.app-header-actions .ant-btn:hover {
+  color: var(--app-primary-text-hover) !important;
+  background: var(--app-primary-surface) !important;
+}
+
+.app-header-actions .ant-avatar {
+  color: var(--app-text-inverse);
+  background: var(--app-primary);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--app-primary) 36%, transparent);
+}
+
 .app-user {
   display: flex;
   min-width: 72px;
@@ -138,11 +245,14 @@
 }
 
 .app-content {
-  height: calc(100vh - var(--app-header-height));
+  height: auto;
   min-width: 0;
+  min-height: 0;
+  flex: 1;
   overflow: auto;
-  padding: 18px 24px 24px;
+  padding: 18px 0 0;
   background: transparent;
+  scrollbar-color: var(--app-border-strong) transparent;
 }
 
 .app-content--workbench {
@@ -167,11 +277,94 @@
 }
 
 @media (max-width: 1480px) {
+  .app-shell {
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .app-shell > .ant-layout,
+  .app-sider {
+    height: calc(100vh - 20px);
+  }
+
+  .app-sider .ant-menu {
+    height: calc(100vh - 20px - 74px - 84px);
+  }
+
   .app-content {
-    padding-inline: 18px;
+    padding-top: 14px;
   }
 
   .app-header {
-    padding-inline: 18px;
+    padding-inline: 14px;
+  }
+}
+
+@media (max-width: 1360px) {
+  .app-sider {
+    width: 76px !important;
+    min-width: 76px !important;
+    max-width: 76px !important;
+    flex-basis: 76px !important;
+  }
+
+  .app-brand {
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  .app-brand > div,
+  .app-sider-footer > div {
+    display: none;
+  }
+
+  .app-sider .ant-menu-title-content {
+    position: absolute !important;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    border: 0;
+    margin: -1px;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .app-brand .anticon {
+    font-size: 26px;
+  }
+
+  .app-sider .ant-menu {
+    height: calc(100vh - 20px - 74px - 70px);
+    padding-inline: 7px;
+  }
+
+  .app-sider .ant-menu-item-group-title {
+    height: 8px;
+    padding: 0;
+    overflow: hidden;
+    color: transparent;
+  }
+
+  .app-sider .ant-menu-item {
+    justify-content: center;
+    padding-inline: 0 !important;
+  }
+
+  .app-sider .ant-menu-item .anticon {
+    margin-inline-end: 0;
+    font-size: 17px;
+  }
+
+  .app-sider-footer {
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    justify-content: center;
+    padding: 11px 0;
+  }
+
+  .app-sider-footer > .anticon {
+    margin-top: 0;
   }
 }

@@ -1,85 +1,198 @@
 .graph-pipeline .ant-card-body {
-  padding: 18px 20px 16px;
+  padding: 24px 18px 12px;
+}
+
+.graph-pipeline {
+  border-color: color-mix(in srgb, var(--app-primary-border) 38%, var(--app-border));
+  box-shadow:
+    inset 0 0 46px color-mix(in srgb, var(--app-primary) 4%, transparent),
+    var(--app-card-shadow);
 }
 
 .graph-pipeline-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 14px;
+  overflow: visible;
+  padding-top: 6px;
 }
 
 .graph-pipeline-stage {
   position: relative;
   min-width: 0;
-  padding: 0 16px;
-  border-right: 1px solid var(--app-border-soft);
+  min-height: 124px;
+  padding: 18px 8px 6px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-medium);
+  background: color-mix(in srgb, var(--app-surface-glass) 82%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 88%, transparent);
 }
 
-.graph-pipeline-stage:first-child {
-  padding-left: 0;
+.graph-pipeline-stage::before {
+  position: absolute;
+  z-index: 0;
+  top: 29px;
+  left: -15px;
+  width: 15px;
+  height: 2px;
+  background: var(--app-border-strong);
+  content: '';
 }
 
-.graph-pipeline-stage:last-child {
-  padding-right: 0;
-  border-right: 0;
+.graph-pipeline-stage::after {
+  position: absolute;
+  z-index: 0;
+  top: 29px;
+  right: -15px;
+  width: 15px;
+  height: 2px;
+  background: var(--app-border-strong);
+  content: '';
+}
+
+.graph-pipeline-stage:first-child::before,
+.graph-pipeline-stage:last-child::after {
+  display: none;
+}
+
+.graph-pipeline-stage--complete::before,
+.graph-pipeline-stage--complete::after {
+  background: var(--app-success);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--app-success) 55%, transparent);
+}
+
+.graph-pipeline-stage--active::before,
+.graph-pipeline-stage--active::after {
+  background: var(--app-primary);
+  box-shadow: 0 0 9px color-mix(in srgb, var(--app-primary) 68%, transparent);
+}
+
+.graph-pipeline-stage--blocked::before {
+  background: var(--app-warning);
+}
+
+.graph-pipeline-stage--complete {
+  border-color: var(--app-success-border);
+  box-shadow:
+    inset 0 0 26px color-mix(in srgb, var(--app-success) 5%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 90%, transparent);
+}
+
+.graph-pipeline-stage--active {
+  border-color: color-mix(in srgb, var(--app-primary-border) 78%, var(--app-border));
+  box-shadow:
+    0 0 18px color-mix(in srgb, var(--app-primary) 14%, transparent),
+    inset 0 0 28px color-mix(in srgb, var(--app-primary) 7%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 92%, transparent);
+}
+
+.graph-pipeline-stage--blocked {
+  border-color: color-mix(in srgb, var(--app-warning-border) 88%, var(--app-border));
+  box-shadow:
+    inset 0 0 26px color-mix(in srgb, var(--app-warning) 5%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 90%, transparent);
+}
+
+.graph-pipeline-step-number {
+  position: absolute;
+  z-index: 1;
+  top: -12px;
+  left: calc(50% - 12px);
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border: 3px solid color-mix(in srgb, var(--app-surface) 86%, white);
+  border-radius: 50%;
+  color: var(--app-text-inverse);
+  background: var(--app-text-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.graph-pipeline-stage--complete .graph-pipeline-step-number {
+  background: var(--app-success);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--app-success) 52%, transparent);
+}
+
+.graph-pipeline-stage--active .graph-pipeline-step-number {
+  background: var(--app-primary);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--app-primary) 68%, transparent);
+}
+
+.graph-pipeline-stage--blocked .graph-pipeline-step-number {
+  background: var(--app-warning);
+  box-shadow: 0 0 13px color-mix(in srgb, var(--app-warning) 46%, transparent);
 }
 
 .graph-pipeline-stage-header {
-  display: flex;
-  min-height: 24px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
+  height: 0;
 }
 
-.graph-pipeline-stage-header .ant-tag {
-  margin-inline-end: 0;
-}
-
-.graph-pipeline-stage-header .ant-typography {
-  font-size: 12px;
-  white-space: nowrap;
+.graph-pipeline-stage-icon {
+  display: grid;
+  height: 20px;
+  place-items: center;
+  color: var(--app-text-secondary);
+  font-size: 18px;
 }
 
 .graph-pipeline-stage-title,
-.graph-pipeline-stage-description {
+.graph-pipeline-stage-description,
+.graph-pipeline-stage-status {
   display: block;
 }
 
 .graph-pipeline-stage-title {
-  margin-top: 10px;
-  font-size: 15px;
+  margin-top: 3px;
+  font-size: 13px;
+  line-height: 18px;
+  text-align: center;
+}
+
+.graph-pipeline-stage-status {
+  margin-top: 1px;
+  color: var(--app-text-muted);
+  font-size: 11px;
+  line-height: 15px;
+  text-align: center;
+}
+
+.graph-pipeline-stage--complete .graph-pipeline-stage-status {
+  color: var(--app-success-text);
+}
+
+.graph-pipeline-stage--active .graph-pipeline-stage-status {
+  color: var(--app-primary-text);
+}
+
+.graph-pipeline-stage--blocked .graph-pipeline-stage-status {
+  color: var(--app-warning-text-secondary);
 }
 
 .graph-pipeline-stage-description {
-  min-height: 42px;
-  margin-top: 4px;
-  font-size: 12px;
-  line-height: 20px;
+  min-height: 16px;
+  margin-top: 2px;
+  overflow: hidden;
+  font-size: 11px;
+  line-height: 16px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .graph-pipeline-stage .ant-progress {
-  margin-top: 6px;
+  margin-top: 2px;
   margin-bottom: 0;
 }
 
 .graph-pipeline-percent {
   display: block;
-  margin-top: 2px;
+  margin-top: 0;
   color: var(--app-text-secondary);
-  font-size: 12px;
+  font-size: 10px;
+  line-height: 13px;
   text-align: right;
-}
-
-.graph-pipeline-blocker {
-  width: 100%;
-  margin-top: 14px;
-  padding: 10px 12px;
-  border-radius: 4px;
-  background: var(--app-warning-icon-soft);
-  color: var(--app-warning-text);
-}
-
-.graph-pipeline-blocker .ant-typography {
-  color: inherit;
-  font-size: 13px;
 }

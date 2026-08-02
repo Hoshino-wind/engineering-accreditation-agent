@@ -3,26 +3,26 @@ import type { TableProps } from 'antd';
 
 import {
   EvaluationStatusTag,
-  type AttainmentEvaluationItem,
+  type AttainmentEvaluationSummary,
   type EvaluationItemStatus,
 } from '../../../entities/attainment-evaluation';
-import { calculateAttainment } from '../../../features/calculate-attainment';
 import { AttainmentEvaluationFiltersControl } from '../../../features/filter-attainment-evaluations';
 
 interface EvaluationObjectQueueProps {
   course: string;
   courses: string[];
-  evaluations: AttainmentEvaluationItem[];
+  evaluations: AttainmentEvaluationSummary[];
   keyword: string;
   onCourseChange: (value: string) => void;
   onKeywordChange: (value: string) => void;
-  onSelect: (evaluation: AttainmentEvaluationItem) => void;
+  onSelect: (evaluation: AttainmentEvaluationSummary) => void;
   onStatusChange: (value: EvaluationItemStatus | 'all') => void;
   selectedEvaluationId?: string;
   status: EvaluationItemStatus | 'all';
+  totalCount: number;
 }
 
-const columns: TableProps<AttainmentEvaluationItem>['columns'] = [
+const columns: TableProps<AttainmentEvaluationSummary>['columns'] = [
   {
     key: 'objective',
     title: '课程目标',
@@ -52,10 +52,7 @@ const columns: TableProps<AttainmentEvaluationItem>['columns'] = [
     key: 'result',
     title: '结果',
     width: 58,
-    render: (_, evaluation) => {
-      const result = calculateAttainment(evaluation);
-      return result.score?.toFixed(2) ?? '—';
-    },
+    render: (_, evaluation) => evaluation.score?.toFixed(2) ?? '—',
   },
 ];
 
@@ -70,13 +67,14 @@ export function EvaluationObjectQueue({
   onStatusChange,
   selectedEvaluationId,
   status,
+  totalCount,
 }: EvaluationObjectQueueProps) {
   return (
     <Card
       className="evaluation-object-queue"
       extra={
         <Typography.Text type="secondary">
-          当前 {evaluations.length} / 共 6 项
+          当前 {evaluations.length} / 共 {totalCount} 项
         </Typography.Text>
       }
       size="small"
@@ -91,7 +89,7 @@ export function EvaluationObjectQueue({
         onStatusChange={onStatusChange}
         status={status}
       />
-      <Table<AttainmentEvaluationItem>
+      <Table<AttainmentEvaluationSummary>
         columns={columns}
         dataSource={evaluations}
         locale={{ emptyText: '没有符合条件的评价对象' }}
