@@ -185,6 +185,17 @@ export function AbilityReviewPanel({
             AI 依据：{edge.aiReasoning}
           </Paragraph>
         )}
+        {(edge.reviewedBy || edge.reviewedAt || edge.evidenceSummary) && (
+          <div className="ability-review-edge-trace">
+            <Space size={6} wrap>
+              {edge.reviewedBy && <Tag color="green">{edge.reviewedBy}</Tag>}
+              {edge.reviewedAt && <Tag>{edge.reviewedAt}</Tag>}
+            </Space>
+            {edge.evidenceSummary && (
+              <Text type="secondary">{edge.evidenceSummary}</Text>
+            )}
+          </div>
+        )}
         <Space size={6} className="ability-review-edge-actions">
           <Button
             size="small"

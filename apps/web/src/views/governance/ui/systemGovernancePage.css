@@ -1,0 +1,104 @@
+.system-governance-page {
+  width: 100%;
+  max-width: var(--app-content-max-width);
+  margin: 0 auto;
+}
+
+.system-governance-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.system-governance-header .ant-typography {
+  margin-bottom: 0;
+}
+
+.system-governance-header h2.ant-typography {
+  margin-top: 0;
+  font-size: var(--font-size-2xl);
+  line-height: 32px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.system-governance-header .ant-typography-secondary {
+  margin-top: var(--space-1);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.system-governance-notice {
+  margin-bottom: var(--space-4);
+  border-radius: var(--radius-lg);
+}
+
+.system-governance-program {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  background: #ffffff;
+  box-shadow: var(--shadow-card);
+}
+
+.system-governance-program h3.ant-typography {
+  margin: var(--space-1) 0;
+}
+
+.system-governance-stats {
+  margin-bottom: var(--space-4);
+}
+
+.system-governance-stats .ant-card {
+  border-radius: var(--radius-lg);
+  border-color: var(--color-border-light);
+  box-shadow: var(--shadow-card);
+}
+
+.system-governance-stats .ant-statistic-title {
+  margin-bottom: 2px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.system-governance-stats .ant-statistic-content {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+}
+
+.system-governance-section {
+  margin-bottom: var(--space-5);
+}
+
+.system-governance-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.system-governance-section h4.ant-typography {
+  margin: 0;
+  font-size: var(--font-size-lg);
+}
+
+.system-governance-section .ant-table {
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: var(--shadow-card);
+}
+
+.system-governance-section .ant-table-thead > tr > th {
+  background: var(--color-bg);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}

@@ -50,5 +50,9 @@ class RecognitionCandidate:
     impact_course_objectives: int = 0
     impact_ability_nodes: int = 0
     impact_rubric_items: int = 0
+    support_strength: str | None = None
     conflict_message: str | None = None
+    reviewed_by: str | None = None
+    reviewed_at: str | None = None
+    review_comment: str | None = None
     evidence: tuple[CandidateEvidence, ...] = field(default_factory=tuple)

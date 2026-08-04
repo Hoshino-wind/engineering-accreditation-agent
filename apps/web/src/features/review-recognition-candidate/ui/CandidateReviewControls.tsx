@@ -10,6 +10,7 @@ import {
   Button,
   Input,
   Radio,
+  Select,
   Tooltip,
   Typography,
 } from 'antd';
@@ -29,14 +30,23 @@ interface CandidateReviewControlsProps {
   candidate: RecognitionCandidate;
   draft: CandidateReviewDraft;
   onDecisionChange: (decision: CandidateReviewDecision) => void;
+  onFieldChange: (
+    field: 'evidenceExcerpt' | 'sourceNode' | 'strength' | 'targetNode',
+    value: string,
+  ) => void;
   onNoteChange: (note: string) => void;
+  onSubmit: () => Promise<void> | void;
+  submitting?: boolean;
 }
 
 export function CandidateReviewControls({
   candidate,
   draft,
   onDecisionChange,
+  onFieldChange,
   onNoteChange,
+  onSubmit,
+  submitting = false,
 }: CandidateReviewControlsProps) {
   return (
     <section className="candidate-review-controls">
@@ -78,17 +88,53 @@ export function CandidateReviewControls({
         value={draft.note}
       />
 
+      <Typography.Text strong>可编辑关系内容</Typography.Text>
+      <Input
+        onChange={(event) => onFieldChange('sourceNode', event.target.value)}
+        placeholder={candidate.sourceNode}
+        value={draft.sourceNode ?? candidate.sourceNode}
+      />
+      <Input
+        onChange={(event) => onFieldChange('targetNode', event.target.value)}
+        placeholder={candidate.targetNode}
+        value={draft.targetNode ?? candidate.targetNode}
+      />
+      <Select
+        onChange={(value) => onFieldChange('strength', value)}
+        options={[
+          { label: 'strong', value: 'strong' },
+          { label: 'medium', value: 'medium' },
+          { label: 'weak', value: 'weak' },
+        ]}
+        placeholder="支撑强度"
+        value={draft.strength ?? candidate.supportStrength}
+      />
+      <TextArea
+        maxLength={500}
+        onChange={(event) => onFieldChange('evidenceExcerpt', event.target.value)}
+        placeholder={candidate.evidence[0]?.excerpt ?? '证据摘录'}
+        rows={3}
+        showCount
+        value={draft.evidenceExcerpt ?? candidate.evidence[0]?.excerpt}
+      />
+
       {draft.decision ? (
         <Alert
-          description="决定和说明仅保存在当前页面草稿中，刷新后不会保留。"
+          description="点击确认后会写入当前登录用户的后端审核状态；演示环境重启后仍可能重置。"
           showIcon
-          title="审核草稿已更新"
+          title="审核决定已选择"
           type="info"
         />
       ) : null}
 
-      <Tooltip title="审核写入将在 M4 后端业务切片接入">
-        <Button block disabled type="primary">
+      <Tooltip title={draft.decision ? '写入后端审核状态' : '请先选择审核决定'}>
+        <Button
+          block
+          disabled={!draft.decision}
+          loading={submitting}
+          onClick={onSubmit}
+          type="primary"
+        >
           确认审核
         </Button>
       </Tooltip>

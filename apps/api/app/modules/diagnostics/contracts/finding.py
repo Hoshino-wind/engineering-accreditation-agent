@@ -6,6 +6,7 @@ from app.modules.diagnostics.domain.finding import (
     DiagnosticFindingRisk,
     DiagnosticFindingType,
     FindingDecisionStatus,
+    GraphDiagnosticReport,
 )
 
 
@@ -81,3 +82,32 @@ class DiagnosticFindingResponse(BaseModel):
 
 class FindingDecisionRequest(BaseModel):
     decision: str  # confirm | dismiss | convert
+
+
+class GraphDiagnosticReportResponse(BaseModel):
+    model_config = ConfigDict(use_enum_values=True)
+
+    graphVersion: str
+    generatedAt: str
+    overallCoverageRate: float
+    gapCount: int
+    partialCount: int
+    orphanNodeCount: int
+    diagnosticsMode: str
+    findings: list[DiagnosticFindingResponse]
+
+    @classmethod
+    def from_domain(cls, report: GraphDiagnosticReport) -> "GraphDiagnosticReportResponse":
+        return cls(
+            graphVersion=report.graph_version,
+            generatedAt=report.generated_at,
+            overallCoverageRate=report.overall_coverage_rate,
+            gapCount=report.gap_count,
+            partialCount=report.partial_count,
+            orphanNodeCount=report.orphan_node_count,
+            diagnosticsMode=report.diagnostics_mode,
+            findings=[
+                DiagnosticFindingResponse.from_domain(finding)
+                for finding in report.findings
+            ],
+        )

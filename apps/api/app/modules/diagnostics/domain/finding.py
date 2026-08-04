@@ -55,3 +55,15 @@ class DiagnosticFinding:
     impact_evaluation_inputs: int = 0
     suggested_destination: str = "M7"
     evidence: tuple[DiagnosticEvidenceRef, ...] = field(default_factory=tuple)
+
+
+@dataclass(frozen=True, slots=True)
+class GraphDiagnosticReport:
+    graph_version: str
+    generated_at: str
+    overall_coverage_rate: float
+    gap_count: int
+    partial_count: int
+    orphan_node_count: int
+    diagnostics_mode: str
+    findings: tuple[DiagnosticFinding, ...] = field(default_factory=tuple)

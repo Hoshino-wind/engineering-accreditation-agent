@@ -14,6 +14,7 @@ import {
   Card,
   Divider,
   Empty,
+  message,
   Space,
   Spin,
   Statistic,
@@ -29,7 +30,7 @@ import {
   type SuggestionPriority,
   type SuggestionType,
 } from '../../../features/generate-improvement-suggestion';
-import { prototypeOnlyAbilityGraph } from '../../../entities/ability-graph';
+import { fetchAbilityGraph } from '../../../shared/api/graphClient';
 
 import './teachingImprovementPage.css';
 
@@ -56,15 +57,25 @@ export function TeachingImprovementPage() {
 
   // 首次加载时调用 AI 生成建议
   useEffect(() => {
-    void generateSuggestions(prototypeOnlyAbilityGraph)
-      .then((result) => {
+    const loadSuggestions = async () => {
+      setLoading(true);
+      try {
+        const graph = await fetchAbilityGraph();
+        const result = await generateSuggestions(graph);
         setSuggestions(result);
         const firstSuggestion = result[0];
         if (firstSuggestion) {
           setSelectedId(firstSuggestion.id);
         }
-      })
-      .finally(() => setLoading(false));
+      } catch (error) {
+        const msg =
+          error instanceof Error ? error.message : '教学改进建议生成失败';
+        message.error(msg);
+      } finally {
+        setLoading(false);
+      }
+    };
+    void loadSuggestions();
   }, []);
 
   const updateStatus = (id: string, status: string) => {

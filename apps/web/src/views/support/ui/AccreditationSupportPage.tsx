@@ -1,8 +1,7 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
-import { Alert, Col, Row, Space, Spin, Tag, Typography } from 'antd';
+import { Alert, Col, message, Row, Space, Spin, Tag, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 
-import { prototypeOnlyAbilityGraph } from '../../../entities/ability-graph/model/prototypeOnlyAbilityGraph';
 import {
   checkReportCompleteness,
   CompletenessCheckList,
@@ -10,6 +9,7 @@ import {
   ReportExportButton,
   ReportPreview,
 } from '../../../features/generate-report';
+import { fetchAbilityGraph } from '../../../shared/api/graphClient';
 import { SupportSummary } from '../../../widgets/support-summary';
 import { SupportWorkbench } from '../../../widgets/support-workbench';
 
@@ -22,9 +22,20 @@ export function AccreditationSupportPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    void generateSelfEvaluationReport(prototypeOnlyAbilityGraph)
-      .then((result) => setSections(result))
-      .finally(() => setLoading(false));
+    const loadReport = async () => {
+      setLoading(true);
+      try {
+        const graph = await fetchAbilityGraph();
+        setSections(await generateSelfEvaluationReport(graph));
+      } catch (error) {
+        const msg =
+          error instanceof Error ? error.message : '认证支撑报告生成失败';
+        message.error(msg);
+      } finally {
+        setLoading(false);
+      }
+    };
+    void loadReport();
   }, []);
 
   const checks = checkReportCompleteness(sections);

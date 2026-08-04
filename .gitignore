@@ -8,6 +8,9 @@ data-private/
 uploads/
 storage/
 *.rar
+apps/api/var/
+apps/api/*.log
+apps/web/*.log
 
 # Python
 __pycache__/

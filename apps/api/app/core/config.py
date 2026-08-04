@@ -17,9 +17,19 @@ class Settings(BaseSettings):
     environment: Literal["development", "test", "staging", "production"] = "development"
     api_v1_prefix: str = "/api/v1"
     database_url: str | None = None
+    database_migrate_on_startup: bool = False
     redis_url: str | None = None
     object_storage_endpoint: str | None = None
-    cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
+    cors_origins: list[str] = Field(
+        default_factory=lambda: [
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://localhost:5176",
+            "http://127.0.0.1:5176",
+            "http://localhost:5177",
+            "http://127.0.0.1:5177",
+        ]
+    )
 
     # ── 认证 / 用户 ─────────────────────────────────────
     jwt_secret: str = "dev-only-change-me-in-prod-2026-engineering-accreditation"

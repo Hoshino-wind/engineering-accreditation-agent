@@ -144,7 +144,6 @@ const navigationItems: MenuProps['items'] = [
         key: '/governance',
         icon: <SettingOutlined />,
         label: 'M9 系统治理',
-        disabled: true,
       },
     ],
   },
@@ -193,6 +192,10 @@ const routeBreadcrumbs: Record<string, RouteBreadcrumb> = {
   '/support': {
     areaName: '改进与输出',
     pageName: '工程认证支撑',
+  },
+  '/governance': {
+    areaName: '系统',
+    pageName: '系统治理',
   },
 };
 

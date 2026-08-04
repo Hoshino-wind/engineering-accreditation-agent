@@ -1,0 +1,2 @@
+"""Academic master-data module."""
+

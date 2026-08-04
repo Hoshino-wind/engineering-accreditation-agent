@@ -45,6 +45,10 @@ export interface AbilityGraphEdge {
   strength?: 'strong' | 'medium' | 'weak';
   confidence?: number;
   aiReasoning?: string;
+  candidateId?: string;
+  reviewedBy?: string;
+  reviewedAt?: string;
+  evidenceSummary?: string;
 }
 
 export interface AbilityGraphData {

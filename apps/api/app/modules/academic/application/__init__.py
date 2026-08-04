@@ -1,0 +1,35 @@
+from app.modules.academic.application.ports import AcademicCatalogRepository
+from app.modules.academic.application.use_cases import (
+    CreateCompetencyIndicator,
+    CreateCourse,
+    CreateCourseObjective,
+    CreateExperimentProject,
+    CreateGraduationRequirement,
+    CreateRubricItem,
+    GetAcademicCatalog,
+    UpdateAcademicProgram,
+    UpdateCompetencyIndicator,
+    UpdateCourse,
+    UpdateCourseObjective,
+    UpdateExperimentProject,
+    UpdateGraduationRequirement,
+    UpdateRubricItem,
+)
+
+__all__ = [
+    "AcademicCatalogRepository",
+    "CreateCompetencyIndicator",
+    "CreateCourse",
+    "CreateCourseObjective",
+    "CreateExperimentProject",
+    "CreateGraduationRequirement",
+    "CreateRubricItem",
+    "GetAcademicCatalog",
+    "UpdateAcademicProgram",
+    "UpdateCompetencyIndicator",
+    "UpdateCourse",
+    "UpdateCourseObjective",
+    "UpdateExperimentProject",
+    "UpdateGraduationRequirement",
+    "UpdateRubricItem",
+]

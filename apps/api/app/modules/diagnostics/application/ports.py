@@ -22,3 +22,8 @@ class FindingRepository(Protocol):
         finding_id: str,
         status: FindingDecisionStatus,
     ) -> DiagnosticFinding | None: ...
+
+    async def replace_graph_findings(
+        self,
+        findings: list[DiagnosticFinding],
+    ) -> list[DiagnosticFinding]: ...

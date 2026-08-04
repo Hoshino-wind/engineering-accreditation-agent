@@ -1,7 +1,5 @@
 import type { UploadedMaterial } from './uploadedMaterial';
 
-// 试点示例数据：学校已上传的教学材料
-// 专业方向：电子信息工程(嵌入式方向)，与 prototypeOnlyAbilityGraph 学校节点一致
 export const prototypeOnlyUploadedMaterials: UploadedMaterial[] = [
   {
     id: 'UM-001',
@@ -40,7 +38,7 @@ export const prototypeOnlyUploadedMaterials: UploadedMaterial[] = [
   },
   {
     id: 'UM-004',
-    fileName: '嵌入式系统原理期末试卷(2024秋).xlsx',
+    fileName: '嵌入式系统原理期末试卷2024秋.xlsx',
     fileType: 'xlsx',
     category: '试卷',
     uploadTime: '2025-06-21 16:48',
