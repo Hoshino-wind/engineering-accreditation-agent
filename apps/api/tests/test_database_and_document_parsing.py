@@ -30,6 +30,7 @@ def test_production_schema_contains_auth_material_version_and_graph_tables() -> 
         "graph_nodes",
         "graph_edges",
         "diagnostic_findings",
+        "improvement_tasks",
     } <= table_names
 
 

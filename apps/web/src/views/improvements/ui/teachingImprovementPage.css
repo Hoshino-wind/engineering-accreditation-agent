@@ -1,4 +1,3 @@
-/* === 教学改进页面 === */
 .teaching-improvement-page {
   width: 100%;
   max-width: var(--app-content-max-width);
@@ -10,6 +9,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  gap: var(--space-4);
   margin-bottom: 16px;
 }
 
@@ -25,31 +25,31 @@
 }
 
 .teaching-improvement-page-header .ant-typography-secondary {
+  max-width: 980px;
   margin-top: 4px;
-  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
 }
 
-.improvement-stats {
-  margin-bottom: 12px;
-}
-
+.improvement-stats,
 .improvement-alert {
   margin-bottom: 12px;
 }
 
-/* 左右布局 */
+.improvement-alert .ant-alert-message {
+  font-weight: var(--font-weight-semibold);
+}
+
 .improvement-body {
   display: grid;
-  grid-template-columns: 360px 1fr;
+  grid-template-columns: minmax(340px, 0.9fr) minmax(520px, 1.4fr);
   gap: 16px;
   align-items: start;
 }
 
-/* 建议列表 */
-.improvement-list-card {
-  max-height: 600px;
-  overflow-y: auto;
+.improvement-list-card,
+.improvement-detail-card {
+  min-height: 560px;
 }
 
 .improvement-list {
@@ -59,54 +59,127 @@
 }
 
 .improvement-list-item {
+  width: 100%;
   padding: 12px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-container);
+  color: inherit;
+  text-align: left;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 
 .improvement-list-item:hover {
   border-color: #6fa8ff;
-  background: var(--color-primary-lighter);
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.12);
 }
 
 .improvement-list-item.selected {
   border-color: var(--color-primary);
-  background: var(--color-primary-light);
-  box-shadow: 0 0 0 1px var(--color-primary);
+  background: var(--color-primary-lighter);
 }
 
 .improvement-list-item-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
 }
 
 .improvement-list-item-title {
   display: block;
+  margin-bottom: 4px;
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  line-height: 1.5;
 }
 
-/* 详情卡片 */
-.improvement-detail-card {
-  min-height: 400px;
-}
-
-.improvement-detail-header {
+.improvement-list-item-meta {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-bottom: 8px;
+  font-size: var(--font-size-xs);
+}
+
+.improvement-loading {
+  display: flex;
+  min-height: 180px;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.improvement-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.improvement-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.improvement-form-grid label,
+.improvement-reevaluation-row label {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.improvement-form-grid .ant-select {
+  width: 100%;
 }
 
 .improvement-detail-section {
-  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border-light);
+}
+
+.improvement-detail-section .ant-typography {
+  margin-bottom: 0;
+}
+
+.improvement-detail-section textarea + input,
+.improvement-detail-section .ant-input + .ant-input {
+  margin-top: 8px;
+}
+
+.improvement-reevaluation-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 240px) 1fr;
+  align-items: end;
 }
 
 .improvement-detail-actions {
-  margin-top: 24px;
-  display: flex;
-  gap: 8px;
+  padding-top: 4px;
+}
+
+@media (max-width: 1180px) {
+  .improvement-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .teaching-improvement-page-header {
+    flex-direction: column;
+  }
+
+  .improvement-form-grid,
+  .improvement-reevaluation-row {
+    grid-template-columns: 1fr;
+  }
 }

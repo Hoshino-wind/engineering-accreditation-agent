@@ -325,6 +325,37 @@ diagnostic_findings = Table(
     UniqueConstraint("user_id", "id", name="uq_diagnostic_findings_user_id"),
 )
 
+improvement_tasks = Table(
+    "improvement_tasks",
+    metadata,
+    Column("id", String(120), primary_key=True),
+    Column("user_id", String(80), primary_key=True),
+    Column("display_id", String(80), nullable=False),
+    Column("source_module", String(40), nullable=False),
+    Column("source_finding_id", String(120)),
+    Column("source_label", Text, nullable=False),
+    Column("title", Text, nullable=False),
+    Column("course", String(180), nullable=False),
+    Column("target_node", Text, nullable=False),
+    Column("priority", String(40), nullable=False),
+    Column("status", String(40), nullable=False),
+    Column("owner", String(120), nullable=False),
+    Column("due_at", String(40), nullable=False),
+    Column("action_title", Text, nullable=False),
+    Column("action_detail", Text, nullable=False),
+    Column("verification_method", Text, nullable=False),
+    Column("baseline", Float),
+    Column("target_value", Float),
+    Column("completion_summary", Text, nullable=False, default=""),
+    Column("evidence_uri", Text, nullable=False, default=""),
+    Column("reevaluation_result", Float),
+    Column("created_at", String(40), nullable=False),
+    Column("updated_at", String(40), nullable=False),
+    Column("closed_at", String(40)),
+    Column("source_payload_json", Text, nullable=False, default="{}"),
+    UniqueConstraint("user_id", "id", name="uq_improvement_tasks_user_id"),
+)
+
 Index("idx_users_username", users.c.username)
 Index(
     "idx_uploaded_materials_user_created",
@@ -357,6 +388,16 @@ Index(
     diagnostic_findings.c.user_id,
     diagnostic_findings.c.rule_id,
 )
+Index(
+    "idx_improvement_tasks_status",
+    improvement_tasks.c.user_id,
+    improvement_tasks.c.status,
+)
+Index(
+    "idx_improvement_tasks_source",
+    improvement_tasks.c.user_id,
+    improvement_tasks.c.source_finding_id,
+)
 
 TENANT_SCOPED_TABLES = (
     "academic_programs",
@@ -374,6 +415,7 @@ TENANT_SCOPED_TABLES = (
     "graph_nodes",
     "graph_edges",
     "diagnostic_findings",
+    "improvement_tasks",
 )
 
 

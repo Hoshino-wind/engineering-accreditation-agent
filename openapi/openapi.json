@@ -1648,6 +1648,137 @@
         }
       }
     },
+    "/api/v1/improvements/tasks": {
+      "get": {
+        "tags": [
+          "improvements"
+        ],
+        "summary": "List teaching improvement tasks",
+        "operationId": "list_tasks_api_v1_improvements_tasks_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "priority",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Priority"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ImprovementTaskResponse"
+                  },
+                  "title": "Response List Tasks Api V1 Improvements Tasks Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/improvements/tasks/{task_id}": {
+      "patch": {
+        "tags": [
+          "improvements"
+        ],
+        "summary": "Update teaching improvement task",
+        "operationId": "update_task_api_v1_improvements_tasks__task_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Task Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImprovementTaskUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImprovementTaskResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/llm/extract": {
       "post": {
         "tags": [
@@ -4099,6 +4230,351 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "ImprovementPriority": {
+        "type": "string",
+        "enum": [
+          "high",
+          "medium",
+          "low"
+        ],
+        "title": "ImprovementPriority"
+      },
+      "ImprovementStatus": {
+        "type": "string",
+        "enum": [
+          "planned",
+          "in-progress",
+          "awaiting-reevaluation",
+          "closed"
+        ],
+        "title": "ImprovementStatus"
+      },
+      "ImprovementTaskResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "displayId": {
+            "type": "string",
+            "title": "Displayid"
+          },
+          "sourceModule": {
+            "type": "string",
+            "title": "Sourcemodule"
+          },
+          "sourceFindingId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sourcefindingid"
+          },
+          "sourceLabel": {
+            "type": "string",
+            "title": "Sourcelabel"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "course": {
+            "type": "string",
+            "title": "Course"
+          },
+          "targetNode": {
+            "type": "string",
+            "title": "Targetnode"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/ImprovementPriority"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ImprovementStatus"
+          },
+          "owner": {
+            "type": "string",
+            "title": "Owner"
+          },
+          "dueAt": {
+            "type": "string",
+            "title": "Dueat"
+          },
+          "actionTitle": {
+            "type": "string",
+            "title": "Actiontitle"
+          },
+          "actionDetail": {
+            "type": "string",
+            "title": "Actiondetail"
+          },
+          "verificationMethod": {
+            "type": "string",
+            "title": "Verificationmethod"
+          },
+          "baseline": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline"
+          },
+          "targetValue": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Targetvalue"
+          },
+          "completionSummary": {
+            "type": "string",
+            "title": "Completionsummary"
+          },
+          "evidenceUri": {
+            "type": "string",
+            "title": "Evidenceuri"
+          },
+          "reevaluationResult": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reevaluationresult"
+          },
+          "createdAt": {
+            "type": "string",
+            "title": "Createdat"
+          },
+          "updatedAt": {
+            "type": "string",
+            "title": "Updatedat"
+          },
+          "closedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closedat"
+          },
+          "sourcePayload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Sourcepayload"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "displayId",
+          "sourceModule",
+          "sourceLabel",
+          "title",
+          "course",
+          "targetNode",
+          "priority",
+          "status",
+          "owner",
+          "dueAt",
+          "actionTitle",
+          "actionDetail",
+          "verificationMethod",
+          "completionSummary",
+          "evidenceUri",
+          "createdAt",
+          "updatedAt",
+          "sourcePayload"
+        ],
+        "title": "ImprovementTaskResponse"
+      },
+      "ImprovementTaskUpdateRequest": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "course": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course"
+          },
+          "targetNode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Targetnode"
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImprovementPriority"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImprovementStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "owner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner"
+          },
+          "dueAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dueat"
+          },
+          "actionTitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actiontitle"
+          },
+          "actionDetail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actiondetail"
+          },
+          "verificationMethod": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verificationmethod"
+          },
+          "baseline": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline"
+          },
+          "targetValue": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Targetvalue"
+          },
+          "completionSummary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completionsummary"
+          },
+          "evidenceUri": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidenceuri"
+          },
+          "reevaluationResult": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reevaluationresult"
+          }
+        },
+        "type": "object",
+        "title": "ImprovementTaskUpdateRequest"
       },
       "InferRelationsRequest": {
         "properties": {

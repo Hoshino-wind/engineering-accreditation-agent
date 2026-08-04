@@ -531,6 +531,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/diagnostics/graph": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Run graph diagnostics from the approved ability graph */
+        get: operations["run_graph_diagnostics_api_v1_diagnostics_graph_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/diagnostics/findings": {
         parameters: {
             query?: never;
@@ -563,6 +580,40 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/v1/improvements/tasks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List teaching improvement tasks */
+        get: operations["list_tasks_api_v1_improvements_tasks_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/improvements/tasks/{task_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update teaching improvement task */
+        patch: operations["update_task_api_v1_improvements_tasks__task_id__patch"];
         trace?: never;
     };
     "/api/v1/llm/extract": {
@@ -1426,6 +1477,25 @@ export interface components {
             /** Description */
             description: string;
         };
+        /** GraphDiagnosticReportResponse */
+        GraphDiagnosticReportResponse: {
+            /** Graphversion */
+            graphVersion: string;
+            /** Generatedat */
+            generatedAt: string;
+            /** Overallcoveragerate */
+            overallCoverageRate: number;
+            /** Gapcount */
+            gapCount: number;
+            /** Partialcount */
+            partialCount: number;
+            /** Orphannodecount */
+            orphanNodeCount: number;
+            /** Diagnosticsmode */
+            diagnosticsMode: string;
+            /** Findings */
+            findings: components["schemas"]["DiagnosticFindingResponse"][];
+        };
         /** GraphEdgeReviewRequest */
         GraphEdgeReviewRequest: {
             /** Decision */
@@ -1435,6 +1505,98 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /**
+         * ImprovementPriority
+         * @enum {string}
+         */
+        ImprovementPriority: "high" | "medium" | "low";
+        /**
+         * ImprovementStatus
+         * @enum {string}
+         */
+        ImprovementStatus: "planned" | "in-progress" | "awaiting-reevaluation" | "closed";
+        /** ImprovementTaskResponse */
+        ImprovementTaskResponse: {
+            /** Id */
+            id: string;
+            /** Displayid */
+            displayId: string;
+            /** Sourcemodule */
+            sourceModule: string;
+            /** Sourcefindingid */
+            sourceFindingId?: string | null;
+            /** Sourcelabel */
+            sourceLabel: string;
+            /** Title */
+            title: string;
+            /** Course */
+            course: string;
+            /** Targetnode */
+            targetNode: string;
+            priority: components["schemas"]["ImprovementPriority"];
+            status: components["schemas"]["ImprovementStatus"];
+            /** Owner */
+            owner: string;
+            /** Dueat */
+            dueAt: string;
+            /** Actiontitle */
+            actionTitle: string;
+            /** Actiondetail */
+            actionDetail: string;
+            /** Verificationmethod */
+            verificationMethod: string;
+            /** Baseline */
+            baseline?: number | null;
+            /** Targetvalue */
+            targetValue?: number | null;
+            /** Completionsummary */
+            completionSummary: string;
+            /** Evidenceuri */
+            evidenceUri: string;
+            /** Reevaluationresult */
+            reevaluationResult?: number | null;
+            /** Createdat */
+            createdAt: string;
+            /** Updatedat */
+            updatedAt: string;
+            /** Closedat */
+            closedAt?: string | null;
+            /** Sourcepayload */
+            sourcePayload: {
+                [key: string]: unknown;
+            };
+        };
+        /** ImprovementTaskUpdateRequest */
+        ImprovementTaskUpdateRequest: {
+            /** Title */
+            title?: string | null;
+            /** Course */
+            course?: string | null;
+            /** Targetnode */
+            targetNode?: string | null;
+            priority?: components["schemas"]["ImprovementPriority"] | null;
+            status?: components["schemas"]["ImprovementStatus"] | null;
+            /** Owner */
+            owner?: string | null;
+            /** Dueat */
+            dueAt?: string | null;
+            /** Actiontitle */
+            actionTitle?: string | null;
+            /** Actiondetail */
+            actionDetail?: string | null;
+            /** Verificationmethod */
+            verificationMethod?: string | null;
+            /** Baseline */
+            baseline?: number | null;
+            /** Targetvalue */
+            targetValue?: number | null;
+            /** Completionsummary */
+            completionSummary?: string | null;
+            /** Evidenceuri */
+            evidenceUri?: string | null;
+            /** Reevaluationresult */
+            reevaluationResult?: number | null;
         };
         /** InferRelationsRequest */
         InferRelationsRequest: {
@@ -2975,6 +3137,26 @@ export interface operations {
             };
         };
     };
+    run_graph_diagnostics_api_v1_diagnostics_graph_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GraphDiagnosticReportResponse"];
+                };
+            };
+        };
+    };
     list_findings_api_v1_diagnostics_findings_get: {
         parameters: {
             query?: {
@@ -3033,6 +3215,73 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DiagnosticFindingResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_tasks_api_v1_improvements_tasks_get: {
+        parameters: {
+            query?: {
+                status?: string | null;
+                priority?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImprovementTaskResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_task_api_v1_improvements_tasks__task_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImprovementTaskUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImprovementTaskResponse"];
                 };
             };
             /** @description Validation Error */

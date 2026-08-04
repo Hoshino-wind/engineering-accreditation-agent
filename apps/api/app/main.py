@@ -61,6 +61,15 @@ from app.modules.graph.infra import (
     SQLiteAbilityGraphRepository,
 )
 from app.modules.graph.routes import create_graph_router
+from app.modules.improvements.application import (
+    ListImprovementTasks,
+    UpdateImprovementTask,
+)
+from app.modules.improvements.infra import (
+    PostgresImprovementTaskRepository,
+    SQLiteImprovementTaskRepository,
+)
+from app.modules.improvements.routes import create_improvements_router
 from app.modules.llm.application.ports import LLMClientPort
 from app.modules.llm.application.rag_port import RAGSearchPort
 from app.modules.llm.infra.llm_client import LLMConfig, OpenAICompatibleLLMClient
@@ -329,6 +338,24 @@ def create_app() -> FastAPI:
     ) -> ReviewGraphEdge:
         return ReviewGraphEdge(repository=graph_repository(current_user.id))
 
+    # --- M7 Teaching Improvement ---
+    def improvement_repository(
+        user_id: str,
+    ) -> SQLiteImprovementTaskRepository | PostgresImprovementTaskRepository:
+        if postgres_enabled:
+            return PostgresImprovementTaskRepository(user_id, settings.database_url or "")
+        return SQLiteImprovementTaskRepository(user_id)
+
+    def provide_list_improvement_tasks(
+        current_user: Annotated[User, Depends(get_current_user)],
+    ) -> ListImprovementTasks:
+        return ListImprovementTasks(repository=improvement_repository(current_user.id))
+
+    def provide_update_improvement_task(
+        current_user: Annotated[User, Depends(get_current_user)],
+    ) -> UpdateImprovementTask:
+        return UpdateImprovementTask(repository=improvement_repository(current_user.id))
+
     # --- M5 Diagnostics ---
     def finding_repository(
         user_id: str,
@@ -345,7 +372,10 @@ def create_app() -> FastAPI:
     def provide_decide_finding(
         current_user: Annotated[User, Depends(get_current_user)],
     ) -> DecideFinding:
-        return DecideFinding(repository=finding_repository(current_user.id))
+        return DecideFinding(
+            repository=finding_repository(current_user.id),
+            improvement_projection=improvement_repository(current_user.id),
+        )
 
     def provide_run_graph_diagnostics(
         current_user: Annotated[User, Depends(get_current_user)],
@@ -465,6 +495,13 @@ def create_app() -> FastAPI:
             provide_list_findings,
             provide_decide_finding,
             provide_run_graph_diagnostics,
+        ),
+        prefix=settings.api_v1_prefix,
+    )
+    application.include_router(
+        create_improvements_router(
+            provide_list_improvement_tasks,
+            provide_update_improvement_task,
         ),
         prefix=settings.api_v1_prefix,
     )

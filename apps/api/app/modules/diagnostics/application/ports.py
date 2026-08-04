@@ -27,3 +27,7 @@ class FindingRepository(Protocol):
         self,
         findings: list[DiagnosticFinding],
     ) -> list[DiagnosticFinding]: ...
+
+
+class ImprovementTaskProjection(Protocol):
+    async def upsert_from_finding(self, finding: DiagnosticFinding) -> object: ...
