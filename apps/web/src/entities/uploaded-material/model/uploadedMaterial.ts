@@ -1,7 +1,4 @@
-// M3 教学资源上传 - 领域模型
-// 学校上传的原始材料，经 AI 提取后转为图谱节点
-
-export type UploadedMaterialFileType = 'pdf' | 'docx' | 'xlsx';
+export type UploadedMaterialFileType = 'pdf' | 'docx' | 'xlsx' | 'txt';
 
 export type UploadedMaterialCategory =
   | '培养方案'
@@ -21,6 +18,7 @@ export interface UploadedMaterial {
   fileName: string;
   fileType: UploadedMaterialFileType;
   category: UploadedMaterialCategory;
+  course?: string;
   uploadTime: string;
   uploadedBy: string;
   status: UploadedMaterialStatus;
@@ -28,4 +26,6 @@ export interface UploadedMaterial {
   fileUrl: string;
   extractedNodeCount?: number;
   failureReason?: string;
+  parserVersion?: string;
+  parseStrategy?: string;
 }

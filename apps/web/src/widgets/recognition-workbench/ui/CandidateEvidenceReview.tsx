@@ -21,16 +21,25 @@ interface CandidateEvidenceReviewProps {
   candidate: RecognitionCandidate | null;
   draft: CandidateReviewDraft;
   onDecisionChange: (decision: CandidateReviewDecision) => void;
+  onFieldChange: (
+    field: 'evidenceExcerpt' | 'sourceNode' | 'strength' | 'targetNode',
+    value: string,
+  ) => void;
   onInspectEvidence: () => void;
   onNoteChange: (note: string) => void;
+  onSubmitReview: () => Promise<void> | void;
+  submitting?: boolean;
 }
 
 export function CandidateEvidenceReview({
   candidate,
   draft,
   onDecisionChange,
+  onFieldChange,
   onInspectEvidence,
   onNoteChange,
+  onSubmitReview,
+  submitting = false,
 }: CandidateEvidenceReviewProps) {
   if (!candidate) {
     return (
@@ -89,11 +98,32 @@ export function CandidateEvidenceReview({
         </section>
       ) : null}
 
+      {candidate.reviewStatus && candidate.reviewStatus !== 'pending' ? (
+        <section className="candidate-primary-evidence">
+          <Typography.Text type="secondary">审核留痕</Typography.Text>
+          <Space wrap>
+            {candidate.reviewedBy ? (
+              <Tag color="green">{candidate.reviewedBy}</Tag>
+            ) : null}
+            {candidate.reviewedAt ? <Tag>{candidate.reviewedAt}</Tag> : null}
+            <Tag color="blue">{candidate.reviewStatus}</Tag>
+          </Space>
+          {candidate.reviewComment ? (
+            <Typography.Paragraph>
+              {candidate.reviewComment}
+            </Typography.Paragraph>
+          ) : null}
+        </section>
+      ) : null}
+
       <CandidateReviewControls
         candidate={candidate}
         draft={draft}
         onDecisionChange={onDecisionChange}
+        onFieldChange={onFieldChange}
         onNoteChange={onNoteChange}
+        onSubmit={onSubmitReview}
+        submitting={submitting}
       />
     </Card>
   );

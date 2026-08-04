@@ -1,26 +1,28 @@
-import {
-  WarningOutlined,
-} from '@ant-design/icons';
+import { ReloadOutlined, WarningOutlined } from '@ant-design/icons';
 import {
   Alert,
+  Button,
   Card,
   Col,
+  message,
   Progress,
   Row,
   Space,
+  Spin,
   Statistic,
   Table,
   Tag,
   Typography,
 } from 'antd';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
+import type { AbilityGraphData } from '../../../entities/ability-graph';
 import {
   calculateAttainmentFromGraph,
-  type RequirementAttainment,
   type CompetencyAttainment,
+  type RequirementAttainment,
 } from '../../../features/calculate-attainment/model/calculateAttainmentFromGraph';
-import { prototypeOnlyAbilityGraph } from '../../../entities/ability-graph';
+import { fetchAbilityGraph } from '../../../shared/api/graphClient';
 
 import './attainmentEvaluationPage.css';
 
@@ -37,57 +39,81 @@ const STATUS_STYLE: Record<
   gap: { color: '#ff4d4f', label: '不达标', tagColor: 'error' },
 };
 
-export function AttainmentEvaluationPage() {
-  const report = useMemo(
-    () => calculateAttainmentFromGraph(prototypeOnlyAbilityGraph),
-    [],
-  );
+const emptyGraph: AbilityGraphData = { nodes: [], edges: [] };
 
-  // 雷达图数据（简易版：用 CSS conic-gradient 画进度环代替，不引入额外图表库）
+function statusStyle(status: AttainmentStatus) {
+  return STATUS_STYLE[status];
+}
+
+export function AttainmentEvaluationPage() {
+  const [graph, setGraph] = useState<AbilityGraphData>(emptyGraph);
+  const [loading, setLoading] = useState(true);
+
+  const loadGraph = async () => {
+    setLoading(true);
+    try {
+      setGraph(await fetchAbilityGraph());
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : '达成度数据加载失败';
+      message.error(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadGraph();
+  }, []);
+
+  const report = useMemo(() => calculateAttainmentFromGraph(graph), [graph]);
+
   const reqColumns = [
     {
       title: '毕业要求',
       dataIndex: 'code',
       key: 'code',
-      width: 100,
-      render: (_: string, record: RequirementAttainment) => (
-        <Space size={6}>
-          <Tag color={STATUS_STYLE[record.status].tagColor}>
-            {record.requirement.code}
-          </Tag>
-          <Text strong>{record.requirement.name}</Text>
-        </Space>
-      ),
+      width: 160,
+      render: (_: string, record: RequirementAttainment) => {
+        const style = statusStyle(record.status);
+        return (
+          <Space size={6}>
+            <Tag color={style.tagColor}>{record.requirement.code}</Tag>
+            <Text strong>{record.requirement.name}</Text>
+          </Space>
+        );
+      },
     },
     {
       title: '达成度',
       dataIndex: 'attainment',
       key: 'attainment',
-      width: 160,
-      render: (val: number, record: RequirementAttainment) => (
-        <Progress
-          percent={Math.round(val * 100)}
-          strokeColor={STATUS_STYLE[record.status].color}
-          size="small"
-          format={(p) => `${p}%`}
-        />
-      ),
+      width: 180,
+      render: (val: number, record: RequirementAttainment) => {
+        const style = statusStyle(record.status);
+        return (
+          <Progress
+            format={(p) => `${p}%`}
+            percent={Math.round(val * 100)}
+            size="small"
+            strokeColor={style.color}
+          />
+        );
+      },
     },
     {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
-      width: 80,
-      render: (status: AttainmentStatus) => (
-        <Tag color={STATUS_STYLE[status].tagColor}>
-          {STATUS_STYLE[status].label}
-        </Tag>
-      ),
+      width: 100,
+      render: (status: AttainmentStatus) => {
+        const style = statusStyle(status);
+        return <Tag color={style.tagColor}>{style.label}</Tag>;
+      },
     },
     {
-      title: '能力指标数',
+      title: '能力指标',
       key: 'compCount',
-      width: 100,
+      width: 120,
       render: (_: unknown, record: RequirementAttainment) => (
         <Text>
           {record.competencies.filter((c) => c.status === 'achieved').length}/
@@ -101,38 +127,41 @@ export function AttainmentEvaluationPage() {
     {
       title: '能力指标',
       key: 'comp',
-      width: 200,
-      render: (_: unknown, record: CompetencyAttainment) => (
-        <Space size={6}>
-          <Tag color={STATUS_STYLE[record.status].tagColor}>
-            {record.competency.code}
-          </Tag>
-          <Text>{record.competency.name}</Text>
-        </Space>
-      ),
+      width: 220,
+      render: (_: unknown, record: CompetencyAttainment) => {
+        const style = statusStyle(record.status);
+        return (
+          <Space size={6}>
+            <Tag color={style.tagColor}>{record.competency.code}</Tag>
+            <Text>{record.competency.name}</Text>
+          </Space>
+        );
+      },
     },
     {
       title: '达成度',
       key: 'attainment',
-      width: 140,
-      render: (_: unknown, record: CompetencyAttainment) => (
-        <Progress
-          percent={Math.round(record.attainment * 100)}
-          strokeColor={STATUS_STYLE[record.status].color}
-          size="small"
-          format={(p) => `${p}%`}
-        />
-      ),
+      width: 160,
+      render: (_: unknown, record: CompetencyAttainment) => {
+        const style = statusStyle(record.status);
+        return (
+          <Progress
+            format={(p) => `${p}%`}
+            percent={Math.round(record.attainment * 100)}
+            size="small"
+            strokeColor={style.color}
+          />
+        );
+      },
     },
     {
       title: '状态',
       key: 'status',
-      width: 80,
-      render: (_: unknown, record: CompetencyAttainment) => (
-        <Tag color={STATUS_STYLE[record.status].tagColor}>
-          {STATUS_STYLE[record.status].label}
-        </Tag>
-      ),
+      width: 100,
+      render: (_: unknown, record: CompetencyAttainment) => {
+        const style = statusStyle(record.status);
+        return <Tag color={style.tagColor}>{style.label}</Tag>;
+      },
     },
     {
       title: '支撑来源',
@@ -141,13 +170,14 @@ export function AttainmentEvaluationPage() {
         record.contributions.length > 0 ? (
           <Space size={4} wrap>
             {record.contributions.map((c, i) => (
-              <Tag key={i} color="blue">
-                {c.node?.code} {c.node?.name} ({c.strength} {Math.round(c.value * 100)}%)
+              <Tag color="blue" key={`${record.competency.id}-${i}`}>
+                {c.node?.code} {c.node?.name} ({c.strength}{' '}
+                {Math.round(c.value * 100)}%)
               </Tag>
             ))}
           </Space>
         ) : (
-          <Text type="danger">无支撑</Text>
+          <Text type="danger">无已审核支撑</Text>
         ),
     },
   ];
@@ -159,24 +189,31 @@ export function AttainmentEvaluationPage() {
           <Space align="center" size={10}>
             <Title level={2}>达成度评价</Title>
             <Tag color="geekblue">M6 达成度评价</Tag>
-            <Tag color="gold">内置 2024 标准</Tag>
+            <Tag color="green">基于正式图谱</Tag>
           </Space>
           <Paragraph type="secondary">
-            基于学校上传数据与内置认证标准的支撑关系，计算每条毕业要求与能力指标的达成度。
-            达成度 &ge; 70% 为达标，40%~70% 为预警，&lt; 40% 为不达标。
-            Demo 阶段用 AI 置信度+支撑强度模拟，正式接入后用实际成绩数据替换。
+            当前达成度以 M2 中已审核通过的支撑关系为输入。待审核或驳回关系不会计入计算；
+            后续 1.0 阶段会继续接入真实成绩和评价材料。
           </Paragraph>
         </div>
+        <Button icon={<ReloadOutlined />} onClick={() => void loadGraph()}>
+          刷新评价
+        </Button>
       </div>
 
-      {/* 总览 */}
+      {loading ? (
+        <Card>
+          <Spin />
+        </Card>
+      ) : null}
+
       <Card className="attainment-stats" size="small">
         <Row gutter={24}>
           <Col>
             <Statistic
+              suffix="%"
               title="总体达成度"
               value={Math.round(report.overallAttainment * 100)}
-              suffix="%"
               valueStyle={{
                 color:
                   report.overallAttainment >= 0.7
@@ -196,56 +233,61 @@ export function AttainmentEvaluationPage() {
           </Col>
           <Col>
             <Statistic
+              prefix={<WarningOutlined />}
               title="预警"
               value={report.warningCount}
               valueStyle={{ color: '#faad14' }}
-              prefix={<WarningOutlined />}
             />
           </Col>
           <Col>
             <Statistic
+              prefix={<WarningOutlined />}
               title="不达标"
               value={report.gapCount}
               valueStyle={{ color: '#ff4d4f' }}
-              prefix={<WarningOutlined />}
             />
           </Col>
         </Row>
       </Card>
 
-      {report.gapCount > 0 && (
+      {report.gapCount > 0 ? (
         <Alert
           className="attainment-gap-alert"
-          type="error"
-          showIcon
           icon={<WarningOutlined />}
-          message={`${report.gapCount} 条毕业要求达成度不达标，请前往 M7 教学改进生成优化建议`}
+          message={`${report.gapCount} 条毕业要求暂未达标，可进入 M7 生成教学改进建议`}
+          showIcon
+          type="error"
         />
-      )}
+      ) : null}
 
-      {/* 雷达图替代：达成度环形进度 */}
-      <Card title="毕业要求达成度总览" size="small" className="attainment-radar-card">
+      <Card
+        className="attainment-radar-card"
+        size="small"
+        title="毕业要求达成度总览"
+      >
         <div className="attainment-ring-grid">
           {report.requirements.map((ra) => {
             const pct = Math.round(ra.attainment * 100);
-            const color = STATUS_STYLE[ra.status].color;
+            const style = statusStyle(ra.status);
             return (
-              <div key={ra.requirement.id} className="attainment-ring-item">
+              <div className="attainment-ring-item" key={ra.requirement.id}>
                 <Progress
-                  type="circle"
-                  percent={pct}
-                  strokeColor={color}
-                  size={72}
                   format={(p) => (
-                    <span style={{ fontSize: 14, fontWeight: 700, color }}>{p}%</span>
+                    <span style={{ color: style.color, fontSize: 14, fontWeight: 700 }}>
+                      {p}%
+                    </span>
                   )}
+                  percent={pct}
+                  size={72}
+                  strokeColor={style.color}
+                  type="circle"
                 />
                 <div className="attainment-ring-label">
-                  <Text style={{ fontSize: 11, textAlign: 'center', display: 'block' }}>
+                  <Text style={{ display: 'block', fontSize: 11, textAlign: 'center' }}>
                     {ra.requirement.code}
                   </Text>
                   <Text
-                    style={{ fontSize: 10, textAlign: 'center', display: 'block' }}
+                    style={{ display: 'block', fontSize: 10, textAlign: 'center' }}
                     type="secondary"
                   >
                     {ra.requirement.name}
@@ -257,25 +299,28 @@ export function AttainmentEvaluationPage() {
         </div>
       </Card>
 
-      {/* 毕业要求明细表 */}
-      <Card title="毕业要求达成度明细" size="small" className="attainment-req-table">
+      <Card
+        className="attainment-req-table"
+        size="small"
+        title="毕业要求达成度明细"
+      >
         <Table
-          dataSource={report.requirements}
           columns={reqColumns}
-          rowKey={(r) => r.requirement.id}
-          pagination={false}
-          size="small"
+          dataSource={report.requirements}
           expandable={{
             expandedRowRender: (record) => (
               <Table
-                dataSource={record.competencies}
                 columns={compColumns}
-                rowKey={(c) => c.competency.id}
+                dataSource={record.competencies}
                 pagination={false}
+                rowKey={(c) => c.competency.id}
                 size="small"
               />
             ),
           }}
+          pagination={false}
+          rowKey={(r) => r.requirement.id}
+          size="small"
         />
       </Card>
     </main>

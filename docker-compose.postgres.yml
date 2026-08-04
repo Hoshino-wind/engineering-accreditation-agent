@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: engineering-accreditation-postgres
+    environment:
+      POSTGRES_DB: accreditation
+      POSTGRES_USER: accreditation
+      POSTGRES_PASSWORD: accreditation
+    ports:
+      - "5432:5432"
+    volumes:
+      - accreditation-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U accreditation -d accreditation"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  accreditation-postgres-data:

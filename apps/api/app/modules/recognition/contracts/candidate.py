@@ -1,7 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 
 from app.modules.recognition.domain.candidate import (
-    CandidateEvidence,
     CandidateReviewStatus,
     RecognitionCandidate,
     RecognitionCandidateRisk,
@@ -37,7 +36,11 @@ class RecognitionCandidateResponse(BaseModel):
     generatedAt: str
     reviewStatus: CandidateReviewStatus
     impact: dict[str, int]
+    supportStrength: str | None = None
     conflictMessage: str | None = None
+    reviewedBy: str | None = None
+    reviewedAt: str | None = None
+    reviewComment: str | None = None
     evidence: list[CandidateEvidenceResponse]
 
     @classmethod
@@ -61,7 +64,11 @@ class RecognitionCandidateResponse(BaseModel):
                 "abilityNodes": c.impact_ability_nodes,
                 "rubricItems": c.impact_rubric_items,
             },
+            supportStrength=c.support_strength,
             conflictMessage=c.conflict_message,
+            reviewedBy=c.reviewed_by,
+            reviewedAt=c.reviewed_at,
+            reviewComment=c.review_comment,
             evidence=[
                 CandidateEvidenceResponse(
                     id=e.id,
@@ -78,3 +85,10 @@ class RecognitionCandidateResponse(BaseModel):
 
 class CandidateReviewRequest(BaseModel):
     decision: str  # accept | reject | modify
+    comment: str | None = None
+    sourceNode: str | None = None
+    targetNode: str | None = None
+    relation: str | None = None
+    confidence: int | None = None
+    strength: str | None = None
+    evidenceExcerpt: str | None = None

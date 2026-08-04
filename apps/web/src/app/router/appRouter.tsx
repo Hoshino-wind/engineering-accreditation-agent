@@ -3,6 +3,7 @@ import { createBrowserRouter } from 'react-router';
 import { AgentConsolePage } from '../../views/agent';
 import { GraphDiagnosticsPage } from '../../views/diagnostics';
 import { AttainmentEvaluationPage } from '../../views/evaluations';
+import { SystemGovernancePage } from '../../views/governance';
 import { GraphViewPage } from '../../views/graph';
 import { TeachingImprovementPage } from '../../views/improvements';
 import { OverviewPage } from '../../views/overview';
@@ -61,6 +62,10 @@ export const appRouter = createBrowserRouter([
       {
         path: 'support',
         element: <AccreditationSupportPage />,
+      },
+      {
+        path: 'governance',
+        element: <SystemGovernancePage />,
       },
     ],
   },

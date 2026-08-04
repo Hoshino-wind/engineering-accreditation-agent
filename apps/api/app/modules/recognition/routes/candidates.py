@@ -44,7 +44,17 @@ def create_recognition_router(
         body: CandidateReviewRequest,
         use_case: Annotated[ReviewCandidate, Depends(review_candidate_use_case)],
     ) -> RecognitionCandidateResponse:
-        result = await use_case.execute(candidate_id, body.decision)
+        result = await use_case.execute(
+            candidate_id,
+            body.decision,
+            body.comment,
+            source_node=body.sourceNode,
+            target_node=body.targetNode,
+            relation=body.relation,
+            confidence=body.confidence,
+            strength=body.strength,
+            evidence_excerpt=body.evidenceExcerpt,
+        )
         if result is None:
             raise HTTPException(status_code=404, detail="候选不存在")
         return RecognitionCandidateResponse.from_domain(result)

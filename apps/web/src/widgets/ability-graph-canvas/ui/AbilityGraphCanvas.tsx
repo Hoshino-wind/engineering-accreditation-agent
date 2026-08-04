@@ -11,7 +11,7 @@ import {
   useEdgesState,
   useNodesState,
 } from '@xyflow/react';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import {
   type AbilityGraphData,
@@ -73,8 +73,13 @@ function AbilityGraphCanvasInner({
     // layoutVersion 变化时重新计算布局
   }, [graph, layoutVersion]);
 
-  const [nodes, , onNodesChange] = useNodesState(initial.nodes);
-  const [edges, , onEdgesChange] = useEdgesState(initial.edges);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initial.nodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initial.edges);
+
+  useEffect(() => {
+    setNodes(initial.nodes);
+    setEdges(initial.edges);
+  }, [initial, setEdges, setNodes]);
 
   // 选中节点时高亮：深色背景下用亮蓝色描边 + 白色外光晕（对齐原型图视觉）
   const decoratedNodes = useMemo(() => {

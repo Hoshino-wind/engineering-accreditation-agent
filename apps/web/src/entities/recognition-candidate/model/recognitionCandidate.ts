@@ -49,6 +49,11 @@ export interface RecognitionCandidate {
   impact: CandidateImpact;
   processorVersion: string;
   relation: string;
+  supportStrength?: string;
+  reviewedAt?: string;
+  reviewedBy?: string;
+  reviewComment?: string;
+  reviewStatus?: 'pending' | 'accepted' | 'rejected' | 'modified';
   risk: RecognitionCandidateRisk;
   sourceNode: string;
   targetNode: string;

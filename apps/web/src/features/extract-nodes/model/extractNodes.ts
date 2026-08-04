@@ -3,6 +3,7 @@ import {
   extractNodesViaLLM,
   type ExtractionLLMItem,
 } from '../../../shared/api/llmClient';
+import { parseUploadedMaterial } from '../../../shared/api/materialsClient';
 import type { AbilityGraphNode } from '../../../entities/ability-graph/model/abilityGraph';
 import type { UploadedMaterial } from '../../../entities/uploaded-material';
 
@@ -27,6 +28,33 @@ export interface ExtractionResult {
 export async function extractNodesFromMaterial(
   material: UploadedMaterial,
 ): Promise<ExtractionResult> {
+  if (material.id.startsWith('material-')) {
+    const startedAt = performance.now();
+    const response = await parseUploadedMaterial(material.id);
+    return {
+      nodes: response.extractedNodes.map((item) => ({
+        node: {
+          id: item.id,
+          kind: item.kind as AbilityGraphNode['kind'],
+          code: item.code,
+          name: item.name,
+          description: item.description,
+          origin: 'school',
+          properties: {},
+        },
+        confidence: item.confidence,
+        sourceExcerpt: item.sourceExcerpt,
+        selected: item.confidence >= 0.8,
+      })),
+      model: 'mvp-file-parser v0.6',
+      usage: {
+        prompt_tokens: 0,
+        completion_tokens: response.candidatesCreated,
+      },
+      latency: performance.now() - startedAt,
+    };
+  }
+
   const response = await extractNodesViaLLM(material.category, material.fileName);
 
   const nodes: ExtractedNode[] = response.data.map((item: ExtractionLLMItem) => ({

@@ -100,6 +100,18 @@
   line-height: 1.5;
 }
 
+.ability-review-edge-trace {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 6px 0 8px;
+  padding: 6px 8px;
+  background: #f8fffb;
+  border: 1px solid #d9f7be;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
 .ability-review-edge-actions {
   display: flex;
   gap: 6px;

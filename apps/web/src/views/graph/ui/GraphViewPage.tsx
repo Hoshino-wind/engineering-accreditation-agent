@@ -19,31 +19,36 @@ import {
   Col,
   Empty,
   Input,
+  message,
   Row,
   Segmented,
   Space,
+  Spin,
   Statistic,
   Steps,
   Tag,
   Tooltip,
   Typography,
 } from 'antd';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
+  type AbilityGraphData,
   type AbilityGraphEdge,
   type AbilityGraphNode,
   type AbilityGraphNodeKind,
-  prototypeOnlyAbilityGraph,
   nodeKindPresentation,
 } from '../../../entities/ability-graph';
+import {
+  fetchAbilityGraph,
+  reviewGraphEdge,
+} from '../../../shared/api/graphClient';
 import { AbilityGraphCanvas } from '../../../widgets/ability-graph-canvas';
 import { AbilityReviewPanel } from '../../../widgets/ability-review-panel';
 import './graphViewPage.css';
 
 const { Paragraph, Text, Title } = Typography;
 
-// 节点类型筛选选项
 const NODE_KIND_OPTIONS: { label: string; value: AbilityGraphNodeKind }[] = [
   { label: '毕业要求', value: 'GraduationRequirement' },
   { label: '能力指标', value: 'Competency' },
@@ -55,8 +60,8 @@ const NODE_KIND_OPTIONS: { label: string; value: AbilityGraphNodeKind }[] = [
 
 type FilterMode = 'all' | 'pending' | 'approved';
 
-// 九步闭环流程状态条
-// 体现 PRD：上传 → AI 提取 → 人工审核 → 建图 → 关联 → 路径 → 评价 → 改进 → 输出
+const emptyGraph: AbilityGraphData = { nodes: [], edges: [] };
+
 const PROCESS_STEPS = [
   { title: '数据上传', icon: <CloudUploadOutlined />, status: 'finish' as const },
   { title: 'AI 提取', icon: <RobotOutlined />, status: 'finish' as const },
@@ -70,9 +75,9 @@ const PROCESS_STEPS = [
 ];
 
 export function GraphViewPage() {
-  const { nodes: allNodes, edges: allEdges } = prototypeOnlyAbilityGraph;
-
-  // 状态：节点类型筛选 / 关系状态筛选 / 节点搜索 / 选中节点 / 重新布局 / 审核后本地状态更新
+  const [graph, setGraph] = useState<AbilityGraphData>(emptyGraph);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string>();
   const [enabledKinds, setEnabledKinds] = useState<Set<AbilityGraphNodeKind>>(
     () => new Set(NODE_KIND_OPTIONS.map((o) => o.value)),
   );
@@ -80,10 +85,33 @@ export function GraphViewPage() {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>();
   const [layoutVersion, setLayoutVersion] = useState(0);
-  // 审核后的本地状态（Demo 用，后端接入后改为服务端返回）
-  const [localEdges, setLocalEdges] = useState<AbilityGraphEdge[]>(allEdges);
 
-  // 按节点类型 + 边审核状态过滤
+  const loadGraph = async () => {
+    setLoading(true);
+    setLoadError(undefined);
+    try {
+      const nextGraph = await fetchAbilityGraph();
+      setGraph(nextGraph);
+      setSelectedNodeId((current) =>
+        current && nextGraph.nodes.some((node) => node.id === current)
+          ? current
+          : undefined,
+      );
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : '能力图谱加载失败';
+      setLoadError(msg);
+      message.error(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadGraph();
+  }, []);
+
+  const { nodes: allNodes, edges: allEdges } = graph;
+
   const filteredGraph = useMemo(() => {
     const kw = searchKeyword.trim().toLowerCase();
     const matchedNodeIds = new Set(
@@ -101,8 +129,7 @@ export function GraphViewPage() {
     );
 
     const nodes = allNodes.filter((n) => matchedNodeIds.has(n.id));
-
-    const edges = localEdges.filter((edge) => {
+    const edges = allEdges.filter((edge) => {
       if (!matchedNodeIds.has(edge.source) || !matchedNodeIds.has(edge.target)) {
         return false;
       }
@@ -112,7 +139,7 @@ export function GraphViewPage() {
     });
 
     return { nodes, edges };
-  }, [allNodes, localEdges, enabledKinds, filterMode, searchKeyword]);
+  }, [allNodes, allEdges, enabledKinds, filterMode, searchKeyword]);
 
   const selectedNode = useMemo(
     () => allNodes.find((n) => n.id === selectedNodeId) ?? null,
@@ -123,40 +150,32 @@ export function GraphViewPage() {
     setSelectedNodeId(node.id);
   };
 
-  const handleJumpToNode = (nodeId: string) => {
-    setSelectedNodeId(nodeId);
+  const handleReviewEdge = async (
+    edgeId: string,
+    decision: 'accept' | 'modify' | 'reject',
+  ) => {
+    try {
+      const updated = await reviewGraphEdge(edgeId, decision);
+      setGraph((current) => ({
+        ...current,
+        edges: current.edges.map((edge) =>
+          edge.id === updated.id ? updated : edge,
+        ),
+      }));
+      message.success('图谱关系审核状态已更新');
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : '图谱审核失败';
+      message.error(msg);
+    }
   };
 
-  // 本地状态下的审核操作（Demo 用）
-  const handleApproveEdge = (edgeId: string) => {
-    setLocalEdges((prev) =>
-      prev.map((e) =>
-        e.id === edgeId ? { ...e, reviewStatus: 'approved' as const } : e,
-      ),
-    );
-  };
-  const handleRejectEdge = (edgeId: string) => {
-    setLocalEdges((prev) =>
-      prev.map((e) =>
-        e.id === edgeId ? { ...e, reviewStatus: 'rejected' as const } : e,
-      ),
-    );
-  };
-  const handleModifyEdge = (edgeId: string) => {
-    setLocalEdges((prev) =>
-      prev.map((e) =>
-        e.id === edgeId ? { ...e, reviewStatus: 'modified' as const } : e,
-      ),
-    );
-  };
-
-  const pendingCount = localEdges.filter(
+  const pendingCount = allEdges.filter(
     (e) => e.reviewStatus === 'pending',
   ).length;
-  const approvedCount = localEdges.filter(
+  const approvedCount = allEdges.filter(
     (e) => e.reviewStatus === 'approved',
   ).length;
-  const aiCount = localEdges.filter((e) => e.sourceType === 'ai').length;
+  const aiCount = allEdges.filter((e) => e.sourceType === 'ai').length;
 
   return (
     <main className="graph-view-page">
@@ -165,17 +184,17 @@ export function GraphViewPage() {
           <Space align="center" size={10}>
             <Title level={2}>实验教学能力图谱</Title>
             <Tag color="geekblue">M2 能力图谱</Tag>
-            <Tag color="gold">内置 2024 认证标准</Tag>
-            <Tag>学校上传数据</Tag>
+            <Tag color="green">服务端图谱</Tag>
           </Space>
           <Paragraph type="secondary">
-            系统内置 2024 版工程教育认证毕业要求与能力指标作为标准（金色边框节点），
-            学校上传课程与实验材料后，AI 提取节点并与内置标准做支撑关系分析。
-            橙色虚线为 AI 推荐待审核关系，教师确认后参与达成度评价；
-            不满足标准覆盖要求的环节将进入 M7 教学改进流程。
+            这里展示教师审核后的正式能力图谱。M4 中接受或修改的候选关系会写入图谱，
+            被驳回的关系不会参与后续诊断、达成度和认证支撑计算。
           </Paragraph>
         </div>
         <Space>
+          <Button icon={<ReloadOutlined />} onClick={() => void loadGraph()}>
+            刷新数据
+          </Button>
           <Button
             icon={<ReloadOutlined />}
             onClick={() => setLayoutVersion((v) => v + 1)}
@@ -185,14 +204,23 @@ export function GraphViewPage() {
         </Space>
       </div>
 
-      {/* 顶部统计条：图谱规模 + 流程状态 */}
+      {loadError ? (
+        <Alert
+          className="graph-view-pending-notice"
+          message="能力图谱加载异常"
+          description={loadError}
+          showIcon
+          type="error"
+        />
+      ) : null}
+
       <Card className="graph-view-stats" size="small">
-        <Row gutter={24} align="middle">
+        <Row align="middle" gutter={24}>
           <Col>
             <Statistic title="节点" value={allNodes.length} prefix={<NodeIndexOutlined />} />
           </Col>
           <Col>
-            <Statistic title="关系总数" value={localEdges.length} />
+            <Statistic title="关系总数" value={allEdges.length} />
           </Col>
           <Col>
             <Statistic
@@ -217,32 +245,31 @@ export function GraphViewPage() {
               prefix={<RobotOutlined />}
             />
           </Col>
-          <Col flex="auto" className="graph-view-process-col">
+          <Col className="graph-view-process-col" flex="auto">
             <Steps
-              size="small"
-              current={2}
+              current={3}
               items={PROCESS_STEPS.map((s) => ({
                 title: s.title,
                 status: s.status,
                 icon: s.icon,
               }))}
+              size="small"
             />
           </Col>
         </Row>
       </Card>
 
-      {/* 工具栏：节点类型筛选 + 关系状态 + 搜索 */}
       <Card className="graph-view-toolbar" size="small">
-        <Row gutter={16} align="middle">
+        <Row align="middle" gutter={16}>
           <Col flex="auto">
             <Space size={16} wrap>
               <Space size={8}>
                 <Text strong>节点类型：</Text>
                 <Checkbox.Group
-                  value={[...enabledKinds]}
                   onChange={(values) =>
                     setEnabledKinds(new Set<AbilityGraphNodeKind>(values))
                   }
+                  value={[...enabledKinds]}
                 >
                   {NODE_KIND_OPTIONS.map((option) => {
                     const presentation = nodeKindPresentation[option.value];
@@ -257,44 +284,45 @@ export function GraphViewPage() {
               <Space size={8}>
                 <Text strong>关系状态：</Text>
                 <Segmented
-                  value={filterMode}
                   onChange={(value) => setFilterMode(value as FilterMode)}
                   options={[
                     { label: '全部', value: 'all' },
                     { label: `仅待审核 (${pendingCount})`, value: 'pending' },
                     { label: '仅已通过', value: 'approved' },
                   ]}
+                  value={filterMode}
                 />
               </Space>
-              <Space size={8}>
-                <Input
-                  allowClear
-                  prefix={<SearchOutlined />}
-                  placeholder="搜索节点编号 / 名称 / 描述"
-                  style={{ width: 280 }}
-                  value={searchKeyword}
-                  onChange={(e) => setSearchKeyword(e.target.value)}
-                />
-              </Space>
+              <Input
+                allowClear
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                placeholder="搜索节点编号 / 名称 / 描述"
+                prefix={<SearchOutlined />}
+                style={{ width: 280 }}
+                value={searchKeyword}
+              />
             </Space>
           </Col>
           <Col>
-            <Tooltip title="节点数 / 关系数（已按筛选过滤）">
+            <Tooltip title="节点数 / 关系数已按筛选条件过滤">
               <Text type="secondary">
-                节点 {filteredGraph.nodes.length} · 关系 {filteredGraph.edges.length}
+                节点 {filteredGraph.nodes.length} / 关系 {filteredGraph.edges.length}
               </Text>
             </Tooltip>
           </Col>
         </Row>
       </Card>
 
-      {/* 主区域：左 70% 画布 + 右 30% 审核面板 */}
       <div className="graph-view-main">
         <Card
           className="graph-view-canvas-card"
           styles={{ body: { padding: 0, height: '100%' } }}
         >
-          {filteredGraph.nodes.length === 0 ? (
+          {loading ? (
+            <div className="graph-view-empty">
+              <Spin size="large" />
+            </div>
+          ) : filteredGraph.nodes.length === 0 ? (
             <Empty
               className="graph-view-empty"
               description="当前筛选条件下无可显示节点"
@@ -302,9 +330,9 @@ export function GraphViewPage() {
           ) : (
             <AbilityGraphCanvas
               graph={filteredGraph}
+              layoutVersion={layoutVersion}
               onNodeClick={handleNodeClick}
               selectedNodeId={selectedNodeId}
-              layoutVersion={layoutVersion}
             />
           )}
         </Card>
@@ -314,18 +342,17 @@ export function GraphViewPage() {
           styles={{ body: { padding: 0, height: '100%' } }}
         >
           <AbilityReviewPanel
+            edges={allEdges}
             node={selectedNode}
-            edges={localEdges}
             nodes={allNodes}
-            onJumpToNode={handleJumpToNode}
-            onApproveEdge={handleApproveEdge}
-            onRejectEdge={handleRejectEdge}
-            onModifyEdge={handleModifyEdge}
+            onApproveEdge={(edgeId) => void handleReviewEdge(edgeId, 'accept')}
+            onJumpToNode={setSelectedNodeId}
+            onModifyEdge={(edgeId) => void handleReviewEdge(edgeId, 'modify')}
+            onRejectEdge={(edgeId) => void handleReviewEdge(edgeId, 'reject')}
           />
         </Card>
       </div>
 
-      {/* 图例 */}
       <Card className="graph-view-legend" size="small">
         <Space size={16} wrap>
           <Text strong>图例：</Text>
@@ -341,21 +368,18 @@ export function GraphViewPage() {
             <span className="graph-view-legend-line graph-view-legend-selected" />
             <Text>选中节点关联</Text>
           </Space>
-          <Text type="secondary">
-            · 点击左侧节点 → 右侧审核面板 → 确认/修改/驳回 AI 关系
-          </Text>
         </Space>
       </Card>
 
-      {pendingCount > 0 && (
+      {pendingCount > 0 ? (
         <Alert
           className="graph-view-pending-notice"
-          type="warning"
-          showIcon
+          description="待审核边不会参与后续达成度计算，必须由教师确认后进入正式图谱。"
           message={`仍有 ${pendingCount} 条 AI 推荐关系待教师审核`}
-          description="审核通过后才参与达成度计算，未审核的边在图谱中以橙色虚线展示。"
+          showIcon
+          type="warning"
         />
-      )}
+      ) : null}
     </main>
   );
 }

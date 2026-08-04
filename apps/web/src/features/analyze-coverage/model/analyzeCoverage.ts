@@ -54,6 +54,8 @@ const STRENGTH_WEIGHT = {
   weak: 1,
 };
 
+const FORMAL_REVIEW_STATUSES = new Set(['approved', 'modified']);
+
 export function analyzeCoverage(graph: AbilityGraphData): CoverageReport {
   const { nodes, edges } = graph;
 
@@ -91,8 +93,8 @@ export function analyzeCoverage(graph: AbilityGraphData): CoverageReport {
   // 分析每条能力指标的覆盖情况
   const competencyCoverages: CompetencyCoverage[] = standardComps.map((comp) => {
     const incomingEdges = incomingByTarget.get(comp.id) ?? [];
-    const approvedIncoming = incomingEdges.filter(
-      (e) => e.reviewStatus === 'approved',
+    const approvedIncoming = incomingEdges.filter((e) =>
+      FORMAL_REVIEW_STATUSES.has(e.reviewStatus),
     );
     const pendingIncoming = incomingEdges.filter(
       (e) => e.reviewStatus === 'pending',
@@ -153,13 +155,13 @@ export function analyzeCoverage(graph: AbilityGraphData): CoverageReport {
     const reqIncoming = incomingByTarget.get(req.id) ?? [];
     const courseIds = new Set(
       reqIncoming
-        .filter((e) => e.reviewStatus === 'approved')
+        .filter((e) => FORMAL_REVIEW_STATUSES.has(e.reviewStatus))
         .map((e) => e.source),
     );
     const supportingCourses = schoolNodes.filter((n) => courseIds.has(n.id));
 
     const strongSupportCount = reqIncoming.filter(
-      (e) => e.reviewStatus === 'approved' && e.strength === 'strong',
+      (e) => FORMAL_REVIEW_STATUSES.has(e.reviewStatus) && e.strength === 'strong',
     ).length;
 
     // 覆盖率：已覆盖能力指标 / 总能力指标

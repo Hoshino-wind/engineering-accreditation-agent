@@ -9,15 +9,18 @@ import {
   Alert,
   Button,
   Card,
+  Descriptions,
   message,
+  Modal,
   Popconfirm,
   Space,
   Table,
   Tag,
+  Tooltip,
   Typography,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   MaterialStatusTag,
@@ -30,104 +33,162 @@ import {
   useExtractionTask,
   type ExtractedNode,
 } from '../../../features/extract-nodes';
-import {
-  AutopilotResultDrawer,
-  useAutopilotTask,
-} from '../../../features/run-autopilot';
 import { UploadDropzone } from '../../../features/upload-material';
+import {
+  getAcademicCatalog,
+  type AcademicCatalog,
+} from '../../../shared/api/academicClient';
+import {
+  getOcrRuntimeStatus,
+  listMaterialVersions,
+  listUploadedMaterials,
+  parseUploadedMaterial,
+  uploadMaterialFile,
+  type MaterialParseApiResponse,
+  type MaterialVersionApiResponse,
+  type OcrRuntimeStatus,
+  type ParsedMaterialNodeResponse,
+} from '../../../shared/api/materialsClient';
 import { TeachingResourceSummary } from '../../../widgets/teaching-resource-summary';
 import { TeachingResourceWorkbench } from '../../../widgets/teaching-resource-workbench';
 
 import './teachingResourcesPage.css';
 
-const { Paragraph, Title } = Typography;
+const { Paragraph, Text, Title } = Typography;
 
 const fileTypeLabel: Record<string, string> = {
-  pdf: 'PDF',
   docx: 'DOCX',
+  pdf: 'PDF',
+  txt: 'TXT',
   xlsx: 'XLSX',
 };
 
 export function TeachingResourcesPage() {
-  const [materials, setMaterials] = useState<UploadedMaterial[]>(
-    prototypeOnlyUploadedMaterials,
-  );
+  const [uploadedMaterials, setUploadedMaterials] = useState<UploadedMaterial[]>([]);
+  const [catalog, setCatalog] = useState<AcademicCatalog | null>(null);
+  const [loadingCatalog, setLoadingCatalog] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [autopilotDrawerOpen, setAutopilotDrawerOpen] = useState(false);
+  const [ocrStatus, setOcrStatus] = useState<OcrRuntimeStatus | null>(null);
+  const [versionModalOpen, setVersionModalOpen] = useState(false);
+  const [versionMaterial, setVersionMaterial] = useState<UploadedMaterial | null>(null);
+  const [versions, setVersions] = useState<MaterialVersionApiResponse[]>([]);
+  const [loadingVersions, setLoadingVersions] = useState(false);
+  const [analyzingMaterialId, setAnalyzingMaterialId] = useState<string | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<MaterialParseApiResponse | null>(null);
   const extraction = useExtractionTask();
-  const autopilot = useAutopilotTask();
 
-  // 模拟上传：将新文件加入列表顶部
-  const handleUpload = (fileName: string, category: UploadedMaterialCategory) => {
-    const ext = fileName.split('.').pop()?.toLowerCase() ?? 'pdf';
-    const newMaterial: UploadedMaterial = {
-      id: `UM-${String(materials.length + 1).padStart(3, '0')}`,
-      fileName,
-      fileType: (['pdf', 'docx', 'xlsx'].includes(ext) ? ext : 'pdf') as UploadedMaterial['fileType'],
-      category,
-      uploadTime: new Date().toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-      uploadedBy: '当前用户',
-      status: 'pending',
-      fileSize: '--',
-      fileUrl: '#',
-    };
-    setMaterials((prev) => [newMaterial, ...prev]);
+  useEffect(() => {
+    setLoadingCatalog(true);
+    void getAcademicCatalog()
+      .then(setCatalog)
+      .catch(() => setCatalog(null))
+      .finally(() => setLoadingCatalog(false));
+
+    void refreshMaterials(setUploadedMaterials);
+    void getOcrRuntimeStatus()
+      .then(setOcrStatus)
+      .catch(() =>
+        setOcrStatus({
+          available: false,
+          engine: 'tesseract',
+          languages: [],
+          message: 'OCR status service is unavailable.',
+          status: 'unknown',
+          version: null,
+        }),
+      );
+  }, []);
+
+  const materials = useMemo(
+    () => mergeMaterials(uploadedMaterials, prototypeOnlyUploadedMaterials),
+    [uploadedMaterials],
+  );
+
+  const courseOptions = useMemo(
+    () =>
+      (catalog?.courses ?? []).map((course) => ({
+        label: `${course.name} (${course.code})`,
+        value: course.name,
+      })),
+    [catalog],
+  );
+
+  const handleUpload = async (
+    file: File,
+    category: UploadedMaterialCategory,
+    course?: string,
+  ) => {
+    const uploaded = await uploadMaterialFile(file, category, course);
+    setUploadedMaterials((prev) => mergeMaterials([uploaded], prev));
+    message.success(`${file.name} 已上传，可点击“提取”生成待审核关系`);
   };
 
-  // 打开提取抽屉，启动 AI 提取
   const handleStartExtract = (record: UploadedMaterial) => {
     setDrawerOpen(true);
-    void extraction.startExtraction(record);
+    void extraction.startExtraction(record).then(() => {
+      void refreshMaterials(setUploadedMaterials);
+    });
   };
 
-  // 确认入库：更新材料状态为 extracted
   const handleConfirmExtract = (nodes: ExtractedNode[]) => {
     const materialId = extraction.material?.id;
     if (materialId) {
-      setMaterials((prev) =>
-        prev.map((m) =>
-          m.id === materialId
-            ? { ...m, status: 'extracted' as const, extractedNodeCount: nodes.length }
-            : m,
+      setUploadedMaterials((prev) =>
+        prev.map((item) =>
+          item.id === materialId
+            ? { ...item, extractedNodeCount: nodes.length, status: 'extracted' }
+            : item,
         ),
       );
-      message.success(`${nodes.length} 个节点已入库，材料状态已更新`);
+      message.success(`${nodes.length} 个节点已确认，候选关系已进入 M4 审核队列`);
     }
     setDrawerOpen(false);
     extraction.reset();
   };
 
-  // 关闭抽屉
   const handleCloseDrawer = () => {
     setDrawerOpen(false);
     extraction.reset();
   };
 
-  // 一键自动分析：调用 autopilot 编排接口，完成后弹出结果
   const handleRunAutopilot = async (record: UploadedMaterial) => {
+    if (!record.id.startsWith('material-')) {
+      message.info('示例材料只用于页面展示，请先上传真实材料后再进行 AI 分析');
+      return;
+    }
+    setAnalyzingMaterialId(record.id);
     try {
-      const result = await autopilot.run(record.id);
+      const result = await parseUploadedMaterial(record.id);
       message.success(
-        `分析完成，已生成 ${result.candidates_created} 条关系候选和 ${result.findings_created} 条诊断`,
+        `AI 分析完成：提取 ${result.extractedNodes.length} 个节点，生成 ${result.candidatesCreated} 条待审核关系`,
       );
-      setAutopilotDrawerOpen(true);
-    } catch (e) {
-      const msg =
-        e instanceof Error ? e.message : '自动分析失败，请稍后重试';
+      setAnalysisResult(result);
+      void refreshMaterials(setUploadedMaterials);
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : 'AI 分析失败，请稍后重试';
       message.error(msg);
+    } finally {
+      setAnalyzingMaterialId(null);
     }
   };
 
-  // 删除材料
   const handleDelete = (record: UploadedMaterial) => {
-    setMaterials((prev) => prev.filter((m) => m.id !== record.id));
-    message.success(`${record.fileName} 已删除`);
+    setUploadedMaterials((prev) => prev.filter((item) => item.id !== record.id));
+    message.success(`${record.fileName} 已从当前列表移除`);
+  };
+
+  const handleOpenVersions = async (record: UploadedMaterial) => {
+    setVersionMaterial(record);
+    setVersionModalOpen(true);
+    setLoadingVersions(true);
+    try {
+      setVersions(await listMaterialVersions(record.id));
+    } catch {
+      setVersions([]);
+      message.warning('该材料暂无可查看的版本记录');
+    } finally {
+      setLoadingVersions(false);
+    }
   };
 
   const columns: ColumnsType<UploadedMaterial> = [
@@ -152,6 +213,14 @@ export function TeachingResourcesPage() {
       width: 110,
     },
     {
+      title: '所属课程',
+      dataIndex: 'course',
+      key: 'course',
+      ellipsis: true,
+      width: 160,
+      render: (course?: string) => course || '--',
+    },
+    {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
@@ -161,10 +230,17 @@ export function TeachingResourcesPage() {
       ),
     },
     {
-      title: '提取节点',
+      title: '解析策略',
+      dataIndex: 'parseStrategy',
+      key: 'parseStrategy',
+      width: 130,
+      render: (value?: string) => value || '--',
+    },
+    {
+      title: '节点',
       dataIndex: 'extractedNodeCount',
       key: 'extractedNodeCount',
-      width: 90,
+      width: 80,
       render: (count?: number) => (count != null ? `${count} 个` : '--'),
     },
     {
@@ -174,19 +250,11 @@ export function TeachingResourcesPage() {
       width: 150,
     },
     {
-      title: '上传人',
-      dataIndex: 'uploadedBy',
-      key: 'uploadedBy',
-      width: 90,
-    },
-    {
       title: '操作',
       key: 'action',
-      width: 300,
+      width: 340,
       render: (_, record) => {
-        const analyzing =
-          autopilot.status === 'running' &&
-          autopilot.loadingResourceId === record.id;
+        const analyzing = analyzingMaterialId === record.id;
         return (
           <Space size={4} wrap>
             <Button
@@ -196,15 +264,7 @@ export function TeachingResourcesPage() {
               size="small"
               type="primary"
             >
-              {analyzing ? '分析中...' : 'AI 自动分析'}
-            </Button>
-            <Button
-              icon={<EyeOutlined />}
-              onClick={() => message.info(`查看 ${record.fileName} 详情`)}
-              size="small"
-              type="link"
-            >
-              详情
+              {analyzing ? '分析中' : 'AI 分析'}
             </Button>
             <Button
               icon={<ReloadOutlined />}
@@ -214,9 +274,17 @@ export function TeachingResourcesPage() {
             >
               提取
             </Button>
+            <Button
+              icon={<EyeOutlined />}
+              onClick={() => handleOpenVersions(record)}
+              size="small"
+              type="link"
+            >
+              版本
+            </Button>
             <Popconfirm
               onConfirm={() => handleDelete(record)}
-              title="确认删除该材料？"
+              title="确认从当前列表移除该材料？"
             >
               <Button danger icon={<DeleteOutlined />} size="small" type="link">
                 删除
@@ -228,6 +296,93 @@ export function TeachingResourcesPage() {
     },
   ];
 
+  const versionColumns: ColumnsType<MaterialVersionApiResponse> = [
+    {
+      title: '版本',
+      dataIndex: 'versionNo',
+      key: 'versionNo',
+      width: 70,
+      render: (value: number) => <Tag color="blue">v{value}</Tag>,
+    },
+    {
+      title: '文件',
+      dataIndex: 'fileName',
+      key: 'fileName',
+      ellipsis: true,
+    },
+    {
+      title: '大小',
+      dataIndex: 'fileSize',
+      key: 'fileSize',
+      width: 90,
+    },
+    {
+      title: '解析',
+      dataIndex: 'parseStrategy',
+      key: 'parseStrategy',
+      width: 140,
+      render: (value?: string) => value || '--',
+    },
+    {
+      title: '表格',
+      key: 'tableCount',
+      width: 80,
+      render: (_, record) => `${extractionNumber(record, 'tableCount')} 个`,
+    },
+    {
+      title: 'OCR',
+      key: 'ocr',
+      width: 110,
+      render: (_, record) => ocrTag(record),
+    },
+    {
+      title: '校验值',
+      dataIndex: 'checksum',
+      key: 'checksum',
+      ellipsis: true,
+      render: (value: string) => (
+        <Tooltip title={value}>
+          <Text code>{value.slice(0, 16)}</Text>
+        </Tooltip>
+      ),
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      width: 150,
+    },
+  ];
+
+  const analysisNodeColumns: ColumnsType<ParsedMaterialNodeResponse> = [
+    {
+      title: '编码',
+      dataIndex: 'code',
+      key: 'code',
+      width: 110,
+    },
+    {
+      title: '名称',
+      dataIndex: 'name',
+      key: 'name',
+      ellipsis: true,
+    },
+    {
+      title: '类型',
+      dataIndex: 'kind',
+      key: 'kind',
+      width: 110,
+      render: (value: string) => <Tag>{value}</Tag>,
+    },
+    {
+      title: '置信度',
+      dataIndex: 'confidence',
+      key: 'confidence',
+      width: 90,
+      render: (value: number) => `${Math.round(value * 100)}%`,
+    },
+  ];
+
   return (
     <main className="teaching-resources-page">
       <div className="teaching-resources-page-header">
@@ -235,24 +390,29 @@ export function TeachingResourcesPage() {
           <Space align="center" size={10}>
             <Title level={2}>教学资源与材料</Title>
             <Tag color="geekblue">M3 教学资源</Tag>
+            <Tag color="green">真实上传解析</Tag>
           </Space>
           <Paragraph type="secondary">
-            上传培养方案、课程大纲、实验指导书等材料，AI 自动提取节点构建能力图谱。
+            上传培养方案、课程大纲、实验指导书和评分表，系统解析后生成待教师审核的图谱候选关系。
           </Paragraph>
         </div>
       </div>
 
       <Alert
         className="teaching-resources-notice"
-        description="当前有 1 份材料提取失败，1 份材料等待处理；异常材料不会进入 M4 智能识别。"
+        description={ocrDescription(ocrStatus)}
         icon={<InfoCircleOutlined />}
         showIcon
-        title="材料治理状态：先处理异常，再进入能力识别"
-        type="warning"
+        title="材料解析与 OCR 环境"
+        type={ocrStatus?.available ? 'success' : 'warning'}
       />
 
       <Card className="teaching-resources-upload-card" size="small">
-        <UploadDropzone onUpload={handleUpload} />
+        <UploadDropzone
+          courseOptions={courseOptions}
+          loadingCourses={loadingCatalog}
+          onUpload={handleUpload}
+        />
       </Card>
 
       <Card
@@ -287,11 +447,140 @@ export function TeachingResourcesPage() {
         status={extraction.status}
       />
 
-      <AutopilotResultDrawer
-        open={autopilotDrawerOpen}
-        result={autopilot.result}
-        onClose={() => setAutopilotDrawerOpen(false)}
-      />
+      <Modal
+        destroyOnClose
+        footer={
+          <Button onClick={() => setAnalysisResult(null)} type="primary">
+            知道了
+          </Button>
+        }
+        onCancel={() => setAnalysisResult(null)}
+        open={Boolean(analysisResult)}
+        title="AI 分析结果"
+        width={900}
+      >
+        {analysisResult && (
+          <>
+            <Descriptions column={3} size="small">
+              <Descriptions.Item label="材料">
+                {analysisResult.material.fileName}
+              </Descriptions.Item>
+              <Descriptions.Item label="节点">
+                {analysisResult.extractedNodes.length}
+              </Descriptions.Item>
+              <Descriptions.Item label="待审核关系">
+                {analysisResult.candidatesCreated}
+              </Descriptions.Item>
+              <Descriptions.Item label="解析策略">
+                {analysisResult.material.parseStrategy || '--'}
+              </Descriptions.Item>
+              <Descriptions.Item label="解析器">
+                {analysisResult.material.parserVersion || '--'}
+              </Descriptions.Item>
+            </Descriptions>
+            <Table
+              columns={analysisNodeColumns}
+              dataSource={analysisResult.extractedNodes}
+              pagination={false}
+              rowKey="id"
+              size="small"
+              style={{ marginTop: 16 }}
+            />
+          </>
+        )}
+      </Modal>
+
+      <Modal
+        destroyOnClose
+        footer={null}
+        onCancel={() => setVersionModalOpen(false)}
+        open={versionModalOpen}
+        title="材料版本与解析记录"
+        width={980}
+      >
+        {versionMaterial && (
+          <Descriptions column={2} size="small">
+            <Descriptions.Item label="材料">{versionMaterial.fileName}</Descriptions.Item>
+            <Descriptions.Item label="当前状态">
+              <MaterialStatusTag status={versionMaterial.status} />
+            </Descriptions.Item>
+            <Descriptions.Item label="解析策略">
+              {versionMaterial.parseStrategy || '--'}
+            </Descriptions.Item>
+            <Descriptions.Item label="解析器版本">
+              {versionMaterial.parserVersion || '--'}
+            </Descriptions.Item>
+          </Descriptions>
+        )}
+        <Table
+          columns={versionColumns}
+          dataSource={versions}
+          loading={loadingVersions}
+          pagination={false}
+          rowKey="id"
+          size="small"
+          style={{ marginTop: 16 }}
+        />
+      </Modal>
     </main>
   );
+}
+
+async function refreshMaterials(
+  setUploadedMaterials: (rows: UploadedMaterial[]) => void,
+) {
+  const rows = await listUploadedMaterials().catch(() => []);
+  setUploadedMaterials(rows);
+}
+
+function mergeMaterials(
+  primary: UploadedMaterial[],
+  secondary: UploadedMaterial[],
+): UploadedMaterial[] {
+  const seen = new Set<string>();
+  return [...primary, ...secondary].filter((item) => {
+    if (seen.has(item.id)) return false;
+    seen.add(item.id);
+    return true;
+  });
+}
+
+function ocrDescription(status: OcrRuntimeStatus | null): string {
+  if (!status) return '正在检查 OCR 运行环境。';
+  if (status.available) {
+    const langText = status.languages.length
+      ? `，语言包：${status.languages.slice(0, 6).join(', ')}`
+      : '';
+    return `OCR 可用，${status.engine} ${status.version || ''}${langText}`;
+  }
+  return `OCR 暂不可用：${status.message}`;
+}
+
+function extractionNumber(
+  record: MaterialVersionApiResponse,
+  key: string,
+): number {
+  const extraction = record.parseArtifacts.extraction;
+  if (!isRecord(extraction)) return 0;
+  const value = extraction[key];
+  return typeof value === 'number' ? value : 0;
+}
+
+function ocrTag(record: MaterialVersionApiResponse) {
+  const extraction = record.parseArtifacts.extraction;
+  if (!isRecord(extraction) || !isRecord(extraction.ocr)) {
+    return <Tag>无</Tag>;
+  }
+  const status = String(extraction.ocr.status || 'unknown');
+  const color =
+    status === 'success' || status === 'not_required'
+      ? 'green'
+      : status === 'failed' || status === 'unavailable'
+        ? 'red'
+        : 'gold';
+  return <Tag color={color}>{status}</Tag>;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 }

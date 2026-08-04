@@ -160,6 +160,696 @@
         }
       }
     },
+    "/api/v1/academic/catalog": {
+      "get": {
+        "tags": [
+          "academic"
+        ],
+        "summary": "Get academic master data catalog",
+        "operationId": "get_catalog_api_v1_academic_catalog_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcademicCatalogResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/academic/program": {
+      "patch": {
+        "tags": [
+          "academic"
+        ],
+        "summary": "Update current academic program",
+        "operationId": "update_program_api_v1_academic_program_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcademicProgramUpsertRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcademicProgramResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/academic/courses": {
+      "post": {
+        "tags": [
+          "academic"
+        ],
+        "summary": "Create one course",
+        "operationId": "create_course_api_v1_academic_courses_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CourseUpsertRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/academic/courses/{course_id}": {
+      "patch": {
+        "tags": [
+          "academic"
+        ],
+        "summary": "Update one course",
+        "operationId": "update_course_api_v1_academic_courses__course_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CourseUpsertRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/academic/graduation-requirements": {
+      "post": {
+        "tags": [
+          "academic"
+        ],
+        "summary": "Create one graduation requirement",
+        "operationId": "create_requirement_api_v1_academic_graduation_requirements_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GraduationRequirementUpsertRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GraduationRequirementResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/academic/graduation-requirements/{requirement_id}": {
+      "patch": {
+        "tags": [
+          "academic"
+        ],
+        "summary": "Update one graduation requirement",
+        "operationId": "update_requirement_api_v1_academic_graduation_requirements__requirement_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "requirement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Requirement Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GraduationRequirementUpsertRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GraduationRequirementResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/academic/indicators": {
+      "post": {
+        "tags": [
+          "academic"
+        ],
+        "summary": "Create one competency indicator",
+        "operationId": "create_indicator_api_v1_academic_indicators_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompetencyIndicatorUpsertRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompetencyIndicatorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/academic/indicators/{indicator_id}": {
+      "patch": {
+        "tags": [
+          "academic"
+        ],
+        "summary": "Update one competency indicator",
+        "operationId": "update_indicator_api_v1_academic_indicators__indicator_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "indicator_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Indicator Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompetencyIndicatorUpsertRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompetencyIndicatorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/academic/objectives": {
+      "post": {
+        "tags": [
+          "academic"
+        ],
+        "summary": "Create one course objective",
+        "operationId": "create_objective_api_v1_academic_objectives_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CourseObjectiveUpsertRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseObjectiveResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/academic/objectives/{objective_id}": {
+      "patch": {
+        "tags": [
+          "academic"
+        ],
+        "summary": "Update one course objective",
+        "operationId": "update_objective_api_v1_academic_objectives__objective_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "objective_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Objective Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CourseObjectiveUpsertRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseObjectiveResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/academic/experiments": {
+      "post": {
+        "tags": [
+          "academic"
+        ],
+        "summary": "Create one experiment project",
+        "operationId": "create_experiment_api_v1_academic_experiments_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExperimentProjectUpsertRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperimentProjectResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/academic/experiments/{experiment_id}": {
+      "patch": {
+        "tags": [
+          "academic"
+        ],
+        "summary": "Update one experiment project",
+        "operationId": "update_experiment_api_v1_academic_experiments__experiment_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "experiment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Experiment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExperimentProjectUpsertRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperimentProjectResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/academic/rubric-items": {
+      "post": {
+        "tags": [
+          "academic"
+        ],
+        "summary": "Create one rubric item",
+        "operationId": "create_rubric_item_api_v1_academic_rubric_items_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RubricItemUpsertRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RubricItemResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/academic/rubric-items/{item_id}": {
+      "patch": {
+        "tags": [
+          "academic"
+        ],
+        "summary": "Update one rubric item",
+        "operationId": "update_rubric_item_api_v1_academic_rubric_items__item_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RubricItemUpsertRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RubricItemResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/resources": {
       "get": {
         "tags": [
@@ -287,6 +977,246 @@
                 "schema": {
                   "$ref": "#/components/schemas/TeachingResourceResponse"
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/materials": {
+      "get": {
+        "tags": [
+          "materials"
+        ],
+        "summary": "List uploaded teaching materials",
+        "operationId": "list_materials_api_v1_materials_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UploadedMaterialResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Materials Api V1 Materials Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/materials/upload": {
+      "post": {
+        "tags": [
+          "materials"
+        ],
+        "summary": "Upload one teaching material",
+        "operationId": "upload_material_api_v1_materials_upload_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MaterialUploadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadedMaterialResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/materials/ocr/status": {
+      "get": {
+        "tags": [
+          "materials"
+        ],
+        "summary": "Check OCR runtime availability",
+        "operationId": "get_ocr_status_api_v1_materials_ocr_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OcrRuntimeStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/materials/{material_id}/versions": {
+      "get": {
+        "tags": [
+          "materials"
+        ],
+        "summary": "List uploaded material versions",
+        "operationId": "list_material_versions_api_v1_materials__material_id__versions_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "material_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Material Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MaterialVersionResponse"
+                  },
+                  "title": "Response List Material Versions Api V1 Materials  Material Id  Versions Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/materials/{material_id}/parse": {
+      "post": {
+        "tags": [
+          "materials"
+        ],
+        "summary": "Parse material and generate recognition candidates",
+        "operationId": "parse_material_api_v1_materials__material_id__parse_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "material_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Material Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaterialParseResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/materials/{material_id}/file": {
+      "get": {
+        "tags": [
+          "materials"
+        ],
+        "summary": "Download uploaded material",
+        "operationId": "get_material_file_api_v1_materials__material_id__file_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "material_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Material Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           },
@@ -454,6 +1384,115 @@
             }
           }
         }
+      }
+    },
+    "/api/v1/graph": {
+      "get": {
+        "tags": [
+          "graph"
+        ],
+        "summary": "Get ability graph",
+        "operationId": "get_graph_api_v1_graph_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AbilityGraphResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/graph/edges/{edge_id}/review": {
+      "post": {
+        "tags": [
+          "graph"
+        ],
+        "summary": "Review graph edge",
+        "operationId": "review_edge_api_v1_graph_edges__edge_id__review_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "edge_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Edge Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GraphEdgeReviewRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AbilityGraphEdgeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/diagnostics/graph": {
+      "get": {
+        "tags": [
+          "diagnostics"
+        ],
+        "summary": "Run graph diagnostics from the approved ability graph",
+        "operationId": "run_graph_diagnostics_api_v1_diagnostics_graph_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GraphDiagnosticReportResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
       }
     },
     "/api/v1/diagnostics/findings": {
@@ -1157,6 +2196,387 @@
   },
   "components": {
     "schemas": {
+      "AbilityGraphEdgeResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "target": {
+            "type": "string",
+            "title": "Target"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "sourceType": {
+            "type": "string",
+            "title": "Sourcetype"
+          },
+          "reviewStatus": {
+            "type": "string",
+            "title": "Reviewstatus"
+          },
+          "strength": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Strength"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "aiReasoning": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aireasoning"
+          },
+          "candidateId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Candidateid"
+          },
+          "reviewedBy": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewedby"
+          },
+          "reviewedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewedat"
+          },
+          "evidenceSummary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidencesummary"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "source",
+          "target",
+          "kind",
+          "sourceType",
+          "reviewStatus"
+        ],
+        "title": "AbilityGraphEdgeResponse"
+      },
+      "AbilityGraphNodeResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "origin": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin"
+          },
+          "properties": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Properties"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "code",
+          "name",
+          "properties"
+        ],
+        "title": "AbilityGraphNodeResponse"
+      },
+      "AbilityGraphResponse": {
+        "properties": {
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/AbilityGraphNodeResponse"
+            },
+            "type": "array",
+            "title": "Nodes"
+          },
+          "edges": {
+            "items": {
+              "$ref": "#/components/schemas/AbilityGraphEdgeResponse"
+            },
+            "type": "array",
+            "title": "Edges"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nodes",
+          "edges"
+        ],
+        "title": "AbilityGraphResponse"
+      },
+      "AcademicCatalogResponse": {
+        "properties": {
+          "program": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AcademicProgramResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "courses": {
+            "items": {
+              "$ref": "#/components/schemas/CourseResponse"
+            },
+            "type": "array",
+            "title": "Courses"
+          },
+          "graduationRequirements": {
+            "items": {
+              "$ref": "#/components/schemas/GraduationRequirementResponse"
+            },
+            "type": "array",
+            "title": "Graduationrequirements"
+          },
+          "indicators": {
+            "items": {
+              "$ref": "#/components/schemas/CompetencyIndicatorResponse"
+            },
+            "type": "array",
+            "title": "Indicators"
+          },
+          "objectives": {
+            "items": {
+              "$ref": "#/components/schemas/CourseObjectiveResponse"
+            },
+            "type": "array",
+            "title": "Objectives"
+          },
+          "experiments": {
+            "items": {
+              "$ref": "#/components/schemas/ExperimentProjectResponse"
+            },
+            "type": "array",
+            "title": "Experiments"
+          },
+          "rubricItems": {
+            "items": {
+              "$ref": "#/components/schemas/RubricItemResponse"
+            },
+            "type": "array",
+            "title": "Rubricitems"
+          },
+          "sourceMaterials": {
+            "items": {
+              "$ref": "#/components/schemas/SourceMaterialResponse"
+            },
+            "type": "array",
+            "title": "Sourcematerials"
+          },
+          "supportLinks": {
+            "items": {
+              "$ref": "#/components/schemas/SupportLinkResponse"
+            },
+            "type": "array",
+            "title": "Supportlinks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "program",
+          "courses",
+          "graduationRequirements",
+          "indicators",
+          "objectives",
+          "experiments",
+          "rubricItems",
+          "sourceMaterials",
+          "supportLinks"
+        ],
+        "title": "AcademicCatalogResponse"
+      },
+      "AcademicProgramResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "discipline": {
+            "type": "string",
+            "title": "Discipline"
+          },
+          "degree": {
+            "type": "string",
+            "title": "Degree"
+          },
+          "owner": {
+            "type": "string",
+            "title": "Owner"
+          },
+          "evaluationCycle": {
+            "type": "string",
+            "title": "Evaluationcycle"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "name",
+          "discipline",
+          "degree",
+          "owner",
+          "evaluationCycle",
+          "status"
+        ],
+        "title": "AcademicProgramResponse"
+      },
+      "AcademicProgramUpsertRequest": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "discipline": {
+            "type": "string",
+            "title": "Discipline"
+          },
+          "degree": {
+            "type": "string",
+            "title": "Degree"
+          },
+          "owner": {
+            "type": "string",
+            "title": "Owner"
+          },
+          "evaluationCycle": {
+            "type": "string",
+            "title": "Evaluationcycle"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "name",
+          "discipline",
+          "degree",
+          "owner",
+          "evaluationCycle",
+          "status"
+        ],
+        "title": "AcademicProgramUpsertRequest"
+      },
       "AgentStepResponse": {
         "properties": {
           "phase": {
@@ -1582,6 +3002,83 @@
           "decision": {
             "type": "string",
             "title": "Decision"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          },
+          "sourceNode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sourcenode"
+          },
+          "targetNode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Targetnode"
+          },
+          "relation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Relation"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "strength": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Strength"
+          },
+          "evidenceExcerpt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidenceexcerpt"
           }
         },
         "type": "object",
@@ -1600,6 +3097,67 @@
         ],
         "title": "CandidateReviewStatus"
       },
+      "CompetencyIndicatorResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "requirementId": {
+            "type": "string",
+            "title": "Requirementid"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "requirementId",
+          "code",
+          "title",
+          "description"
+        ],
+        "title": "CompetencyIndicatorResponse"
+      },
+      "CompetencyIndicatorUpsertRequest": {
+        "properties": {
+          "requirementId": {
+            "type": "string",
+            "title": "Requirementid"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "requirementId",
+          "code",
+          "title",
+          "description"
+        ],
+        "title": "CompetencyIndicatorUpsertRequest"
+      },
       "ComponentStatus": {
         "type": "string",
         "enum": [
@@ -1608,6 +3166,174 @@
           "not_configured"
         ],
         "title": "ComponentStatus"
+      },
+      "CourseObjectiveResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "courseId": {
+            "type": "string",
+            "title": "Courseid"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "courseId",
+          "code",
+          "title",
+          "description"
+        ],
+        "title": "CourseObjectiveResponse"
+      },
+      "CourseObjectiveUpsertRequest": {
+        "properties": {
+          "courseId": {
+            "type": "string",
+            "title": "Courseid"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "courseId",
+          "code",
+          "title",
+          "description"
+        ],
+        "title": "CourseObjectiveUpsertRequest"
+      },
+      "CourseResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "programId": {
+            "type": "string",
+            "title": "Programid"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "term": {
+            "type": "string",
+            "title": "Term"
+          },
+          "creditHours": {
+            "type": "number",
+            "title": "Credithours"
+          },
+          "owner": {
+            "type": "string",
+            "title": "Owner"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "programId",
+          "code",
+          "name",
+          "category",
+          "term",
+          "creditHours",
+          "owner",
+          "status"
+        ],
+        "title": "CourseResponse"
+      },
+      "CourseUpsertRequest": {
+        "properties": {
+          "programId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Programid"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "term": {
+            "type": "string",
+            "title": "Term"
+          },
+          "creditHours": {
+            "type": "number",
+            "title": "Credithours"
+          },
+          "owner": {
+            "type": "string",
+            "title": "Owner"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "name",
+          "category",
+          "term",
+          "creditHours",
+          "owner",
+          "status"
+        ],
+        "title": "CourseUpsertRequest"
       },
       "DiagnosticEvidenceRefResponse": {
         "properties": {
@@ -1783,6 +3509,93 @@
         ],
         "title": "EvidenceFragmentResponse"
       },
+      "ExperimentProjectResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "courseId": {
+            "type": "string",
+            "title": "Courseid"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "environment": {
+            "type": "string",
+            "title": "Environment"
+          },
+          "sourceMaterialId": {
+            "type": "string",
+            "title": "Sourcematerialid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "courseId",
+          "code",
+          "title",
+          "description",
+          "environment",
+          "sourceMaterialId"
+        ],
+        "title": "ExperimentProjectResponse"
+      },
+      "ExperimentProjectUpsertRequest": {
+        "properties": {
+          "courseId": {
+            "type": "string",
+            "title": "Courseid"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "environment": {
+            "type": "string",
+            "title": "Environment"
+          },
+          "sourceMaterialId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sourcematerialid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "courseId",
+          "code",
+          "title",
+          "description",
+          "environment"
+        ],
+        "title": "ExperimentProjectUpsertRequest"
+      },
       "ExplanationItemResponse": {
         "properties": {
           "target_code": {
@@ -1869,6 +3682,49 @@
           "data"
         ],
         "title": "ExtractNodesResponse"
+      },
+      "ExtractedNodeResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence"
+          },
+          "sourceExcerpt": {
+            "type": "string",
+            "title": "Sourceexcerpt"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "code",
+          "name",
+          "description",
+          "confidence",
+          "sourceExcerpt"
+        ],
+        "title": "ExtractedNodeResponse"
       },
       "ExtractionItemResponse": {
         "properties": {
@@ -2100,6 +3956,137 @@
         ],
         "title": "GenerateSuggestionsResponse"
       },
+      "GraduationRequirementResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "programId": {
+            "type": "string",
+            "title": "Programid"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "programId",
+          "code",
+          "title",
+          "description"
+        ],
+        "title": "GraduationRequirementResponse"
+      },
+      "GraduationRequirementUpsertRequest": {
+        "properties": {
+          "programId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Programid"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "title",
+          "description"
+        ],
+        "title": "GraduationRequirementUpsertRequest"
+      },
+      "GraphDiagnosticReportResponse": {
+        "properties": {
+          "graphVersion": {
+            "type": "string",
+            "title": "Graphversion"
+          },
+          "generatedAt": {
+            "type": "string",
+            "title": "Generatedat"
+          },
+          "overallCoverageRate": {
+            "type": "number",
+            "title": "Overallcoveragerate"
+          },
+          "gapCount": {
+            "type": "integer",
+            "title": "Gapcount"
+          },
+          "partialCount": {
+            "type": "integer",
+            "title": "Partialcount"
+          },
+          "orphanNodeCount": {
+            "type": "integer",
+            "title": "Orphannodecount"
+          },
+          "diagnosticsMode": {
+            "type": "string",
+            "title": "Diagnosticsmode"
+          },
+          "findings": {
+            "items": {
+              "$ref": "#/components/schemas/DiagnosticFindingResponse"
+            },
+            "type": "array",
+            "title": "Findings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "graphVersion",
+          "generatedAt",
+          "overallCoverageRate",
+          "gapCount",
+          "partialCount",
+          "orphanNodeCount",
+          "diagnosticsMode",
+          "findings"
+        ],
+        "title": "GraphDiagnosticReportResponse"
+      },
+      "GraphEdgeReviewRequest": {
+        "properties": {
+          "decision": {
+            "type": "string",
+            "title": "Decision"
+          }
+        },
+        "type": "object",
+        "required": [
+          "decision"
+        ],
+        "title": "GraphEdgeReviewRequest"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -2205,6 +4192,163 @@
         ],
         "title": "LoginRequest"
       },
+      "MaterialParseResponse": {
+        "properties": {
+          "material": {
+            "$ref": "#/components/schemas/UploadedMaterialResponse"
+          },
+          "extractedNodes": {
+            "items": {
+              "$ref": "#/components/schemas/ExtractedNodeResponse"
+            },
+            "type": "array",
+            "title": "Extractednodes"
+          },
+          "candidatesCreated": {
+            "type": "integer",
+            "title": "Candidatescreated"
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/RecognitionCandidateResponse"
+            },
+            "type": "array",
+            "title": "Candidates"
+          },
+          "parseArtifacts": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Parseartifacts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "material",
+          "extractedNodes",
+          "candidatesCreated",
+          "candidates"
+        ],
+        "title": "MaterialParseResponse"
+      },
+      "MaterialUploadRequest": {
+        "properties": {
+          "fileName": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "contentBase64": {
+            "type": "string",
+            "title": "Contentbase64"
+          },
+          "contentType": {
+            "type": "string",
+            "title": "Contenttype",
+            "default": "application/octet-stream"
+          },
+          "course": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fileName",
+          "category",
+          "contentBase64"
+        ],
+        "title": "MaterialUploadRequest"
+      },
+      "MaterialVersionResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "materialId": {
+            "type": "string",
+            "title": "Materialid"
+          },
+          "versionNo": {
+            "type": "integer",
+            "title": "Versionno"
+          },
+          "fileName": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "fileType": {
+            "type": "string",
+            "title": "Filetype"
+          },
+          "fileSize": {
+            "type": "string",
+            "title": "Filesize"
+          },
+          "storageUri": {
+            "type": "string",
+            "title": "Storageuri"
+          },
+          "checksum": {
+            "type": "string",
+            "title": "Checksum"
+          },
+          "parserVersion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parserversion"
+          },
+          "parseStrategy": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parsestrategy"
+          },
+          "createdAt": {
+            "type": "string",
+            "title": "Createdat"
+          },
+          "parseArtifacts": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Parseartifacts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "materialId",
+          "versionNo",
+          "fileName",
+          "fileType",
+          "fileSize",
+          "storageUri",
+          "checksum",
+          "createdAt"
+        ],
+        "title": "MaterialVersionResponse"
+      },
       "MeResponse": {
         "properties": {
           "id": {
@@ -2248,6 +4392,52 @@
           "created_at"
         ],
         "title": "MeResponse"
+      },
+      "OcrRuntimeStatusResponse": {
+        "properties": {
+          "available": {
+            "type": "boolean",
+            "title": "Available"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "engine": {
+            "type": "string",
+            "title": "Engine"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          },
+          "languages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Languages"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "available",
+          "status",
+          "engine",
+          "message"
+        ],
+        "title": "OcrRuntimeStatusResponse"
       },
       "OverallStatus": {
         "type": "string",
@@ -2422,6 +4612,17 @@
             "type": "object",
             "title": "Impact"
           },
+          "supportStrength": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supportstrength"
+          },
           "conflictMessage": {
             "anyOf": [
               {
@@ -2432,6 +4633,39 @@
               }
             ],
             "title": "Conflictmessage"
+          },
+          "reviewedBy": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewedby"
+          },
+          "reviewedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewedat"
+          },
+          "reviewComment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewcomment"
           },
           "evidence": {
             "items": {
@@ -2635,6 +4869,100 @@
         "type": "object",
         "title": "ReviewRequest"
       },
+      "RubricItemResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "courseId": {
+            "type": "string",
+            "title": "Courseid"
+          },
+          "experimentId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Experimentid"
+          },
+          "indicatorId": {
+            "type": "string",
+            "title": "Indicatorid"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "points": {
+            "type": "number",
+            "title": "Points"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "courseId",
+          "experimentId",
+          "indicatorId",
+          "code",
+          "title",
+          "points"
+        ],
+        "title": "RubricItemResponse"
+      },
+      "RubricItemUpsertRequest": {
+        "properties": {
+          "courseId": {
+            "type": "string",
+            "title": "Courseid"
+          },
+          "experimentId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Experimentid"
+          },
+          "indicatorId": {
+            "type": "string",
+            "title": "Indicatorid"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "points": {
+            "type": "number",
+            "title": "Points"
+          }
+        },
+        "type": "object",
+        "required": [
+          "courseId",
+          "indicatorId",
+          "code",
+          "title",
+          "points"
+        ],
+        "title": "RubricItemUpsertRequest"
+      },
       "RunResponse": {
         "properties": {
           "runId": {
@@ -2718,6 +5046,49 @@
         ],
         "title": "RunResponse"
       },
+      "SourceMaterialResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "courseId": {
+            "type": "string",
+            "title": "Courseid"
+          },
+          "fileName": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "materialType": {
+            "type": "string",
+            "title": "Materialtype"
+          },
+          "sourcePath": {
+            "type": "string",
+            "title": "Sourcepath"
+          },
+          "checksum": {
+            "type": "string",
+            "title": "Checksum"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "courseId",
+          "fileName",
+          "materialType",
+          "sourcePath",
+          "checksum",
+          "status"
+        ],
+        "title": "SourceMaterialResponse"
+      },
       "StartRunRequest": {
         "properties": {
           "goal": {
@@ -2785,6 +5156,54 @@
           "expected_effect"
         ],
         "title": "SuggestionItemResponse"
+      },
+      "SupportLinkResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "sourceType": {
+            "type": "string",
+            "title": "Sourcetype"
+          },
+          "sourceId": {
+            "type": "string",
+            "title": "Sourceid"
+          },
+          "targetIndicatorId": {
+            "type": "string",
+            "title": "Targetindicatorid"
+          },
+          "relation": {
+            "type": "string",
+            "title": "Relation"
+          },
+          "strength": {
+            "type": "string",
+            "title": "Strength"
+          },
+          "evidence": {
+            "type": "string",
+            "title": "Evidence"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "sourceType",
+          "sourceId",
+          "targetIndicatorId",
+          "relation",
+          "strength",
+          "evidence",
+          "status"
+        ],
+        "title": "SupportLinkResponse"
       },
       "SystemComponentResponse": {
         "properties": {
@@ -3041,6 +5460,119 @@
           "status"
         ],
         "title": "ToolCallResponse"
+      },
+      "UploadedMaterialResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "fileName": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "fileType": {
+            "type": "string",
+            "title": "Filetype"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "uploadTime": {
+            "type": "string",
+            "title": "Uploadtime"
+          },
+          "uploadedBy": {
+            "type": "string",
+            "title": "Uploadedby"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "fileSize": {
+            "type": "string",
+            "title": "Filesize"
+          },
+          "fileUrl": {
+            "type": "string",
+            "title": "Fileurl"
+          },
+          "course": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course"
+          },
+          "extractedNodeCount": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extractednodecount"
+          },
+          "candidatesCreated": {
+            "type": "integer",
+            "title": "Candidatescreated",
+            "default": 0
+          },
+          "failureReason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failurereason"
+          },
+          "parserVersion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parserversion"
+          },
+          "parseStrategy": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parsestrategy"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "fileName",
+          "fileType",
+          "category",
+          "uploadTime",
+          "uploadedBy",
+          "status",
+          "fileSize",
+          "fileUrl"
+        ],
+        "title": "UploadedMaterialResponse"
       },
       "ValidationError": {
         "properties": {

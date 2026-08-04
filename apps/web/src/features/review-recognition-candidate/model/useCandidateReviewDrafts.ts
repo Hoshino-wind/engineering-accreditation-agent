@@ -4,7 +4,11 @@ import type { CandidateReviewDecision } from '../../../entities/recognition-cand
 
 export interface CandidateReviewDraft {
   decision?: CandidateReviewDecision;
+  evidenceExcerpt?: string;
   note: string;
+  sourceNode?: string;
+  strength?: string;
+  targetNode?: string;
 }
 
 const emptyDraft: CandidateReviewDraft = {
@@ -41,9 +45,24 @@ export function useCandidateReviewDrafts() {
     }));
   };
 
+  const setField = (
+    candidateId: string,
+    field: keyof Omit<CandidateReviewDraft, 'decision' | 'note'>,
+    value: string,
+  ) => {
+    setDrafts((current) => ({
+      ...current,
+      [candidateId]: {
+        ...(current[candidateId] ?? emptyDraft),
+        [field]: value,
+      },
+    }));
+  };
+
   return {
     getDraft,
     setDecision,
+    setField,
     setNote,
   };
 }

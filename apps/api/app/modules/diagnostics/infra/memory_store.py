@@ -158,6 +158,28 @@ class InMemoryFindingRepository:
             self._store[f.id] = f
         return findings
 
+    async def replace_graph_findings(
+        self,
+        findings: list[DiagnosticFinding],
+    ) -> list[DiagnosticFinding]:
+        existing_status = {
+            finding.id: finding.decision_status
+            for finding in self._store.values()
+            if finding.rule_id.startswith("GRAPH-DIAG-")
+        }
+        self._store = {
+            finding_id: finding
+            for finding_id, finding in self._store.items()
+            if not finding.rule_id.startswith("GRAPH-DIAG-")
+        }
+        updated = [
+            replace(finding, decision_status=existing_status.get(finding.id, finding.decision_status))
+            for finding in findings
+        ]
+        for finding in updated:
+            self._store[finding.id] = finding
+        return updated
+
     async def update_decision(
         self,
         finding_id: str,

@@ -3,18 +3,38 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from app.modules.diagnostics.application import DecideFinding, ListFindings
+from app.modules.diagnostics.application import (
+    DecideFinding,
+    ListFindings,
+    RunGraphDiagnostics,
+)
 from app.modules.diagnostics.contracts import (
     DiagnosticFindingResponse,
     FindingDecisionRequest,
+    GraphDiagnosticReportResponse,
 )
 
 
 def create_diagnostics_router(
     list_findings_use_case: Callable[[], ListFindings],
     decide_finding_use_case: Callable[[], DecideFinding],
+    run_graph_diagnostics_use_case: Callable[[], RunGraphDiagnostics],
 ) -> APIRouter:
     router = APIRouter(prefix="/diagnostics", tags=["diagnostics"])
+
+    @router.get(
+        "/graph",
+        response_model=GraphDiagnosticReportResponse,
+        summary="Run graph diagnostics from the approved ability graph",
+    )
+    async def run_graph_diagnostics(
+        use_case: Annotated[
+            RunGraphDiagnostics,
+            Depends(run_graph_diagnostics_use_case),
+        ],
+    ) -> GraphDiagnosticReportResponse:
+        report = await use_case.execute()
+        return GraphDiagnosticReportResponse.from_domain(report)
 
     @router.get(
         "/findings",
