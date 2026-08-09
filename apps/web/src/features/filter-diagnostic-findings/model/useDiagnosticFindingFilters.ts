@@ -9,6 +9,7 @@ import { filterDiagnosticFindings } from './filterDiagnosticFindings';
 
 export function useDiagnosticFindingFilters(
   sourceFindings: DiagnosticFinding[],
+  globalCourseName?: string | null,
 ) {
   const [course, setCourse] = useState('all');
   const [findingType, setFindingType] = useState<
@@ -16,6 +17,11 @@ export function useDiagnosticFindingFilters(
   >('all');
   const [keyword, setKeyword] = useState('');
   const [risk, setRisk] = useState<DiagnosticFindingRisk | 'all'>('all');
+
+  // 当外部传入了全局课程（侧边栏选了具体课程），用它覆盖内部下拉选择
+  const isCourseLocked =
+    globalCourseName !== undefined && globalCourseName !== null;
+  const effectiveCourse = isCourseLocked ? globalCourseName : course;
 
   const courses = useMemo(
     () =>
@@ -28,12 +34,12 @@ export function useDiagnosticFindingFilters(
   const findings = useMemo(
     () =>
       filterDiagnosticFindings(sourceFindings, {
-        course,
+        course: effectiveCourse,
         findingType,
         keyword,
         risk,
       }),
-    [course, findingType, keyword, risk, sourceFindings],
+    [effectiveCourse, findingType, keyword, risk, sourceFindings],
   );
 
   return {
@@ -41,6 +47,7 @@ export function useDiagnosticFindingFilters(
     courses,
     findingType,
     findings,
+    isCourseLocked,
     keyword,
     risk,
     setCourse,

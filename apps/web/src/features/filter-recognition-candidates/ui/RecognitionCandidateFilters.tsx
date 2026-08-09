@@ -12,6 +12,7 @@ interface RecognitionCandidateFiltersProps {
   candidateType: RecognitionCandidateType | 'all';
   course: string;
   courses: string[];
+  isCourseLocked?: boolean;
   keyword: string;
   risk: RecognitionCandidateRisk | 'all';
   onCandidateTypeChange: (value: RecognitionCandidateType | 'all') => void;
@@ -24,6 +25,7 @@ export function RecognitionCandidateFilters({
   candidateType,
   course,
   courses,
+  isCourseLocked = false,
   keyword,
   onCandidateTypeChange,
   onCourseChange,
@@ -33,15 +35,17 @@ export function RecognitionCandidateFilters({
 }: RecognitionCandidateFiltersProps) {
   return (
     <Space className="recognition-candidate-filters" size={8} wrap>
-      <Select
-        aria-label="按课程筛选候选"
-        onChange={onCourseChange}
-        options={[
-          { value: 'all', label: '全部课程' },
-          ...courses.map((value) => ({ value, label: value })),
-        ]}
-        value={course}
-      />
+      {!isCourseLocked && (
+        <Select
+          aria-label="按课程筛选候选"
+          onChange={onCourseChange}
+          options={[
+            { value: 'all', label: '全部课程' },
+            ...courses.map((value) => ({ value, label: value })),
+          ]}
+          value={course}
+        />
+      )}
       <Select
         aria-label="按候选类型筛选"
         onChange={onCandidateTypeChange}

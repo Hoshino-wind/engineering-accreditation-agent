@@ -1,31 +1,88 @@
+/* ====== M4 · 关系审核 · 工业风专属样式 ====== */
+
 .recognition-review-page {
   width: 100%;
-  max-width: 1680px;
+  max-width: var(--app-content-max-width, 1680px);
   margin: 0 auto;
-}
-
-.recognition-review-page-header {
+  padding: 16px 0 28px;
+  min-height: 100vh;
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ---- Hero ---- */
+.recognition-review-page .recognition-review-page-header {
+  display: flex;
+  align-items: flex-end;
   justify-content: space-between;
-  margin-bottom: 14px;
+  gap: 16px;
+  padding-bottom: 16px;
+  margin-bottom: 20px !important;
+  border-bottom: 1px solid var(--mi-rule);
+  position: relative;
 }
 
-.recognition-review-page-header .ant-typography {
-  margin-bottom: 0;
+.recognition-review-page .recognition-review-page-header h2.ant-typography {
+  margin: 0;
+  font-family: var(--mi-font-display);
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--mi-ink);
+}
+.recognition-review-page .recognition-review-page-header .ant-typography-secondary {
+  margin: 6px 0 0 0 !important;
+  max-width: 72ch;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--mi-ink-soft);
 }
 
-.recognition-review-page-header h2.ant-typography {
-  margin-top: 0;
-  font-size: 24px;
-  line-height: 32px;
+.recognition-review-page-header .ant-space:first-of-type {
+  align-items: flex-start !important;
+  gap: 14px !important;
 }
 
-.recognition-review-page-header .ant-typography-secondary {
-  margin-top: 4px;
-  font-size: 13px;
+.recognition-review-page-header .ant-tag {
+  margin-inline-end: 0;
+  margin-top: 2px;
 }
 
+/* ---- Alert 琥珀金铭牌 ---- */
 .recognition-review-notice {
-  margin-bottom: 16px;
+  border-radius: var(--mi-radius-card) !important;
+  padding: 14px 18px 14px 50px !important;
+  border: 1px solid var(--mi-amber-fog) !important;
+  background:
+    linear-gradient(135deg, rgba(255, 247, 230, 0.95) 0%, rgba(255, 250, 240, 0.95) 100%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='1'/><feColorMatrix values='0 0 0 0 0.78  0 0 0 0 0.66  0 0 0 0 0.45  0 0 0 0.08 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>") !important;
+  background-blend-mode: multiply !important;
+  box-shadow: var(--mi-shadow-card) !important;
+  overflow: hidden;
+}
+
+.recognition-review-notice .ant-alert-icon {
+  color: var(--mi-amber) !important;
+  font-size: 18px !important;
+  top: 16px !important;
+  left: 18px !important;
+}
+.recognition-review-notice .ant-alert-message {
+  font-family: var(--mi-font-display);
+  font-weight: 600 !important;
+  color: var(--mi-amber-ink) !important;
+  font-size: 14px !important;
+}
+.recognition-review-notice .ant-alert-description {
+  font-family: var(--mi-font-display);
+  color: var(--mi-ink-soft) !important;
+  font-size: 12px !important;
+  line-height: 1.6;
+}
+
+/* ---- Banner 与子组件区域的间距 ---- */
+.recognition-review-page > * + * {
+  margin-top: 0;
 }

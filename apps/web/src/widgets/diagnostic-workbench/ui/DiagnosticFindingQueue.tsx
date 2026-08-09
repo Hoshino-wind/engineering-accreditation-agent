@@ -15,6 +15,7 @@ interface DiagnosticFindingQueueProps {
   courses: string[];
   findingType: DiagnosticFindingType | 'all';
   findings: DiagnosticFinding[];
+  isCourseLocked?: boolean;
   keyword: string;
   onCourseChange: (value: string) => void;
   onFindingTypeChange: (value: DiagnosticFindingType | 'all') => void;
@@ -66,6 +67,7 @@ export function DiagnosticFindingQueue({
   courses,
   findingType,
   findings,
+  isCourseLocked,
   keyword,
   onCourseChange,
   onFindingTypeChange,
@@ -90,6 +92,7 @@ export function DiagnosticFindingQueue({
         course={course}
         courses={courses}
         findingType={findingType}
+        isCourseLocked={isCourseLocked}
         keyword={keyword}
         onCourseChange={onCourseChange}
         onFindingTypeChange={onFindingTypeChange}

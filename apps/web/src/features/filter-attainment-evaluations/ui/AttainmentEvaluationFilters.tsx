@@ -8,6 +8,7 @@ import './attainmentEvaluationFilters.css';
 interface AttainmentEvaluationFiltersProps {
   course: string;
   courses: string[];
+  isCourseLocked?: boolean;
   keyword: string;
   onCourseChange: (value: string) => void;
   onKeywordChange: (value: string) => void;
@@ -18,6 +19,7 @@ interface AttainmentEvaluationFiltersProps {
 export function AttainmentEvaluationFiltersControl({
   course,
   courses,
+  isCourseLocked = false,
   keyword,
   onCourseChange,
   onKeywordChange,
@@ -27,19 +29,21 @@ export function AttainmentEvaluationFiltersControl({
   return (
     <div className="attainment-evaluation-filters">
       <div className="attainment-evaluation-filter-row">
-        <Select
-          aria-label="按课程筛选评价对象"
-          onChange={onCourseChange}
-          options={[
-            { label: '全部课程', value: 'all' },
-            ...courses.map((item) => ({
-              label: item,
-              value: item,
-            })),
-          ]}
-          size="small"
-          value={course}
-        />
+        {!isCourseLocked && (
+          <Select
+            aria-label="按课程筛选评价对象"
+            onChange={onCourseChange}
+            options={[
+              { label: '全部课程', value: 'all' },
+              ...courses.map((item) => ({
+                label: item,
+                value: item,
+              })),
+            ]}
+            size="small"
+            value={course}
+          />
+        )}
         <Select
           aria-label="按状态筛选评价对象"
           onChange={onStatusChange}

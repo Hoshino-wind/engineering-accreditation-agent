@@ -1,0 +1,304 @@
+/* ============================================================
+ *  课程矩阵 · Course Matrix
+ *  横轴=5 阶段，纵轴=10 门课程，每格=状态徽章
+ *  工业风：纸张底 + 靛蓝/琥珀 + 等宽数字
+ * ============================================================ */
+
+.course-matrix-wrapper {
+  position: relative;
+  width: 100%;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid rgba(26, 26, 26, 0.06);
+  box-shadow: 0 1px 2px rgba(20,20,40,0.02), 0 4px 16px rgba(20,20,40,0.04);
+  overflow: hidden;
+}
+
+/* —— 图例条 —— */
+.course-matrix-legend {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--m1-line, rgba(26, 26, 26, 0.06));
+  background: rgba(59, 91, 219, 0.03);
+  flex-wrap: wrap;
+}
+
+.matrix-legend-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--m1-ink-faint, #8a8a8a);
+  margin-right: 4px;
+}
+
+.matrix-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--m1-ink-soft, #4a4a4a);
+}
+
+/* —— 表格滚动区 —— */
+.course-matrix-table-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.course-matrix-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  min-width: 720px;
+}
+
+/* —— 列宽 —— */
+.matrix-col-course {
+  width: 200px;
+  min-width: 160px;
+  text-align: left;
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--m1-bg-paper, #faf8f3);
+  border-right: 2px solid var(--m1-rule, rgba(26, 26, 26, 0.10));
+}
+
+.matrix-col-stage {
+  width: auto;
+  min-width: 110px;
+  text-align: center;
+  padding: 14px 8px 10px;
+  border-bottom: 1px solid var(--m1-line, rgba(26, 26, 26, 0.06));
+  background: rgba(59, 91, 219, 0.02);
+}
+
+.matrix-stage-icon {
+  font-size: 18px;
+  color: var(--m1-indigo, #3b5bdb);
+  margin-bottom: 4px;
+}
+
+.matrix-stage-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--m1-ink, #1a1a1a);
+  line-height: 1.3;
+}
+
+.matrix-stage-short {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--m1-ink-faint, #8a8a8a);
+  margin-top: 2px;
+  text-transform: uppercase;
+}
+
+/* —— 行 —— */
+.matrix-row {
+  transition: background 0.2s;
+}
+
+.matrix-row:hover {
+  background: rgba(59, 91, 219, 0.02);
+}
+
+.matrix-row:hover .matrix-cell-course {
+  background: rgba(59, 91, 219, 0.04);
+}
+
+/* —— 课程名列 —— */
+.matrix-cell-course {
+  padding: 14px 16px;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--m1-bg-paper, #faf8f3);
+  border-bottom: 1px solid var(--m1-line, rgba(26, 26, 26, 0.06));
+  border-right: 2px solid var(--m1-rule, rgba(26, 26, 26, 0.10));
+}
+
+.matrix-row:hover .matrix-cell-course {
+  background: rgba(59, 91, 219, 0.04);
+}
+
+.matrix-course-name {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: var(--font-display-weight);
+  color: var(--m1-ink, #1a1a1a);
+  line-height: 1.3;
+}
+
+.matrix-course-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.6px;
+  color: var(--m1-ink-faint, #8a8a8a);
+  margin-top: 2px;
+}
+
+/* —— 单元格 —— */
+.matrix-cell {
+  text-align: center;
+  padding: 0;
+  border-bottom: 1px solid var(--m1-line, rgba(26, 26, 26, 0.06));
+  cursor: default;
+  vertical-align: middle;
+  transition: background 0.15s;
+  user-select: none;
+}
+
+.matrix-cell-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 16px 8px;
+  min-height: 56px;
+  justify-content: center;
+}
+
+.matrix-cell-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.matrix-cell-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.4px;
+  color: var(--m1-ink-soft, #4a4a4a);
+}
+
+/* —— 可交互的格子（非 locked） —— */
+.matrix-cell:not(.matrix-cell--locked) {
+  cursor: pointer;
+}
+
+.matrix-cell:not(.matrix-cell--locked):hover {
+  background: rgba(59, 91, 219, 0.06);
+}
+
+/* —— 状态样式 —— */
+
+/* 已完成 · 绿色 */
+.matrix-cell--done .matrix-cell-icon {
+  color: #52c41a;
+}
+.matrix-cell--done .matrix-cell-label {
+  color: #389e0d;
+  font-weight: 600;
+}
+
+/* 可进入 · 蓝色脉冲 */
+.matrix-cell--in-progress .matrix-cell-icon {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.matrix-cell--in-progress .matrix-cell-label {
+  color: var(--m1-indigo, #3b5bdb);
+  font-weight: 600;
+}
+
+/* 脉冲点 */
+.matrix-pulse-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--m1-indigo, #3b5bdb);
+  position: relative;
+}
+.matrix-pulse-dot::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 50%;
+  border: 2px solid var(--m1-indigo, #3b5bdb);
+  opacity: 0.4;
+  animation: matrix-pulse 1.6s ease-out infinite;
+}
+
+@keyframes matrix-pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  70% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* 异常 · 琥珀 */
+.matrix-cell--warning .matrix-cell-icon {
+  color: var(--m1-amber, #b08d57);
+}
+.matrix-cell--warning .matrix-cell-label {
+  color: var(--m1-amber-ink, #8a6a3a);
+  font-weight: 600;
+}
+
+/* 锁定 · 灰色 */
+.matrix-cell--locked .matrix-cell-icon {
+  color: #c0c0c0;
+}
+.matrix-cell--locked .matrix-cell-label {
+  color: #c0c0c0;
+}
+
+/* 未开始 · 空心 */
+.matrix-cell--not-started .matrix-cell-icon {
+  color: #d0d0d0;
+}
+.matrix-cell--not-started .matrix-cell-label {
+  color: #b0b0b0;
+}
+
+/* —— 底部统计 —— */
+.course-matrix-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--m1-line, rgba(26, 26, 26, 0.06));
+  font-size: 12px;
+  color: var(--m1-ink-soft, #4a4a4a);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.4px;
+}
+
+/* —— 加载 / 空态 —— */
+.course-matrix-loading,
+.course-matrix-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: var(--m1-ink-faint, #8a8a8a);
+  font-size: 13px;
+}
+
+/* —— 响应式：窄屏横向滚动 —— */
+@media (max-width: 768px) {
+  .course-matrix-legend {
+    gap: 12px;
+  }
+
+  .matrix-legend-item {
+    font-size: 11px;
+  }
+}

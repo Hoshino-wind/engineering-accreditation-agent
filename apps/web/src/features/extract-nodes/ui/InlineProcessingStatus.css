@@ -1,0 +1,49 @@
+/* 行内处理进度组件 */
+.inline-processing-status {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  min-width: 0;
+}
+
+.inline-processing-status-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.inline-processing-status-icon {
+  font-size: 12px;
+  color: var(--color-primary, #3b5bdb);
+}
+
+.inline-processing-status-text {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}
+
+/* 完成态：绿色对勾 + 文字 */
+.inline-processing-status-done {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.inline-processing-status-done .inline-processing-status-icon {
+  color: var(--color-success, #2f9e44);
+}
+
+.inline-processing-status-done .inline-processing-status-text {
+  color: var(--color-success, #2f9e44);
+}
+
+/* 进度条：使用品牌色 */
+.inline-processing-status-progress {
+  margin: 0;
+}
+
+.inline-processing-status-progress .ant-progress-bg {
+  background-color: var(--color-primary, #3b5bdb);
+}

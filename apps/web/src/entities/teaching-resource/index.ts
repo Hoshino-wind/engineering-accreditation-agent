@@ -1,4 +1,3 @@
-export { prototypeOnlyTeachingResources } from './model/prototypeOnlyTeachingResources';
 export type {
   EvidenceFragment,
   ProcessingStage,

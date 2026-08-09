@@ -1,31 +1,400 @@
+/* ====== M6 · 达成度评价 · 工业风专属样式 ====== */
+
 .attainment-evaluation-page {
   width: 100%;
-  max-width: 1680px;
+  max-width: var(--app-content-max-width, 1680px);
   margin: 0 auto;
-}
-
-.attainment-evaluation-page-header {
+  padding: 16px 0 28px;
+  min-height: 100vh;
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ---- 加载态 ---- */
+.attainment-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 120px 0;
+}
+
+/* ---- Hero ---- */
+.attainment-evaluation-page .attainment-evaluation-page-header {
+  display: flex;
+  align-items: flex-end;
   justify-content: space-between;
-  margin-bottom: 14px;
+  gap: 16px;
+  padding-bottom: 16px;
+  margin-bottom: 20px !important;
+  border-bottom: 1px solid var(--mi-rule);
+  position: relative;
 }
 
-.attainment-evaluation-page-header .ant-typography {
-  margin-bottom: 0;
+.attainment-evaluation-page .attainment-evaluation-page-header h2.ant-typography {
+  margin: 0;
+  font-family: var(--mi-font-display);
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--mi-ink);
+}
+.attainment-evaluation-page .attainment-evaluation-page-header .ant-typography-secondary {
+  margin: 6px 0 0 0 !important;
+  max-width: 70ch;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--mi-ink-soft);
 }
 
-.attainment-evaluation-page-header h2.ant-typography {
-  margin-top: 0;
-  font-size: 24px;
-  line-height: 32px;
+.attainment-evaluation-page-header .ant-space:first-of-type {
+  align-items: flex-start !important;
+  gap: 14px !important;
+}
+.attainment-evaluation-page-header .ant-tag {
+  margin-inline-end: 0;
+  margin-top: 2px;
 }
 
-.attainment-evaluation-page-header .ant-typography-secondary {
-  margin-top: 4px;
+/* ---- 总览卡（深色渐变 · 与诊断页类似） ---- */
+.attainment-stats.ant-card {
+  position: relative;
+  background:
+    linear-gradient(135deg, #243a9e 0%, #3b5bdb 45%, #5c7bed 100%) !important;
+  color: #fff !important;
+  overflow: hidden;
+}
+.attainment-stats.ant-card::before {
+  background: linear-gradient(90deg,
+    transparent 0%, rgba(255,255,255,0.3) 10%,
+    rgba(212, 180, 129, 0.85) 50%,
+    rgba(255,255,255,0.3) 90%, transparent 100%);
+  opacity: 0.7;
+}
+.attainment-stats.ant-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 8% 100%, rgba(176,141,87,0.25) 0%, rgba(176,141,87,0) 50%),
+    radial-gradient(circle at 90% 10%, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 45%);
+  pointer-events: none;
+}
+.attainment-stats .ant-card-body {
+  padding: 18px 24px 20px !important;
+  position: relative;
+  z-index: 1;
+}
+.attainment-stats .ant-statistic-title {
+  font-family: var(--mi-font-display) !important;
+  font-size: 11.5px !important;
+  letter-spacing: 0.8px;
+  color: rgba(255,255,255,0.72) !important;
+  margin-bottom: 2px !important;
+}
+.attainment-stats .ant-statistic-content {
+  font-family: var(--mi-font-number) !important;
+  font-weight: 700 !important;
+  font-size: 30px !important;
+  line-height: 1 !important;
+  letter-spacing: -0.02em;
+  color: #ffffff !important;
+}
+.attainment-stats .ant-statistic-content-suffix {
+  font-family: var(--mi-font-serif-en);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 18px;
+  margin-left: 4px;
+  color: rgba(255,255,255,0.82);
+}
+.attainment-stats .ant-statistic-content-prefix {
+  color: var(--mi-amber-glow);
+  margin-right: 6px;
+}
+
+/* ---- 不达标 Alert ---- */
+.attainment-gap-alert {
+  border-radius: var(--mi-radius-card) !important;
+  padding: 14px 18px 14px 50px !important;
+  border: 1px solid rgba(255,77,79,0.22) !important;
+  background:
+    linear-gradient(135deg, rgba(255,240,240,0.95) 0%, rgba(255,245,245,0.95) 100%) !important;
+  box-shadow: var(--mi-shadow-card) !important;
+  overflow: hidden;
+}
+.attainment-gap-alert .ant-alert-icon {
+  color: var(--mi-danger) !important;
+  font-size: 18px !important;
+  top: 16px !important;
+  left: 18px !important;
+}
+.attainment-gap-alert .ant-alert-message {
+  font-family: var(--mi-font-display);
+  font-weight: 600 !important;
+  color: var(--mi-danger-ink) !important;
+  font-size: 14px !important;
+}
+.attainment-gap-alert .ant-alert-description {
+  font-family: var(--mi-font-display);
+  color: var(--mi-ink-soft) !important;
+  font-size: 12px !important;
+  line-height: 1.6;
+}
+
+/* ---- 达成度环形总览 ---- */
+.attainment-radar-card.ant-card {
+  border-radius: var(--mi-radius-card) !important;
+}
+.attainment-radar-card.ant-card::before {
+  background: linear-gradient(90deg,
+    transparent 0%, var(--mi-indigo) 15%, var(--mi-amber) 50%,
+    var(--mi-indigo) 85%, transparent 100%);
+  opacity: 0.55;
+}
+.attainment-radar-card .ant-card-head {
+  padding: 12px 20px 10px !important;
+  border-bottom: 1px solid var(--mi-line) !important;
+}
+.attainment-radar-card .ant-card-head-title {
+  font-family: var(--mi-font-display);
+  font-weight: 600;
+  font-size: 15.5px;
+  color: var(--mi-ink);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.attainment-radar-card .ant-card-head-title::before {
+  content: '';
+  display: inline-block;
+  width: 4px; height: 20px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--mi-indigo) 0%, var(--mi-amber) 100%);
+}
+.attainment-radar-card .ant-card-body {
+  padding: 20px 24px;
+}
+
+.attainment-ring-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 18px 14px;
+  justify-items: center;
+}
+
+.attainment-ring-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 10px;
+  border: 1px solid var(--mi-line);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 150px;
+  transition: all 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  background: linear-gradient(180deg, #fff 0%, #fafaf8 100%);
+  position: relative;
+}
+.attainment-ring-item:hover {
+  border-color: var(--mi-indigo);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px -10px rgba(59,91,219,0.25);
+}
+.attainment-ring-item::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  border-radius: 12px 12px 0 0;
+  background: linear-gradient(90deg,
+    transparent 0%, var(--mi-indigo) 30%, var(--mi-amber) 70%, transparent 100%);
+  opacity: 0.6;
+}
+
+.attainment-ring-item .ant-progress-inner {
+  border-radius: 50% !important;
+}
+.attainment-ring-item .ant-progress-circle.ant-progress-status-success .ant-progress-text {
+  color: var(--mi-success-ink) !important;
+}
+.attainment-ring-item .ant-progress-text {
+  font-family: var(--mi-font-number) !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+}
+
+.attainment-ring-label {
+  width: 100%;
+  text-align: center;
+}
+.attainment-ring-label .ant-typography:first-of-type {
+  font-family: var(--mi-font-display) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: var(--mi-ink) !important;
+  display: block;
+  text-align: center;
+}
+.attainment-ring-label .ant-typography:last-of-type {
+  font-family: var(--mi-font-display) !important;
+  font-size: 10.5px !important;
+  color: var(--mi-ink-faint) !important;
+  line-height: 1.4;
+  display: block;
+  text-align: center;
+  margin-top: 2px;
+}
+
+/* ---- 毕业要求明细表 ---- */
+.attainment-req-table.ant-card {
+  border-radius: var(--mi-radius-card) !important;
+}
+.attainment-req-table.ant-card::before {
+  background: linear-gradient(90deg,
+    transparent 0%, var(--mi-indigo) 15%, var(--mi-indigo) 85%, transparent 100%);
+  opacity: 0.55;
+}
+.attainment-req-table .ant-card-head {
+  padding: 12px 20px 10px !important;
+  border-bottom: 1px solid var(--mi-line) !important;
+}
+.attainment-req-table .ant-card-head-title {
+  font-family: var(--mi-font-display);
+  font-weight: 600;
+  font-size: 15.5px;
+  color: var(--mi-ink);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.attainment-req-table .ant-card-head-title::before {
+  content: '';
+  display: inline-block;
+  width: 4px; height: 20px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--mi-amber) 0%, var(--mi-indigo) 100%);
+}
+.attainment-req-table .ant-card-body {
+  padding: 14px 12px;
+}
+
+.attainment-req-table .ant-table-thead > tr > th {
+  font-family: var(--mi-font-display);
+  font-weight: 600;
+  font-size: 12.5px;
+  background: var(--mi-bg-sunken) !important;
+  color: var(--mi-ink) !important;
+  border-bottom: 1px solid var(--mi-rule) !important;
+}
+.attainment-req-table .ant-table-tbody > tr > td {
+  border-bottom: 1px solid var(--mi-line) !important;
+  font-family: var(--mi-font-display);
   font-size: 13px;
+  color: var(--mi-ink-soft);
+}
+.attainment-req-table .ant-table-tbody > tr > td:first-child {
+  color: var(--mi-ink);
+  font-weight: 500;
 }
 
-.attainment-evaluation-notice {
-  margin-bottom: 16px;
+/* ---- 段落统一样式 ---- */
+.attainment-evaluation-page .ant-card-head {
+  border-bottom: 1px solid var(--mi-line) !important;
+  padding: 12px 20px 10px !important;
+}
+.attainment-evaluation-page .ant-card-head-title {
+  font-family: var(--mi-font-display);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--mi-ink);
+}
+.attainment-evaluation-page .ant-card-body {
+  padding: 16px 20px;
+}
+
+/* ---- 计算口径说明 ---- */
+.attainment-formula-alert {
+  border-radius: var(--mi-radius-card) !important;
+  border: 1px solid rgba(59, 91, 219, 0.18) !important;
+  background: linear-gradient(135deg, #f0f4ff 0%, #f7f9ff 100%) !important;
+}
+.attainment-formula-alert .ant-alert-message {
+  font-family: var(--mi-font-display);
+  font-weight: 600;
+  color: var(--mi-indigo-ink);
+}
+.attainment-formula-alert .ant-alert-description {
+  font-family: var(--mi-font-display);
+  color: var(--mi-ink-soft);
+  line-height: 1.7;
+}
+
+/* ---- 权重明细抽屉 ---- */
+.attainment-drawer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.attainment-drawer-summary {
+  display: flex;
+  gap: 24px;
+  padding: 16px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffffff 0%, #faf8f3 100%);
+  border: 1px solid var(--mi-line);
+}
+
+.attainment-drawer-summary > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.attainment-drawer-value {
+  font-family: var(--mi-font-number);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--mi-indigo);
+  line-height: 1;
+}
+
+.attainment-drawer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.attainment-drawer-distribution {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.attainment-drawer-dist-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--mi-bg-sunken);
+  border: 1px solid var(--mi-line);
+}
+
+.attainment-drawer-dist-label {
+  font-family: var(--mi-font-display);
+  font-size: 13px;
+  color: var(--mi-ink-soft);
+}
+
+.attainment-drawer-dist-value {
+  font-family: var(--mi-font-number);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--mi-indigo);
 }

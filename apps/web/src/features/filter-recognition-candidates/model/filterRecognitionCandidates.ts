@@ -9,6 +9,7 @@ export interface RecognitionCandidateFilters {
   course: string;
   keyword: string;
   risk: RecognitionCandidateRisk | 'all';
+  reviewStatus: 'pending' | 'all';
 }
 
 export function filterRecognitionCandidates(
@@ -35,7 +36,16 @@ export function filterRecognitionCandidates(
       candidate.candidateType === filters.candidateType;
     const matchesRisk =
       filters.risk === 'all' || candidate.risk === filters.risk;
+    const matchesReviewStatus =
+      filters.reviewStatus === 'all' ||
+      (candidate.reviewStatus ?? 'pending') === 'pending';
 
-    return matchesKeyword && matchesCourse && matchesType && matchesRisk;
+    return (
+      matchesKeyword &&
+      matchesCourse &&
+      matchesType &&
+      matchesRisk &&
+      matchesReviewStatus
+    );
   });
 }

@@ -7,7 +7,10 @@ import type {
 } from '../../../entities/teaching-resource';
 import { filterTeachingResources } from './filterTeachingResources';
 
-export function useTeachingResourceFilters(source: TeachingResource[]) {
+export function useTeachingResourceFilters(
+  source: TeachingResource[],
+  globalCourseName?: string | null,
+) {
   const [course, setCourse] = useState('all');
   const [keyword, setKeyword] = useState('');
   const [resourceType, setResourceType] = useState<
@@ -15,15 +18,19 @@ export function useTeachingResourceFilters(source: TeachingResource[]) {
   >('all');
   const [status, setStatus] = useState<TeachingResourceStatus | 'all'>('all');
 
+  const isCourseLocked =
+    globalCourseName !== undefined && globalCourseName !== null;
+  const effectiveCourse = isCourseLocked ? globalCourseName : course;
+
   const resources = useMemo(
     () =>
       filterTeachingResources(source, {
-        course,
+        course: effectiveCourse,
         keyword,
         resourceType,
         status,
       }),
-    [course, keyword, resourceType, source, status],
+    [effectiveCourse, keyword, resourceType, source, status],
   );
 
   const courses = useMemo(
@@ -34,6 +41,7 @@ export function useTeachingResourceFilters(source: TeachingResource[]) {
   return {
     course,
     courses,
+    isCourseLocked,
     keyword,
     resourceType,
     resources,

@@ -1,4 +1,3 @@
-export { prototypeOnlyWorkItems } from './model/prototypeOnlyWorkItems';
 export type {
   WorkItem,
   WorkItemModule,

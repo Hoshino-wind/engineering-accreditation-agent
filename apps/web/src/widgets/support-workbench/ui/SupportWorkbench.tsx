@@ -1,9 +1,9 @@
+import { Empty } from 'antd';
 import { useMemo, useState } from 'react';
 
-import {
-  prototypeOnlySupportPackages,
-  type SupportPackage,
-  type SupportPackageSection,
+import type {
+  SupportPackage,
+  SupportPackageSection,
 } from '../../../entities/support-package';
 import { useSupportExportDrafts } from '../../../features/configure-support-export';
 import { useSupportPackageFilters } from '../../../features/filter-support-packages';
@@ -15,21 +15,27 @@ import { SupportValidationPanel } from './SupportValidationPanel';
 
 import './supportWorkbench.css';
 
-export function SupportWorkbench() {
-  const filters = useSupportPackageFilters(prototypeOnlySupportPackages);
+interface SupportWorkbenchProps {
+  /** 由实时报告章节与图谱快照组装出的支撑包 */
+  packages: SupportPackage[];
+}
+
+export function SupportWorkbench({ packages }: SupportWorkbenchProps) {
+  const filters = useSupportPackageFilters(packages);
   const exportDrafts = useSupportExportDrafts();
-  const [selectedPackageId, setSelectedPackageId] = useState(
-    prototypeOnlySupportPackages[0]?.id,
-  );
-  const [selectedSectionId, setSelectedSectionId] = useState(
-    prototypeOnlySupportPackages[0]?.sections[0]?.id,
-  );
+  const [selectedPackageId, setSelectedPackageId] = useState<
+    string | undefined
+  >(packages[0]?.id);
+  const [selectedSectionId, setSelectedSectionId] = useState<
+    string | undefined
+  >(packages[0]?.sections[0]?.id);
   const [evidenceDrawerOpen, setEvidenceDrawerOpen] = useState(false);
   const selectedPackage =
     filters.packages.find(
       (supportPackage) => supportPackage.id === selectedPackageId,
     ) ??
     filters.packages[0] ??
+    packages[0] ??
     null;
   const selectedSection =
     selectedPackage?.sections.find(
@@ -57,6 +63,17 @@ export function SupportWorkbench() {
     setSelectedSectionId(section.id);
   };
 
+  if (packages.length === 0) {
+    return (
+      <section className="support-workbench">
+        <Empty
+          description="自评报告章节生成后，支撑包会基于实时图谱与报告自动组装"
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
+      </section>
+    );
+  }
+
   return (
     <>
       <section className="support-workbench">
@@ -70,6 +87,7 @@ export function SupportWorkbench() {
           selectedPackageId={selectedPackage?.id}
           status={filters.status}
           template={filters.template}
+          total={packages.length}
         />
         <SupportPackageContentPanel
           onInspectEvidence={() => setEvidenceDrawerOpen(true)}

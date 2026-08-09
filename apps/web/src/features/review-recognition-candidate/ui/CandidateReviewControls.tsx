@@ -10,7 +10,8 @@ import {
   Button,
   Input,
   Radio,
-  Tooltip,
+  Space,
+  Tag,
   Typography,
 } from 'antd';
 import type { RadioChangeEvent } from 'antd';
@@ -25,11 +26,23 @@ import './candidateReviewControls.css';
 
 const { TextArea } = Input;
 
+const REVIEW_STATUS_META: Record<
+  string,
+  { color: string; label: string } | undefined
+> = {
+  accepted: { color: 'success', label: '已接受' },
+  modified: { color: 'warning', label: '已修改' },
+  pending: { color: 'default', label: '待审核' },
+  rejected: { color: 'error', label: '已驳回' },
+};
+
 interface CandidateReviewControlsProps {
   candidate: RecognitionCandidate;
   draft: CandidateReviewDraft;
   onDecisionChange: (decision: CandidateReviewDecision) => void;
   onNoteChange: (note: string) => void;
+  onSubmitReview: () => void;
+  submitting: boolean;
 }
 
 export function CandidateReviewControls({
@@ -37,10 +50,21 @@ export function CandidateReviewControls({
   draft,
   onDecisionChange,
   onNoteChange,
+  onSubmitReview,
+  submitting,
 }: CandidateReviewControlsProps) {
+  const statusMeta = candidate.reviewStatus
+    ? REVIEW_STATUS_META[candidate.reviewStatus]
+    : undefined;
+
   return (
     <section className="candidate-review-controls">
-      <Typography.Text strong>审核决定</Typography.Text>
+      <Space>
+        <Typography.Text strong>审核决定</Typography.Text>
+        {statusMeta ? (
+          <Tag color={statusMeta.color}>识别库状态：{statusMeta.label}</Tag>
+        ) : null}
+      </Space>
       <Radio.Group
         buttonStyle="solid"
         onChange={(event: RadioChangeEvent) =>
@@ -80,18 +104,22 @@ export function CandidateReviewControls({
 
       {draft.decision ? (
         <Alert
-          description="决定和说明仅保存在当前页面草稿中，刷新后不会保留。"
+          description="点击下方「确认审核」后，决定将写入识别库并实时更新该候选的审核状态。"
           showIcon
-          title="审核草稿已更新"
+          title="审核草稿已就绪"
           type="info"
         />
       ) : null}
 
-      <Tooltip title="审核写入将在 M4 后端业务切片接入">
-        <Button block disabled type="primary">
-          确认审核
-        </Button>
-      </Tooltip>
+      <Button
+        block
+        disabled={!draft.decision}
+        loading={submitting}
+        onClick={onSubmitReview}
+        type="primary"
+      >
+        确认审核
+      </Button>
     </section>
   );
 }

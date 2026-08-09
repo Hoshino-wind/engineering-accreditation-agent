@@ -8,5 +8,4 @@ export type {
   EvaluationReadinessCheck,
   EvaluationReviewDecision,
 } from './model/attainmentEvaluation';
-export { prototypeOnlyAttainmentEvaluations } from './model/prototypeOnlyAttainmentEvaluations';
 export { EvaluationStatusTag } from './ui/EvaluationStatusTag';

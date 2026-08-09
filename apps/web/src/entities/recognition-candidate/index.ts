@@ -1,4 +1,3 @@
-export { prototypeOnlyRecognitionCandidates } from './model/prototypeOnlyRecognitionCandidates';
 export type {
   CandidateEvidence,
   CandidateImpact,
@@ -7,5 +6,7 @@ export type {
   RecognitionCandidateRisk,
   RecognitionCandidateType,
 } from './model/recognitionCandidate';
+export { mapRecognitionCandidate } from './model/recognitionCandidateMapper';
+export { useRecognitionCandidates } from './model/useRecognitionCandidates';
 export { RecognitionCandidateRiskTag } from './ui/RecognitionCandidateRiskTag';
 export { RecognitionCandidateTypeTag } from './ui/RecognitionCandidateTypeTag';

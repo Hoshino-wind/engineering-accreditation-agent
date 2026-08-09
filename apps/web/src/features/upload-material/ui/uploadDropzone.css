@@ -1,0 +1,211 @@
+.upload-dropzone-wrapper {
+  margin-bottom: 0;
+}
+
+.upload-dropzone-category {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
+
+.upload-dropzone-category-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-right: var(--space-2);
+  font-weight: var(--font-weight-medium);
+}
+
+.upload-dropzone-wrapper .ant-upload-wrapper {
+  border-radius: var(--radius-lg);
+}
+
+.upload-dropzone-wrapper .ant-upload-drag {
+  border: 1.5px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-primary-lighter);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.upload-dropzone-wrapper .ant-upload-drag:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.upload-dropzone-wrapper .ant-upload-drag-icon {
+  margin-bottom: var(--space-2);
+}
+
+.upload-dropzone-wrapper .ant-upload-drag-icon .anticon {
+  font-size: 40px;
+  color: var(--color-primary);
+}
+
+.upload-dropzone-wrapper .ant-upload-text {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.upload-dropzone-wrapper .ant-upload-hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  margin-top: var(--space-1);
+}
+
+.upload-dropzone-tips {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-lighter);
+  border: 1px solid var(--color-border);
+}
+
+.upload-dropzone-tips-label {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+.upload-dropzone-tips-text {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  line-height: 1.6;
+}
+
+/* ── 待确认文件列表 ── */
+.upload-pending-list {
+  margin-top: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-elevated, #fff);
+  overflow: hidden;
+}
+
+.upload-pending-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: var(--color-primary-lighter);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.upload-pending-title {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  letter-spacing: 0.4px;
+}
+
+.upload-pending-item {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--color-border);
+  transition: background var(--transition-fast);
+}
+
+.upload-pending-item:last-child {
+  border-bottom: none;
+}
+
+.upload-pending-item:hover {
+  background: var(--color-primary-lighter);
+}
+
+.upload-pending-item-row1 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.upload-pending-filename {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60%;
+}
+
+.upload-pending-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.upload-pending-item-row2 {
+  margin-top: 8px;
+  padding-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.upload-pending-classify {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.upload-pending-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.upload-pending-ai-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-xs);
+  color: var(--color-success, #52c41a);
+  font-weight: var(--font-weight-medium);
+}
+
+.upload-pending-ai-tag.modified {
+  color: var(--color-warning, #faad14);
+}
+
+.upload-pending-confidence {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.upload-pending-reason {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  line-height: 1.5;
+  padding: 4px 8px;
+  background: var(--color-bg-secondary, #fafafa);
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--color-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.upload-pending-confirm {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.upload-pending-loading-hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  font-style: italic;
+}

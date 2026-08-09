@@ -10,6 +10,5 @@ export type {
   ImprovementSourceModule,
   ImprovementSourceRef,
 } from './model/improvementCase';
-export { prototypeOnlyImprovementCases } from './model/prototypeOnlyImprovementCases';
 export { ImprovementCaseStatusTag } from './ui/ImprovementCaseStatusTag';
 export { ImprovementSourceTag } from './ui/ImprovementSourceTag';

@@ -7,6 +7,7 @@ export type {
   DiagnosticRuleKind,
   FindingDecision,
 } from './model/diagnosticFinding';
-export { prototypeOnlyDiagnosticFindings } from './model/prototypeOnlyDiagnosticFindings';
+export { mapDiagnosticFinding } from './model/diagnosticFindingMapper';
+export { useDiagnosticFindings } from './model/useDiagnosticFindings';
 export { DiagnosticFindingRiskTag } from './ui/DiagnosticFindingRiskTag';
 export { DiagnosticFindingTypeTag } from './ui/DiagnosticFindingTypeTag';

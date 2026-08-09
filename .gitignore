@@ -1,10 +1,11 @@
-# 本地环境与密钥
+﻿# 本地环境与密钥
 .env
 .env.*
 !.env.example
 
 # 私有教学资料与运行文件
 data-private/
+apps/api/data/
 uploads/
 storage/
 *.rar
@@ -28,3 +29,10 @@ coverage/
 .DS_Store
 .idea/
 .vscode/
+
+
+# 开发调试遗留（不入库）
+apps/api/test_integration.db
+apps/api/fix_encoding*.py
+apps/api/_verify_persistence.py
+

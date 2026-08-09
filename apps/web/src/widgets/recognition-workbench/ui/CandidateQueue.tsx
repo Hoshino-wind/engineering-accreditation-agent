@@ -1,4 +1,4 @@
-import { Card, Progress, Table, Typography } from 'antd';
+import { Card, Progress, Segmented, Table, Typography } from 'antd';
 import type { TableProps } from 'antd';
 
 import {
@@ -15,14 +15,18 @@ interface CandidateQueueProps {
   candidates: RecognitionCandidate[];
   course: string;
   courses: string[];
+  isCourseLocked?: boolean;
   keyword: string;
   onCandidateTypeChange: (value: RecognitionCandidateType | 'all') => void;
   onCourseChange: (value: string) => void;
   onKeywordChange: (value: string) => void;
   onRiskChange: (value: RecognitionCandidateRisk | 'all') => void;
   onSelect: (candidate: RecognitionCandidate) => void;
+  onReviewStatusChange: (value: 'pending' | 'all') => void;
+  reviewStatus: 'pending' | 'all';
   risk: RecognitionCandidateRisk | 'all';
   selectedCandidateId?: string;
+  totalCount: number;
 }
 
 const columns: TableProps<RecognitionCandidate>['columns'] = [
@@ -55,8 +59,9 @@ const columns: TableProps<RecognitionCandidate>['columns'] = [
       <Progress
         format={() => `${value}%`}
         percent={value}
-        size="small"
+        size={38}
         status={value < 70 ? 'exception' : 'normal'}
+        strokeColor={value < 70 ? '#d4380d' : '#2f6fed'}
         type="circle"
       />
     ),
@@ -77,22 +82,33 @@ export function CandidateQueue({
   candidates,
   course,
   courses,
+  isCourseLocked,
   keyword,
   onCandidateTypeChange,
   onCourseChange,
   onKeywordChange,
   onRiskChange,
   onSelect,
+  onReviewStatusChange,
+  reviewStatus,
   risk,
   selectedCandidateId,
+  totalCount,
 }: CandidateQueueProps) {
   return (
     <Card
       className="candidate-queue"
       extra={
-        <Typography.Text type="secondary">
-          {candidates.length} 条
-        </Typography.Text>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Segmented
+            value={reviewStatus}
+            options={[
+              { label: `待审核 ${totalCount}`, value: 'pending' },
+              { label: `全部 (含AI已处理) ${candidates.length}`, value: 'all' },
+            ]}
+            onChange={(val) => onReviewStatusChange(val as 'pending' | 'all')}
+          />
+        </div>
       }
       size="small"
       title="候选队列"
@@ -101,6 +117,7 @@ export function CandidateQueue({
         candidateType={candidateType}
         course={course}
         courses={courses}
+        isCourseLocked={isCourseLocked}
         keyword={keyword}
         onCandidateTypeChange={onCandidateTypeChange}
         onCourseChange={onCourseChange}
@@ -111,7 +128,12 @@ export function CandidateQueue({
       <Table<RecognitionCandidate>
         columns={columns}
         dataSource={candidates}
-        locale={{ emptyText: '没有符合条件的候选' }}
+        locale={{
+          emptyText:
+            reviewStatus === 'pending'
+              ? 'AI 已自动审核完毕，暂无待人工审核的候选'
+              : '没有符合条件的候选',
+        }}
         onRow={(candidate) => ({
           'aria-selected': candidate.id === selectedCandidateId,
           onClick: () => onSelect(candidate),

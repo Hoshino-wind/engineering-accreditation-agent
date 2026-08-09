@@ -1,31 +1,155 @@
+/* ====== M8 · 认证支撑 · 工业风专属样式 ====== */
+
 .accreditation-support-page {
   width: 100%;
-  max-width: 1680px;
+  max-width: var(--app-content-max-width, 1680px);
   margin: 0 auto;
-}
-
-.accreditation-support-page-header {
+  padding: 16px 0 28px;
+  min-height: 100vh;
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ---- Hero ---- */
+.accreditation-support-page .accreditation-support-page-header {
+  display: flex;
+  align-items: flex-end;
   justify-content: space-between;
-  margin-bottom: 14px;
+  gap: 16px;
+  padding-bottom: 16px;
+  margin-bottom: 20px !important;
+  border-bottom: 1px solid var(--mi-rule);
+  position: relative;
 }
 
-.accreditation-support-page-header .ant-typography {
-  margin-bottom: 0;
+.accreditation-support-page .accreditation-support-page-header h2.ant-typography {
+  margin: 0;
+  font-family: var(--mi-font-display);
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--mi-ink);
+}
+.accreditation-support-page .accreditation-support-page-header .ant-typography-secondary {
+  margin: 6px 0 0 0 !important;
+  max-width: 70ch;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--mi-ink-soft);
 }
 
-.accreditation-support-page-header h2.ant-typography {
-  margin-top: 0;
-  font-size: 24px;
-  line-height: 32px;
+.accreditation-support-page-header .ant-space:first-of-type {
+  align-items: flex-start !important;
+  gap: 14px !important;
+}
+.accreditation-support-page-header .ant-tag {
+  margin-inline-end: 0;
+  margin-top: 2px;
 }
 
-.accreditation-support-page-header .ant-typography-secondary {
-  margin-top: 4px;
-  font-size: 13px;
+.accreditation-support-page-header-export {
+  padding-bottom: 4px;
 }
 
+/* ---- 规则信息 Alert ---- */
 .accreditation-support-notice {
-  margin-bottom: 16px;
+  border-radius: var(--mi-radius-card) !important;
+  padding: 14px 18px 14px 50px !important;
+  border: 1px solid rgba(59, 91, 219, 0.18) !important;
+  background:
+    linear-gradient(135deg, rgba(238, 242, 255, 0.95) 0%, rgba(245, 247, 255, 0.95) 100%) !important;
+  box-shadow: var(--mi-shadow-card) !important;
+  overflow: hidden;
+}
+.accreditation-support-notice .ant-alert-icon {
+  color: var(--mi-indigo) !important;
+  font-size: 18px !important;
+  top: 16px !important;
+  left: 18px !important;
+}
+.accreditation-support-notice .ant-alert-message {
+  font-family: var(--mi-font-display);
+  font-weight: 600 !important;
+  color: var(--mi-indigo-ink) !important;
+  font-size: 14px !important;
+}
+.accreditation-support-notice .ant-alert-description {
+  font-family: var(--mi-font-display);
+  color: var(--mi-ink-soft) !important;
+  font-size: 12px !important;
+  line-height: 1.6;
+}
+
+/* ---- 左右两栏：报告预览 + 支撑包 ---- */
+.accreditation-support-page .ant-row {
+  row-gap: 14px;
+}
+
+/* 左侧卡片：报告预览 */
+.accreditation-support-page .ant-col.ant-col-16 > .ant-card {
+  border-radius: var(--mi-radius-card) !important;
+}
+.accreditation-support-page .ant-col.ant-col-16 > .ant-card::before {
+  background: linear-gradient(90deg,
+    transparent 0%, var(--mi-indigo) 15%, var(--mi-indigo) 85%, transparent 100%);
+  opacity: 0.55;
+}
+
+/* 右侧卡片：支撑包 */
+.accreditation-support-page .ant-col.ant-col-8 > .ant-card {
+  border-radius: var(--mi-radius-card) !important;
+}
+.accreditation-support-page .ant-col.ant-col-8 > .ant-card::before {
+  background: linear-gradient(90deg,
+    transparent 0%, var(--mi-amber) 15%, var(--mi-amber) 85%, transparent 100%);
+  opacity: 0.5;
+}
+
+.accreditation-support-page .ant-card-head {
+  border-bottom: 1px solid var(--mi-line) !important;
+  padding: 12px 20px 10px !important;
+}
+.accreditation-support-page .ant-card-head-title {
+  font-family: var(--mi-font-display);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--mi-ink);
+}
+.accreditation-support-page .ant-card-body {
+  padding: 16px 20px;
+}
+
+/* 折叠面板 */
+.accreditation-support-page .ant-collapse {
+  border-radius: 10px !important;
+  background: transparent;
+  border: 1px solid var(--mi-line);
+}
+.accreditation-support-page .ant-collapse > .ant-collapse-item {
+  border-bottom: 1px solid var(--mi-line);
+}
+.accreditation-support-page .ant-collapse > .ant-collapse-item:last-child {
+  border-bottom: none;
+}
+.accreditation-support-page .ant-collapse > .ant-collapse-item > .ant-collapse-header {
+  font-size: 13px !important;
+  font-family: var(--mi-font-display);
+  font-weight: 500;
+  color: var(--mi-ink-soft);
+  padding: 12px 16px !important;
+}
+.accreditation-support-page .ant-collapse > .ant-collapse-item.ant-collapse-item-active > .ant-collapse-header {
+  color: var(--mi-indigo-ink);
+  font-weight: 600;
+  background: var(--mi-indigo-fog);
+}
+
+/* ---- 加载态 ---- */
+.accreditation-support-page .ant-spin + div {
+  font-family: var(--mi-font-display);
+  color: var(--mi-ink-soft);
+  font-size: 13px;
+  margin-top: 14px;
 }

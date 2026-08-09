@@ -1,4 +1,4 @@
-import { EyeOutlined, FileTextOutlined } from '@ant-design/icons';
+import { EyeOutlined, FileTextOutlined, NodeIndexOutlined } from '@ant-design/icons';
 import {
   Button,
   Card,
@@ -23,6 +23,9 @@ interface CandidateEvidenceReviewProps {
   onDecisionChange: (decision: CandidateReviewDecision) => void;
   onInspectEvidence: () => void;
   onNoteChange: (note: string) => void;
+  onPreviewInGraph?: () => void;
+  onSubmitReview: () => void;
+  submitting: boolean;
 }
 
 export function CandidateEvidenceReview({
@@ -31,6 +34,9 @@ export function CandidateEvidenceReview({
   onDecisionChange,
   onInspectEvidence,
   onNoteChange,
+  onPreviewInGraph,
+  onSubmitReview,
+  submitting,
 }: CandidateEvidenceReviewProps) {
   if (!candidate) {
     return (
@@ -85,6 +91,13 @@ export function CandidateEvidenceReview({
             >
               查看原文
             </Button>
+            <Button
+              icon={<NodeIndexOutlined />}
+              onClick={onPreviewInGraph}
+              size="small"
+            >
+              在图谱中预览
+            </Button>
           </div>
         </section>
       ) : null}
@@ -94,6 +107,8 @@ export function CandidateEvidenceReview({
         draft={draft}
         onDecisionChange={onDecisionChange}
         onNoteChange={onNoteChange}
+        onSubmitReview={onSubmitReview}
+        submitting={submitting}
       />
     </Card>
   );

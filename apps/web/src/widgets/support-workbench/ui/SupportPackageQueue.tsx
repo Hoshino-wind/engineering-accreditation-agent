@@ -19,6 +19,7 @@ interface SupportPackageQueueProps {
   selectedPackageId?: string;
   status: SupportPackageStatus | 'all';
   template: SupportTemplateKind | 'all';
+  total: number;
 }
 
 const templateLabels: Record<SupportTemplateKind, string> = {
@@ -74,13 +75,14 @@ export function SupportPackageQueue({
   selectedPackageId,
   status,
   template,
+  total,
 }: SupportPackageQueueProps) {
   return (
     <Card
       className="support-package-queue"
       extra={
         <Typography.Text type="secondary">
-          当前 {packages.length} / 共 5 项
+          当前 {packages.length} / 共 {total} 项
         </Typography.Text>
       }
       size="small"

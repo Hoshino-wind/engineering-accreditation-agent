@@ -11,6 +11,7 @@ import './teachingResourceFilters.css';
 interface TeachingResourceFiltersProps {
   course: string;
   courses: string[];
+  isCourseLocked?: boolean;
   keyword: string;
   resourceType: TeachingResourceType | 'all';
   status: TeachingResourceStatus | 'all';
@@ -23,6 +24,7 @@ interface TeachingResourceFiltersProps {
 export function TeachingResourceFilters({
   course,
   courses,
+  isCourseLocked = false,
   keyword,
   onCourseChange,
   onKeywordChange,
@@ -33,15 +35,17 @@ export function TeachingResourceFilters({
 }: TeachingResourceFiltersProps) {
   return (
     <Space className="teaching-resource-filters" size={8}>
-      <Select
-        aria-label="按课程筛选教学资源"
-        onChange={onCourseChange}
-        options={[
-          { value: 'all', label: '全部课程' },
-          ...courses.map((value) => ({ value, label: value })),
-        ]}
-        value={course}
-      />
+      {!isCourseLocked && (
+        <Select
+          aria-label="按课程筛选教学资源"
+          onChange={onCourseChange}
+          options={[
+            { value: 'all', label: '全部课程' },
+            ...courses.map((value) => ({ value, label: value })),
+          ]}
+          value={course}
+        />
+      )}
       <Select
         aria-label="按材料类型筛选教学资源"
         onChange={onResourceTypeChange}

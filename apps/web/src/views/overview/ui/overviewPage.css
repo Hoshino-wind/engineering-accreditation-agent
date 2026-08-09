@@ -1,35 +1,908 @@
+/* ============================================================
+ *  M1 工作台 · 全屏 Hero + 动态流
+ *  Editorial × Industrial Intelligence
+ *  衬线排版 + 工业铭牌 + 纸张质感 + 靛蓝琥珀金
+ * ============================================================ */
+
+/* ==================== 主容器 ==================== */
 .overview-page {
+  /* —— M1 工业风设计变量 —— */
+  --m1-ink: #1a1a1a;
+  --m1-ink-soft: #4a4a4a;
+  --m1-ink-faint: #8a8a8a;
+  --m1-indigo: #3b5bdb;
+  --m1-indigo-ink: #243a9e;
+  --m1-indigo-deep: #1a237e;
+  --m1-indigo-fog: rgba(59, 91, 219, 0.08);
+  --m1-amber: #b08d57;
+  --m1-amber-ink: #8a6a3a;
+  --m1-amber-fog: rgba(176, 141, 87, 0.10);
+  --m1-line: rgba(26, 26, 26, 0.08);
+  --m1-rule: rgba(26, 26, 26, 0.14);
+  --m1-bg-paper: #faf8f3;
+  --m1-bg-ink: #0c1228;
+  --m1-shadow-card:
+    0 1px 2px rgba(20, 20, 40, 0.04),
+    0 4px 18px rgba(20, 20, 40, 0.06);
+  --m1-shadow-card-hover:
+    0 2px 4px rgba(20, 20, 40, 0.05),
+    0 10px 32px rgba(59, 91, 219, 0.10);
+  --m1-radius-card: 14px;
+
+  position: relative;
   width: 100%;
-  max-width: 1680px;
-  margin: 0 auto;
+  /* 撑破 .app-content 内边距，让 Hero 全屏铺底 */
+  margin: -28px -28px 0;
+  padding: 0;
+  overflow: hidden;
+
+  /* —— 细腻纸张噪声 —— */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.55  0 0 0 0 0.52  0 0 0 0 0.46  0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-color: var(--m1-bg-paper);
+  background-blend-mode: multiply;
 }
 
-.overview-page-header {
+/* ==================== HERO：Clean Editorial ==================== */
+.hero-fullscreen {
+  position: relative;
+  width: 100%;
+  min-height: calc(55vh - var(--app-header-height, 64px));
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 14px;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 64px 56px;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(135deg, #1a2744 0%, #1e3050 50%, #243a5c 100%);
+  color: #ffffff;
+  border-radius: var(--radius-xl);
+  margin-bottom: 24px;
 }
 
-.overview-page-header .ant-typography {
-  margin-bottom: 0;
+.hero-fullscreen::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -10%;
+  width: 60%;
+  height: 160%;
+  background: radial-gradient(circle, rgba(184,134,11,0.12) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
 }
 
-.overview-page-header h2.ant-typography {
-  margin-top: 0;
-  font-size: 24px;
-  line-height: 32px;
+/* —— 右上角模块铭牌 —— */
+.hero-corner-plate {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border: 1px solid rgba(184,134,11,0.35);
+  border-radius: 4px;
+  background: rgba(255,255,255,0.04);
+  font-family: var(--mi-font-mono);
+  font-size: 10px;
+  letter-spacing: 1.6px;
+  color: #d4b481;
+  text-transform: uppercase;
 }
 
-.overview-page-header .ant-typography-secondary {
-  margin-top: 4px;
+.hero-corner-plate::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #d4b481;
+}
+
+/* —— 左下编号 —— */
+.hero-corner-id {
+  display: none;
+}
+
+/* —— Hero 内容区 —— */
+.hero-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 760px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 600ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 600ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.hero-fullscreen.is-ready .hero-content {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* —— Kicker —— */
+.hero-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 12px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.04);
+  margin-bottom: 22px;
+}
+
+.hero-kicker-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #d4b481;
+}
+
+@keyframes hero-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(212, 180, 129, 0.2); }
+  50% { box-shadow: 0 0 0 5px rgba(212, 180, 129, 0.05); }
+}
+
+.hero-kicker-text {
+  font-family: var(--mi-font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.4px;
+  color: rgba(255,255,255,0.9);
+  text-transform: uppercase;
+}
+
+.hero-kicker-divider {
+  display: none;
+}
+
+.hero-kicker-sub {
+  display: none;
+}
+
+/* —— 大标题 —— */
+.hero-title {
+  margin: 0 0 18px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(36px, 4.5vw, 56px);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+}
+
+.hero-title-accent {
+  color: #d4b481;
+}
+
+/* —— 引导文案 —— */
+.hero-lead {
+  margin: 0 0 28px;
+  max-width: 56ch;
+  font-size: 15px;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.75);
+}
+
+.hero-lead strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.hero-course-focus {
+  margin: -8px 0 22px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(184,134,11,0.12);
+  border: 1px solid rgba(184,134,11,0.2);
   font-size: 13px;
+  color: #f3e8c8;
+  display: inline-block;
 }
 
-.overview-notice {
+/* —— CTA 按钮组 —— */
+.hero-cta-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 46px;
+  padding: 0 22px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.hero-cta .anticon {
+  font-size: 15px;
+}
+
+.hero-cta-arrow {
+  transition: transform 200ms ease;
+}
+
+.hero-cta:hover .hero-cta-arrow {
+  transform: translateX(3px);
+}
+
+.hero-cta--primary {
+  background: linear-gradient(135deg, #3b5bdb 0%, #4c6fff 100%);
+  color: #ffffff;
+  box-shadow: 0 8px 24px -6px rgba(59, 91, 219, 0.45);
+}
+
+.hero-cta--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -6px rgba(59, 91, 219, 0.55);
+}
+
+.hero-cta--ghost {
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.9);
+  border: 1px solid rgba(255,255,255,0.16);
+}
+
+.hero-cta--ghost:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+/* —— Hero 元信息小行 —— */
+.hero-meta-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.55);
+}
+
+.hero-meta-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #34c759;
+}
+
+.hero-meta-dot--ok {
+  box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.2);
+}
+
+/* —— 滚动提示 —— */
+.hero-scroll-hint {
+  display: none;
+}
+
+/* ==================== 核心指标区（首屏可见） ==================== */
+.overview-metrics-section {
+  position: relative;
+  padding: 48px 96px 56px;
+  background:
+    linear-gradient(180deg, #f7f6f1 0%, var(--m1-bg-paper) 100%);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.55  0 0 0 0 0.52  0 0 0 0 0.46  0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-blend-mode: multiply;
+  border-top: 1px solid var(--m1-line);
+}
+
+.overview-metrics-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 16px;
 }
 
-.overview-section {
-  margin-top: 16px;
+.overview-metrics-title-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.overview-metrics-section .metrics-grid {
+  gap: 16px;
+}
+
+/* 在独立指标区直接显示卡片，不需要 reveal 动画 */
+.overview-metrics-section .reveal-item {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ==================== 动态工作流区 ==================== */
+.workflow-stream {
+  position: relative;
+  padding: 64px 96px 80px;
+  background: var(--m1-bg-paper);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.55  0 0 0 0 0.52  0 0 0 0 0.46  0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-blend-mode: multiply;
+}
+
+/* —— Workflow 区段头 —— */
+.workflow-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.workflow-title-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.workflow-bullet {
+  width: 5px;
+  height: 26px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--m1-indigo) 0%, var(--m1-amber) 100%);
+}
+
+.workflow-bullet--amber {
+  background: linear-gradient(180deg, var(--m1-amber) 0%, var(--m1-indigo) 100%);
+}
+
+.workflow-title {
+  margin: 0;
+  font-family: 'Noto Serif SC', serif;
+  font-weight: 600;
+  font-size: 28px;
+  line-height: 1.2;
+  letter-spacing: 0.2px;
+  color: var(--m1-ink);
+}
+
+.workflow-count {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--m1-indigo-ink);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.workflow-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.8px;
+  color: var(--m1-ink-faint);
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border: 1px solid var(--m1-line);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.workflow-subtitle {
+  margin: 0 0 28px 19px;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--m1-ink-soft);
+  max-width: 56ch;
+}
+
+/* —— 5 步动态流容器 —— */
+.workflow-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 56px;
+}
+
+/* 步骤间进度连线 */
+.workflow-steps.has-progress-line {
+  position: relative;
+}
+
+.workflow-steps.has-progress-line::before {
+  content: '';
+  position: absolute;
+  top: 30px;
+  bottom: 30px;
+  left: 80px;
+  width: 2px;
+  background: linear-gradient(
+    180deg,
+    var(--m1-line) 0%,
+    var(--m1-line) 100%
+  );
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* 当前步骤左侧进度点 */
+.workflow-step.is-current .workflow-step-icon::after {
+  content: '';
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--m1-indigo);
+  box-shadow: 0 0 0 4px rgba(59, 91, 219, 0.15);
+  z-index: 2;
+}
+
+/* 已完成步骤左侧对勾点 */
+.workflow-step.is-done .workflow-step-icon::after {
+  content: '';
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #34c759;
+  box-shadow: 0 0 0 4px rgba(52, 199, 89, 0.12);
+  z-index: 2;
+}
+
+.workflow-step-icon {
+  position: relative;
+}
+
+/* —— 单步卡片 —— */
+.workflow-step {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid var(--m1-line);
+  border-radius: var(--m1-radius-card);
+  box-shadow: var(--m1-shadow-card);
+  overflow: hidden;
+  transition:
+    box-shadow 320ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    border-color 320ms ease,
+    transform 320ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.workflow-step::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--m1-line);
+  transition: background 320ms ease;
+}
+
+.workflow-step:hover {
+  box-shadow: var(--m1-shadow-card-hover);
+  transform: translateY(-1px);
+}
+
+/* 已完成态 */
+.workflow-step.is-done {
+  background: linear-gradient(180deg, rgba(248, 252, 246, 0.6) 0%, #ffffff 100%);
+}
+
+.workflow-step.is-done::before {
+  background: linear-gradient(180deg, #34c759 0%, #2da858 100%);
+}
+
+/* 当前态 */
+.workflow-step.is-current {
+  border-color: rgba(59, 91, 219, 0.28);
+  box-shadow:
+    0 1px 2px rgba(20, 20, 40, 0.04),
+    0 8px 28px rgba(59, 91, 219, 0.14);
+}
+
+.workflow-step.is-current::before {
+  background: linear-gradient(180deg, var(--m1-indigo) 0%, var(--m1-indigo-deep) 100%);
+  box-shadow: 0 0 12px rgba(59, 91, 219, 0.4);
+}
+
+/* 展开态 */
+.workflow-step.is-expanded {
+  box-shadow:
+    0 1px 2px rgba(20, 20, 40, 0.04),
+    0 12px 36px rgba(59, 91, 219, 0.16);
+}
+
+/* —— 步骤头：可点击行 —— */
+.workflow-step-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 24px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 240ms ease;
+}
+
+.workflow-step-header:hover {
+  background: rgba(59, 91, 219, 0.025);
+}
+
+.workflow-step-no {
+  flex-shrink: 0;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--m1-ink-faint);
+  min-width: 44px;
+  letter-spacing: -0.02em;
+  transition: color 320ms ease;
+}
+
+.workflow-step.is-current .workflow-step-no,
+.workflow-step.is-expanded .workflow-step-no {
+  color: var(--m1-indigo-ink);
+}
+
+.workflow-step.is-done .workflow-step-no {
+  color: #2da858;
+}
+
+.workflow-step-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  font-size: 18px;
+  background: linear-gradient(135deg, rgba(59, 91, 219, 0.08) 0%, rgba(176, 141, 87, 0.06) 100%);
+  color: var(--m1-indigo);
+  border: 1px solid var(--m1-line);
+  transition: all 320ms ease;
+}
+
+.workflow-step.is-current .workflow-step-icon {
+  background: linear-gradient(135deg, var(--m1-indigo) 0%, var(--m1-indigo-deep) 100%);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 0 0 4px rgba(59, 91, 219, 0.12);
+  animation: step-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes step-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(59, 91, 219, 0.12); }
+  50% { box-shadow: 0 0 0 7px rgba(59, 91, 219, 0.06); }
+}
+
+.workflow-step.is-done .workflow-step-icon {
+  background: linear-gradient(135deg, #34c759 0%, #2da858 100%);
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.workflow-step-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.workflow-step-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.workflow-step-title {
+  font-family: 'Noto Serif SC', serif;
+  font-weight: 600;
+  font-size: 16.5px;
+  line-height: 1.3;
+  letter-spacing: 0.2px;
+  color: var(--m1-ink);
+}
+
+.workflow-step.is-done .workflow-step-title {
+  color: var(--m1-ink-soft);
+}
+
+.workflow-step-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  white-space: nowrap;
+}
+
+.workflow-step-tag--done {
+  background: rgba(52, 199, 89, 0.1);
+  color: #1f8a3d;
+  border: 1px solid rgba(52, 199, 89, 0.22);
+}
+
+.workflow-step-tag--current {
+  background: rgba(59, 91, 219, 0.1);
+  color: var(--m1-indigo-ink);
+  border: 1px solid rgba(59, 91, 219, 0.22);
+}
+
+.workflow-step-desc {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--m1-ink-soft);
+  letter-spacing: 0.02em;
+}
+
+.workflow-step.is-done .workflow-step-desc {
+  opacity: 0.7;
+}
+
+/* —— 展开箭头 —— */
+.workflow-step-chevron {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: var(--m1-ink-faint);
+  transition: transform 320ms cubic-bezier(0.2, 0.7, 0.2, 1), color 240ms ease;
+}
+
+.workflow-step-chevron.expanded {
+  transform: rotate(180deg);
+  color: var(--m1-indigo-ink);
+}
+
+/* —— 步骤详情展开区 —— */
+.workflow-step-detail {
+  padding: 0 24px 22px 86px;
+  border-top: 1px dashed var(--m1-line);
+  background: linear-gradient(180deg, rgba(250, 248, 243, 0.55) 0%, transparent 100%);
+  animation: detail-reveal 360ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@keyframes detail-reveal {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.workflow-step-detail-text {
+  padding: 14px 0 10px;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--m1-ink-soft);
+  letter-spacing: 0.02em;
+}
+
+.workflow-step-detail-hint {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  margin: 4px 0 14px;
+  border-radius: 8px;
+  background: rgba(176, 141, 87, 0.06);
+  border-left: 2px solid var(--m1-amber);
+}
+
+.workflow-step-hint-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  color: var(--m1-amber-ink);
+  text-transform: uppercase;
+}
+
+.workflow-step-hint-text {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 13px;
+  color: var(--m1-ink);
+  font-weight: 500;
+}
+
+.workflow-step-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 8px;
+  border: 1px solid var(--m1-indigo);
+  background: linear-gradient(135deg, rgba(59, 91, 219, 0.06) 0%, rgba(59, 91, 219, 0.02) 100%);
+  font-family: 'Noto Serif SC', serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--m1-indigo-ink);
+  cursor: pointer;
+  transition: all 240ms ease;
+}
+
+.workflow-step-go:hover {
+  background: linear-gradient(135deg, var(--m1-indigo) 0%, var(--m1-indigo-deep) 100%);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px -6px rgba(59, 91, 219, 0.45);
+}
+
+.workflow-step-go .anticon {
+  font-size: 12px;
+  transition: transform 240ms ease;
+}
+
+.workflow-step-go:hover .anticon {
+  transform: translateX(3px);
+}
+
+/* —— 工作流中的指标区 —— */
+.workflow-metrics {
+  position: relative;
+  padding-top: 32px;
+  border-top: 1px solid var(--m1-rule);
+}
+
+.workflow-metrics .workflow-header {
+  margin-bottom: 16px;
+}
+
+/* 让 OverviewMetrics 在工作流末尾保持原有视觉 */
+.workflow-metrics .metrics-grid {
+  gap: 16px;
+}
+
+/* OverviewMetrics 卡片带 reveal-item（opacity:0）但无 reveal-group.is-ready 父级，
+   工作流场景下直接显示，避免卡片不可见 */
+.workflow-metrics .reveal-item {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ==================== 响应式 ==================== */
+@media (max-width: 1280px) {
+  .hero-fullscreen {
+    padding: 64px 56px;
+    min-height: calc(70vh - var(--app-header-height, 64px));
+  }
+  .workflow-stream {
+    padding: 48px 56px 64px;
+  }
+  .overview-metrics-section {
+    padding: 40px 56px 48px;
+  }
+  .workflow-steps.has-progress-line::before {
+    left: 68px;
+  }
+}
+
+@media (max-width: 960px) {
+  .hero-fullscreen {
+    padding: 56px 32px;
+    min-height: calc(70vh - var(--app-header-height, 64px));
+  }
+  .hero-title {
+    font-size: clamp(40px, 9vw, 60px);
+  }
+  .hero-lead {
+    font-size: 15px;
+  }
+  .workflow-stream {
+    padding: 40px 32px 56px;
+  }
+  .overview-metrics-section {
+    padding: 32px 32px 40px;
+  }
+  .workflow-step-header {
+    padding: 16px 18px;
+    gap: 14px;
+  }
+  .workflow-step-no {
+    font-size: 26px;
+    min-width: 36px;
+  }
+  .workflow-step-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+  .workflow-step-detail {
+    padding: 0 18px 18px 68px;
+  }
+  .workflow-steps.has-progress-line::before {
+    left: 52px;
+  }
+  .workflow-step.is-current .workflow-step-icon::after,
+  .workflow-step.is-done .workflow-step-icon::after {
+    left: -12px;
+    width: 8px;
+    height: 8px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-fullscreen {
+    padding: 48px 24px;
+    min-height: calc(70vh - var(--app-header-height, 64px));
+  }
+  .hero-corner-plate {
+    top: 18px;
+    right: 18px;
+    font-size: 9px;
+    padding: 4px 10px;
+  }
+  .hero-corner-id {
+    left: 18px;
+    bottom: 18px;
+    font-size: 9px;
+  }
+  .hero-cta-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .hero-cta {
+    justify-content: center;
+  }
+  .overview-metrics-section {
+    padding: 24px 20px 32px;
+  }
+  .overview-metrics-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .workflow-stream {
+    padding: 32px 20px 48px;
+  }
+  .workflow-step-header {
+    gap: 12px;
+    padding: 14px 14px;
+  }
+  .workflow-step-no {
+    display: none;
+  }
+  .workflow-step-detail {
+    padding: 0 14px 16px 14px;
+  }
+  .workflow-steps.has-progress-line::before {
+    display: none;
+  }
+  .workflow-step.is-current .workflow-step-icon::after,
+  .workflow-step.is-done .workflow-step-icon::after {
+    display: none;
+  }
+}
+
+/* ==================== 课程矩阵区段 ==================== */
+.course-matrix-section {
+  position: relative;
+  padding: 48px 96px 56px;
+  background: var(--m1-bg-paper);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.55  0 0 0 0 0.52  0 0 0 0 0.46  0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-blend-mode: multiply;
+  border-top: 1px solid var(--m1-line);
+}
+
+.course-matrix-section .workflow-header {
+  margin-bottom: 8px;
+}
+
+.course-matrix-section .workflow-subtitle {
+  margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+  .course-matrix-section {
+    padding: 24px 20px 32px;
+  }
 }

@@ -1,55 +1,84 @@
-import {
-  InfoCircleOutlined,
-  PlayCircleOutlined,
-} from '@ant-design/icons';
-import {
-  Alert,
-  Button,
-  Space,
-  Tag,
-  Tooltip,
-  Typography,
-} from 'antd';
+import { InfoCircleOutlined } from '@ant-design/icons';
+import { Alert, Tag, Typography } from 'antd';
+import { useMemo } from 'react';
 
+import { useRecognitionCandidates } from '../../../entities/recognition-candidate';
+import { useCourseState } from '../../../shared/course/useCourseState';
 import { RecognitionSummary } from '../../../widgets/recognition-summary';
 import { RecognitionWorkbench } from '../../../widgets/recognition-workbench';
+import { NextStepBanner } from '../../../widgets/next-step-banner/ui/NextStepBanner';
 
 import './recognitionReviewPage.css';
 
 const { Paragraph, Title } = Typography;
 
 export function RecognitionReviewPage() {
+  const {
+    candidates,
+    loadFailed,
+    loading,
+    reload,
+    updateCandidate,
+  } = useRecognitionCandidates();
+  const { selectedCourseName: currentCourseName } = useCourseState();
+
+  // 按当前选中课程过滤候选列表
+  const filteredCandidates = useMemo(
+    () =>
+      currentCourseName
+        ? candidates.filter((c) => c.course === currentCourseName)
+        : candidates,
+    [candidates, currentCourseName],
+  );
+
+  const notice = useMemo(() => {
+    const pending = filteredCandidates.filter(
+      (c) => (c.reviewStatus ?? 'pending') === 'pending',
+    ).length;
+    const highImpact = filteredCandidates.filter(
+      (c) => c.risk === 'highImpact',
+    ).length;
+    const conflicts = filteredCandidates.filter(
+      (c) => c.risk === 'conflict' || Boolean(c.conflictMessage),
+    ).length;
+    return { conflicts, highImpact, pending, total: filteredCandidates.length };
+  }, [filteredCandidates]);
+
   return (
-    <main className="recognition-review-page">
+    <main className="recognition-review-page mi-paper-bg">
       <div className="recognition-review-page-header">
         <div>
-          <Space align="center" size={10}>
-            <Title level={2}>智能识别与映射审核</Title>
-            <Tag color="geekblue">M4 识别与审核</Tag>
-            <Tag>试点示例数据</Tag>
-          </Space>
+          <div className="gv-plate-row">
+            <span className="mi-module-plate">ADVANCED · BATCH REVIEW</span>
+            <Tag color="cyan">数据来自识别库实时接口</Tag>
+          </div>
+          <Title level={2} style={{ marginTop: 8 }}>批量审核 / 冲突处理</Title>
           <Paragraph type="secondary">
-            在原文、候选建议与正式图谱之间完成可追溯的人工审核。
+            这是高级批量审核入口。日常审核请在「② 能力图谱」右侧侧栏就地完成；当候选量大、需集中处理冲突或高影响关系时，再使用此工作台。
           </Paragraph>
         </div>
-        <Tooltip title="识别任务将在 M4 后端业务切片接入">
-          <Button disabled icon={<PlayCircleOutlined />} type="primary">
-            运行识别
-          </Button>
-        </Tooltip>
       </div>
 
-      <Alert
-        className="recognition-review-notice"
-        description="本轮识别发现 27 条待审核候选，其中 7 条为高影响关系、4 条存在冲突；请先处理风险项，再提交正式图谱。页面业务数量均为试点示例数据。"
-        icon={<InfoCircleOutlined />}
-        showIcon
-        title="当前重点：优先处理冲突、低置信度和高影响关系"
-        type="warning"
-      />
+      {filteredCandidates.length > 0 ? (
+        <Alert
+          className="recognition-review-notice"
+          description={`识别库当前共 ${notice.total} 条候选，其中 ${notice.pending} 条待审核、${notice.highImpact} 条高影响关系、${notice.conflicts} 条存在冲突；请先处理风险项，再提交正式图谱。`}
+          icon={<InfoCircleOutlined />}
+          showIcon
+          title="当前重点：优先处理冲突、低置信度和高影响关系"
+          type="warning"
+        />
+      ) : null}
 
-      <RecognitionSummary />
-      <RecognitionWorkbench />
+      <RecognitionSummary candidates={filteredCandidates} />
+      <RecognitionWorkbench
+        candidates={filteredCandidates}
+        loadFailed={loadFailed}
+        loading={loading}
+        onCandidateUpdated={updateCandidate}
+        onReload={() => void reload()}
+      />
+      <NextStepBanner currentPath="/recognition" />
     </main>
   );
 }

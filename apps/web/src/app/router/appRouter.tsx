@@ -1,22 +1,48 @@
 import { createBrowserRouter } from 'react-router';
 
+import { AgentConsolePage } from '../../views/agent';
 import { GraphDiagnosticsPage } from '../../views/diagnostics';
 import { AttainmentEvaluationPage } from '../../views/evaluations';
+import { GraphViewPage } from '../../views/graph';
 import { TeachingImprovementPage } from '../../views/improvements';
 import { OverviewPage } from '../../views/overview';
 import { RecognitionReviewPage } from '../../views/recognition';
 import { TeachingResourcesPage } from '../../views/resources';
 import { AccreditationSupportPage } from '../../views/support';
-import { AppShell } from '../layouts/AppShell';
+import { SettingsPage } from '../../views/settings';
+import { LoginPage } from '../../views/auth/ui/LoginPage';
+import { RegisterPage } from '../../views/auth/ui/RegisterPage';
+import { SelectMajorPage } from '../../views/major';
+import { AuthShell } from '../layouts/AuthShell';
 
 export const appRouter = createBrowserRouter([
   {
+    path: '/login',
+    element: <LoginPage />,
+  },
+  {
+    path: '/register',
+    element: <RegisterPage />,
+  },
+  {
+    path: '/select-major',
+    element: <SelectMajorPage />,
+  },
+  {
     path: '/',
-    element: <AppShell />,
+    element: <AuthShell />,
     children: [
       {
         index: true,
         element: <OverviewPage />,
+      },
+      {
+        path: 'agent',
+        element: <AgentConsolePage />,
+      },
+      {
+        path: 'graph',
+        element: <GraphViewPage />,
       },
       {
         path: 'resources',
@@ -41,6 +67,10 @@ export const appRouter = createBrowserRouter([
       {
         path: 'support',
         element: <AccreditationSupportPage />,
+      },
+      {
+        path: 'settings',
+        element: <SettingsPage />,
       },
     ],
   },

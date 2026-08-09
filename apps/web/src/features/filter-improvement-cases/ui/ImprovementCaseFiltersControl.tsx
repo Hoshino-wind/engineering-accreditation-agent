@@ -35,9 +35,9 @@ export function ImprovementCaseFiltersControl({
           onChange={onSourceChange}
           options={[
             { label: '全部来源', value: 'all' },
-            { label: 'M3 教学资源', value: 'M3' },
-            { label: 'M5 图谱诊断', value: 'M5' },
-            { label: 'M6 达成评价', value: 'M6' },
+            { label: '教学材料', value: 'M3' },
+            { label: '图谱诊断', value: 'M5' },
+            { label: '达成度评价', value: 'M6' },
           ]}
           value={source}
         />

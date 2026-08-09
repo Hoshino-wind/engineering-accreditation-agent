@@ -12,6 +12,7 @@ interface DiagnosticFindingFiltersProps {
   course: string;
   courses: string[];
   findingType: DiagnosticFindingType | 'all';
+  isCourseLocked?: boolean;
   keyword: string;
   onCourseChange: (value: string) => void;
   onFindingTypeChange: (value: DiagnosticFindingType | 'all') => void;
@@ -24,6 +25,7 @@ export function DiagnosticFindingFilters({
   course,
   courses,
   findingType,
+  isCourseLocked = false,
   keyword,
   onCourseChange,
   onFindingTypeChange,
@@ -34,15 +36,17 @@ export function DiagnosticFindingFilters({
   return (
     <div className="diagnostic-finding-filters">
       <div className="diagnostic-finding-filter-row">
-        <Select
-          aria-label="按课程筛选诊断发现"
-          onChange={onCourseChange}
-          options={[
-            { value: 'all', label: '全部课程' },
-            ...courses.map((item) => ({ value: item, label: item })),
-          ]}
-          value={course}
-        />
+        {!isCourseLocked && (
+          <Select
+            aria-label="按课程筛选诊断发现"
+            onChange={onCourseChange}
+            options={[
+              { value: 'all', label: '全部课程' },
+              ...courses.map((item) => ({ value: item, label: item })),
+            ]}
+            value={course}
+          />
+        )}
         <Select
           aria-label="按类型筛选诊断发现"
           onChange={onFindingTypeChange}

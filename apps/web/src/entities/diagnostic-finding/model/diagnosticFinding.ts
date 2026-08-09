@@ -34,6 +34,7 @@ export interface DiagnosticPathStep {
 
 export interface DiagnosticFinding {
   course: string;
+  decisionStatus?: 'confirmed' | 'converted' | 'dismissed' | 'pending';
   evidence: DiagnosticEvidenceRef[];
   graphVersion: string;
   id: string;

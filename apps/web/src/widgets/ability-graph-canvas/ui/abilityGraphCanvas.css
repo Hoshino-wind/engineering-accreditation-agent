@@ -1,0 +1,236 @@
+/* ====== 能力图谱画布 · 深色控制台风格 ======
+ * 画布刻意比页面纸面背景深，形成"监控台/驾驶舱"对比：
+ * 图谱是被观察的对象，纸面是阅读的区域。
+ */
+
+.ability-graph-canvas {
+  height: 100%;
+  width: 100%;
+  background:
+    radial-gradient(1100px 700px at 28% 16%, #232b3c 0%, transparent 60%),
+    linear-gradient(160deg, #1b2130 0%, #171c27 100%);
+  border-radius: var(--mi-radius-card, 14px);
+}
+
+/* ---- 列头标签：每列业务维度的悬浮铭牌 ---- */
+.ability-graph-col-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  white-space: nowrap;
+}
+
+.ability-graph-col-header-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ability-graph-col-header-label {
+  font-family: var(--mi-font-display, inherit);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.74);
+}
+
+.ability-graph-col-header-count {
+  font-family: var(--mi-font-number, 'SFMono-Regular', Consolas, monospace);
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ---- 节点卡：深色玻璃底 + 类型色竖条 ----
+ * 类型色由组件经 CSS 变量 --node-accent 注入
+ */
+.ability-graph-node.ability-graph-node-card {
+  position: relative;
+  width: 164px;
+  padding: 9px 10px 8px 15px;
+  background: linear-gradient(180deg, rgba(35, 42, 58, 0.97) 0%, rgba(24, 29, 41, 0.97) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  color: #fff;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ability-graph-node.ability-graph-node-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--node-accent);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.38);
+  z-index: 10;
+}
+
+/* 标准节点（内置认证标准）：金色描边提示"不可改" */
+.ability-graph-node.ability-graph-node-standard {
+  border-color: rgba(236, 201, 75, 0.55);
+}
+
+/* 左侧类型色竖条 */
+.ability-graph-node-accent {
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--node-accent);
+}
+
+.ability-graph-node-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.ability-graph-node-kind {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  color: var(--node-accent);
+  white-space: nowrap;
+}
+
+/* 来源徽标 */
+.ability-graph-node-origin {
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 2.5px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ability-graph-node-origin-standard {
+  background: #ecc94b;
+  color: #1a202c;
+}
+
+.ability-graph-node-origin-school {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.66);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.ability-graph-node-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #fff;
+  margin-bottom: 3px;
+}
+
+.ability-graph-node-code {
+  font-family: var(--mi-font-number, 'SFMono-Regular', Consolas, monospace);
+  font-size: 10px;
+  letter-spacing: 0.3px;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* 四方向 Handle：深色背景下半透明白点，hover 时显形 */
+.ability-graph-handle {
+  width: 7px;
+  height: 7px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.ability-graph-node:hover .ability-graph-handle {
+  opacity: 1;
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+/* ---- 关系线 ----
+ * 待审核（AI 推荐）：琥珀色虚线，深色背景下醒目提醒"需要教师确认"
+ * 已通过：浅灰实线，清晰但不抢戏
+ * 选中关联：靛蓝加粗
+ */
+.ability-graph-edge-pending path {
+  stroke: #f5a524 !important;
+  stroke-width: 2px !important;
+  stroke-dasharray: 7 5 !important;
+}
+
+.ability-graph-edge-approved path {
+  stroke: rgba(203, 213, 225, 0.55) !important;
+  stroke-width: 1.6px !important;
+}
+
+.ability-graph-edge-selected path {
+  stroke: #7aa2f7 !important;
+  stroke-width: 2.4px !important;
+  stroke-dasharray: none !important;
+}
+
+/* 候选关系预览边：审核时高亮这条关系将连接的两个节点 */
+.ability-graph-edge-preview path {
+  stroke: #f5a524 !important;
+  stroke-width: 2.6px !important;
+  stroke-dasharray: 9 6 !important;
+  filter: drop-shadow(0 0 4px rgba(245, 165, 36, 0.55));
+  animation: ability-graph-preview-flow 1.2s linear infinite;
+}
+
+/* ---- 链路追踪模式 ----
+ * 开启后，点击某节点会高亮经过它的全部上下游链路，
+ * 链路外节点/边降低不透明度，形成"聚焦"效果。
+ */
+.ability-graph-edge-traced path {
+  stroke: #38b2ac !important;
+  stroke-width: 2.8px !important;
+  stroke-dasharray: none !important;
+  filter: drop-shadow(0 0 3px rgba(56, 178, 172, 0.45));
+}
+
+.ability-graph-node-dimmed {
+  opacity: 0.18 !important;
+}
+
+.ability-graph-edge-dimmed path {
+  opacity: 0.1 !important;
+}
+
+@keyframes ability-graph-preview-flow {
+  to {
+    stroke-dashoffset: -30;
+  }
+}
+
+/* ---- 缩放控制条：与深色画布同色系 ---- */
+.ability-graph-controls {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.ability-graph-controls .react-flow__controls-button {
+  background: rgba(28, 34, 47, 0.94);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  width: 26px;
+  height: 26px;
+}
+
+.ability-graph-controls .react-flow__controls-button svg {
+  fill: #cbd5e1;
+}
+
+.ability-graph-controls .react-flow__controls-button:hover {
+  background: rgba(50, 59, 78, 0.96);
+}

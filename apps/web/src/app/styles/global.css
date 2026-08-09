@@ -1,14 +1,180 @@
 :root {
-  --app-desktop-min-width: 1440px;
-  --app-desktop-target-width: 1920px;
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
-    'Microsoft YaHei', sans-serif;
-  color: rgba(0, 0, 0, 0.88);
-  background: #f3f5f8;
+  /* ===== 设计 Token 系统 v3 — Editorial × Industrial Intelligence ===== */
+  /* 美学方向：精致编辑风 × 工业智能感 */
+  /* 关键记忆点：琥珀金点缀色、噪声纹理纸张背景、衬线数字字体、不对称层级 */
+
+  /* —— 品牌色：靛蓝（工业理性）—— */
+  --color-primary: #3b5bdb;
+  --color-primary-hover: #2b4ee6;
+  --color-primary-active: #1d3fc7;
+  --color-primary-light: #eef1ff;
+  --color-primary-lighter: #f5f7ff;
+  --color-primary-soft: #e8ebff;
+  --color-primary-ink: #1a237e; /* 墨水蓝：用于大标题强调 */
+
+  /* —— 点缀色：琥珀金（认证权威感）—— */
+  --color-accent: #b08d57;
+  --color-accent-light: #f5ecd9;
+  --color-accent-soft: #faf4e7;
+  --color-accent-dark: #8a6d3f;
+
+  /* —— 中性色：暖白纸张感，避免廉价冷灰 —— */
+  --color-bg: #f8f9fc;
+  --color-bg-card: #ffffff;
+  --color-bg-hover: #f3f4f8;
+  --color-bg-elevated: #ffffff;
+  --color-bg-sunken: #f1f2f7;
+  --color-border: #e4e6ee;
+  --color-border-light: #eef0f5;
+  --color-border-strong: #d4d7e0;
+  --color-text: #11182e;
+  --color-text-secondary: #4a5266;
+  --color-text-tertiary: #7a8194;
+  --color-text-disabled: #b4b8c4;
+
+  /* —— 侧栏：纯深空黑 + 微蓝底，更纯粹 —— */
+  --color-sider-bg: #0a0f1d;
+  --color-sider-bg-grad: linear-gradient(180deg, #0a0f1d 0%, #0d1428 55%, #0f1830 100%);
+  --color-sider-text: rgba(255, 255, 255, 0.94);
+  --color-sider-text-secondary: rgba(255, 255, 255, 0.42);
+  --color-sider-text-muted: rgba(255, 255, 255, 0.26);
+  --color-sider-border: rgba(255, 255, 255, 0.05);
+  --color-sider-active: linear-gradient(
+    135deg,
+    rgba(59, 91, 219, 1) 0%,
+    rgba(80, 108, 225, 0.92) 50%,
+    rgba(59, 91, 219, 0.85) 100%
+  );
+  --color-sider-active-indicator: #9fb1ff;
+
+  /* —— 语义色：降饱和，克制 —— */
+  --color-success: #0c9966;
+  --color-success-light: #e8f7ef;
+  --color-warning: #c08a1b;
+  --color-warning-light: #fdf4de;
+  --color-danger: #c43c3c;
+  --color-danger-light: #fdf0f0;
+  --color-info: #3b5bdb;
+  --color-info-light: #eef1ff;
+  --color-purple: #6c2bd1;
+  --color-purple-light: #f3eeff;
+  --color-cyan: #09869a;
+  --color-cyan-light: #e6f7fb;
+
+  /* —— 字体层级：Editorial 九级字号，严格拉开 —— */
+  --font-size-hero: 44px;       /* 页面标题 hero */
+  --font-size-display: 34px;    /* 次级大标题 */
+  --font-size-h1: 28px;
+  --font-size-h2: 22px;
+  --font-size-h3: 18px;
+  --font-size-body: 15px;
+  --font-size-small: 13px;
+  --font-size-caption: 12px;
+  --font-size-micro: 11px;
+
+  /* 数字字体 —— 衬线等宽：给人精确、编辑排版的质感 */
+  --font-number: 'Noto Serif SC', 'Cormorant Garamond', 'Source Han Serif SC',
+    Georgia, 'Times New Roman', serif;
+  --font-number-weight: 600;
+  --font-feature-numbers: 'tnum' 1, 'lnum' 1;
+
+  /* 大标题字体 —— 半衬线：中英文都有优雅感 */
+  --font-display: 'Noto Serif SC', 'Source Han Serif SC', 'PingFang SC',
+    Georgia, -apple-system, serif;
+  --font-display-weight: 600;
+
+  /* 正文字体 —— 统一为 Noto Sans SC，保证跨平台一致 */
+  font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'SF Pro Text',
+    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei',
+    sans-serif;
+  font-size: var(--font-size-body);
+  color: var(--color-text);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'cv11', 'ss01', 'kern';
+
+  /* 字重 */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* —— 间距 4/8 栅格 —— */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* —— 圆角：克制的方中带圆 —— */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-2xl: 20px;
+
+  /* —— 阴影：多层柔光，建筑级质感 —— */
+  --shadow-xs: 0 1px 2px 0 rgba(17, 24, 46, 0.04);
+  --shadow-sm: 0 1px 3px 0 rgba(17, 24, 46, 0.05), 0 1px 2px 0 rgba(17, 24, 46, 0.03);
+  --shadow-md: 0 4px 14px -2px rgba(17, 24, 46, 0.07), 0 2px 4px -1px rgba(17, 24, 46, 0.04);
+  --shadow-lg: 0 14px 40px -6px rgba(17, 24, 46, 0.11), 0 4px 10px -2px rgba(17, 24, 46, 0.06);
+  --shadow-card: 0 1px 3px 0 rgba(17, 24, 46, 0.04), 0 1px 2px 0 rgba(17, 24, 46, 0.03);
+  --shadow-card-hover: 0 12px 32px -8px rgba(59, 91, 219, 0.14),
+    0 6px 14px -4px rgba(17, 24, 46, 0.08);
+  --shadow-card-inner: inset 0 1px 0 0 rgba(255, 255, 255, 0.8),
+    inset 0 0 0 1px rgba(17, 24, 46, 0.03);
+  --shadow-sider: 4px 0 32px -10px rgba(10, 15, 29, 0.25),
+    0 0 0 1px rgba(10, 15, 29, 0.04);
+  --shadow-popover: 0 12px 32px -6px rgba(17, 24, 46, 0.13),
+    0 4px 10px -2px rgba(17, 24, 46, 0.06);
+  --shadow-glow-primary: 0 0 0 4px rgba(59, 91, 219, 0.08),
+    0 8px 20px -4px rgba(59, 91, 219, 0.22);
+  --shadow-glow-accent: 0 0 0 4px rgba(176, 141, 87, 0.1),
+    0 8px 20px -4px rgba(176, 141, 87, 0.22);
+  --shadow-number-halo: radial-gradient(
+    circle at 50% 50%,
+    rgba(59, 91, 219, 0.08) 0%,
+    rgba(59, 91, 219, 0.02) 55%,
+    rgba(59, 91, 219, 0) 75%
+  );
+
+  /* —— 过渡与动效 —— */
+  --transition-fast: 160ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 260ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 420ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* —— 布局常量 —— */
+  --app-desktop-min-width: 1440px;
+  --app-sider-width: 252px;
+  --app-header-height: 64px;
+  --app-content-max-width: 1680px;
+
+  /* —— 背景噪声纹理：SVG data-uri（纸张颗粒，10% 透明度）—— */
+  --noise-texture: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.06  0 0 0 0 0.08  0 0 0 0 0.14  0 0 0 0.035 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+
+  /* —— 装饰几何：右上斜角切分（Editorial 标志性元素）—— */
+  --deco-corner-angle: linear-gradient(
+    135deg,
+    rgba(59, 91, 219, 0.06) 0%,
+    rgba(59, 91, 219, 0.06) 32%,
+    rgba(176, 141, 87, 0.05) 32%,
+    rgba(176, 141, 87, 0.05) 100%
+  );
 }
+
+/* ================== 工业风共享基座（各页面可直接复用 .mi-* 类） ================== */
+@import './industrialKit.css';
+
+/* ================== 全局基础 ================== */
 
 * {
   box-sizing: border-box;
@@ -24,6 +190,19 @@ body,
 
 body {
   min-height: 100vh;
+  background-color: #f8f8f5;
+  background-image:
+    radial-gradient(
+      800px 600px at 100% -100px,
+      rgba(59, 91, 219, 0.04) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      600px 500px at -80px 110%,
+      rgba(176, 141, 87, 0.03) 0%,
+      transparent 65%
+    );
+  background-attachment: fixed;
 }
 
 button,
@@ -31,4 +210,737 @@ input,
 select,
 textarea {
   font: inherit;
+}
+
+/* 数字强制衬线字体 + 等宽：Editorial 的灵魂 */
+.ant-statistic-content,
+.ant-progress-text,
+.tabular,
+.metric-number,
+.big-number {
+  font-family: var(--font-number);
+  font-weight: var(--font-number-weight);
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+  letter-spacing: -0.01em;
+}
+
+/* 大标题衬线 */
+h1.hero-title,
+h2.hero-title,
+.display-title,
+.page-hero .page-title {
+  font-family: var(--font-display);
+  font-weight: var(--font-display-weight);
+  letter-spacing: -0.012em;
+  line-height: 1.2;
+}
+
+/* 滚动条：窄、半透明、克制 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(17, 24, 46, 0.13);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(17, 24, 46, 0.22);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::selection {
+  background: rgba(59, 91, 219, 0.18);
+  color: var(--color-text);
+}
+
+/* ================== 动效：Staggered Reveal ================== */
+/* 页面或模块进入时，子元素依次上浮 + 淡入（给 .reveal-group 内 .reveal-item） */
+
+.reveal-group {
+  pointer-events: none;
+}
+
+.reveal-group.is-ready {
+  pointer-events: auto;
+}
+
+.reveal-item {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 480ms var(--ease-soft),
+    transform 560ms var(--ease-soft);
+  will-change: opacity, transform;
+}
+
+.reveal-group.is-ready .reveal-item {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-group.is-ready .reveal-item:nth-child(1) { transition-delay: 30ms; }
+.reveal-group.is-ready .reveal-item:nth-child(2) { transition-delay: 90ms; }
+.reveal-group.is-ready .reveal-item:nth-child(3) { transition-delay: 150ms; }
+.reveal-group.is-ready .reveal-item:nth-child(4) { transition-delay: 210ms; }
+.reveal-group.is-ready .reveal-item:nth-child(5) { transition-delay: 270ms; }
+.reveal-group.is-ready .reveal-item:nth-child(6) { transition-delay: 330ms; }
+.reveal-group.is-ready .reveal-item:nth-child(7) { transition-delay: 390ms; }
+.reveal-group.is-ready .reveal-item:nth-child(8) { transition-delay: 450ms; }
+
+/* 一次性首屏淡入（#root 级别） */
+@keyframes page-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+body > *,
+#root {
+  animation: page-fade-in 380ms var(--ease-soft) both;
+}
+
+/* 指标卡浮起：轻、克制 */
+@keyframes soft-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-2px); }
+}
+
+/* 琥珀金 Badge 呼吸光 */
+@keyframes accent-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(176, 141, 87, 0.35); }
+  50%      { box-shadow: 0 0 0 5px rgba(176, 141, 87, 0); }
+}
+
+/* 细节：页面角落装饰 */
+.page-corner-deco {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, transparent 0%, transparent 52%, var(--deco-corner-angle) 52%, var(--deco-corner-angle) 100%) top right / 180px 180px no-repeat,
+    linear-gradient(135deg, rgba(17, 24, 46, 0.035) 0%, rgba(17, 24, 46, 0.035) 100%, transparent 100%) 0 0 / 100% 1px repeat-x,
+    linear-gradient(90deg,  rgba(17, 24, 46, 0.035) 0%, rgba(17, 24, 46, 0.035) 100%, transparent 100%) 0 0 / 1px 100% repeat-y;
+  z-index: 0;
+  border-radius: inherit;
+}
+
+/* ================== 全局组件统一覆盖 — Editorial × Industrial ================== */
+
+/* ---- Ant Design Card：去边框 + 柔光阴影 + 顶部琥珀金细边 + hover上浮 ---- */
+.ant-card {
+  position: relative;
+  border: none !important;
+  border-radius: var(--radius-xl) !important;
+  background: var(--color-bg-card);
+  box-shadow: var(--shadow-card);
+  transition:
+    box-shadow var(--transition-normal) var(--ease-soft),
+    transform var(--transition-normal) var(--ease-soft);
+  overflow: hidden;
+}
+
+.ant-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    rgba(59, 91, 219, 0) 0%,
+    rgba(59, 91, 219, 0.28) 20%,
+    rgba(176, 141, 87, 0.3) 55%,
+    rgba(59, 91, 219, 0.28) 80%,
+    rgba(59, 91, 219, 0) 100%
+  );
+  opacity: 0.65;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.ant-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: var(--shadow-card-inner);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ant-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.ant-card:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+}
+
+.ant-card-head {
+  border-bottom: 1px solid var(--color-border-light) !important;
+  padding: 18px 22px 14px !important;
+  background: transparent !important;
+  position: relative;
+}
+
+.ant-card-head::after {
+  content: '';
+  position: absolute;
+  left: 22px;
+  bottom: -1px;
+  width: 36px;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--color-accent) 0%,
+    rgba(176, 141, 87, 0) 100%
+  );
+  opacity: 0.75;
+  border-radius: 1px;
+}
+
+.ant-card-head-title {
+  font-size: var(--font-size-h3) !important;
+  font-weight: var(--font-weight-semibold) !important;
+  color: var(--color-text) !important;
+  letter-spacing: 0.1px;
+  font-family: var(--font-display);
+  padding: 0 !important;
+}
+
+.ant-card-extra {
+  padding-inline-start: 0 !important;
+}
+
+.ant-card-body {
+  padding: 20px 22px !important;
+}
+
+/* ---- Ant Design Table：编辑风 —— 细线 + 行分割 + 表头玻璃感 ---- */
+.ant-table-wrapper {
+  border-radius: var(--radius-xl) !important;
+  overflow: hidden;
+}
+
+.ant-table {
+  background: transparent !important;
+  font-size: var(--font-size-small);
+}
+
+.ant-table-thead > tr > th {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(59, 91, 219, 0.05) 0%,
+      rgba(248, 249, 252, 0.9) 100%
+    ) !important;
+  border-bottom: 1.5px solid var(--color-border) !important;
+  border-top: none !important;
+  color: var(--color-text) !important;
+  font-weight: var(--font-weight-semibold) !important;
+  font-size: 12.5px !important;
+  letter-spacing: 0.2px;
+  padding: 13px 16px !important;
+  position: relative;
+}
+
+.ant-table-thead > tr > th::before {
+  display: none !important;
+}
+
+.ant-table-thead > tr > th:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 25%;
+  bottom: 25%;
+  width: 1px;
+  background: var(--color-border-light);
+}
+
+.ant-table-tbody > tr {
+  transition: background-color var(--transition-fast);
+}
+
+.ant-table-tbody > tr > td {
+  border-bottom: 1px solid var(--color-border-light) !important;
+  padding: 13px 16px !important;
+  color: var(--color-text-secondary);
+}
+
+.ant-table-tbody > tr:hover > td {
+  background: rgba(59, 91, 219, 0.035) !important;
+}
+
+.ant-table-tbody > tr:nth-child(even) > td {
+  background: rgba(241, 242, 247, 0.4);
+}
+
+.ant-table-tbody > tr:nth-child(even):hover > td {
+  background: rgba(59, 91, 219, 0.045) !important;
+}
+
+/* 表格首列 —— 强调色，类似编辑杂志首字下沉感 */
+.ant-table-tbody > tr > td:first-child {
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
+}
+
+.ant-table-row-expand-icon {
+  border-radius: 4px !important;
+  border-color: var(--color-border-strong) !important;
+}
+
+/* ---- Ant Design Tag：工业标签风 + 胶囊 + 琥珀金边 ---- */
+.ant-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 9px !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 6px !important;
+  font-size: 11.5px !important;
+  font-weight: var(--font-weight-medium) !important;
+  letter-spacing: 0.15px;
+  line-height: 20px !important;
+  background: var(--color-bg-sunken) !important;
+  color: var(--color-text-secondary) !important;
+  transition: all var(--transition-fast);
+}
+
+.ant-tag:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px -2px rgba(17, 24, 46, 0.08);
+}
+
+/* 状态色标签 —— 柔和去饱和，避免刺眼 */
+.ant-tag-success {
+  background: var(--color-success-light) !important;
+  border-color: rgba(12, 153, 102, 0.22) !important;
+  color: var(--color-success) !important;
+}
+
+.ant-tag-warning {
+  background: var(--color-warning-light) !important;
+  border-color: rgba(192, 138, 27, 0.22) !important;
+  color: var(--color-warning) !important;
+}
+
+.ant-tag-error {
+  background: var(--color-danger-light) !important;
+  border-color: rgba(196, 60, 60, 0.22) !important;
+  color: var(--color-danger) !important;
+}
+
+.ant-tag-processing,
+.ant-tag-blue {
+  background: var(--color-info-light) !important;
+  border-color: rgba(59, 91, 219, 0.22) !important;
+  color: var(--color-info) !important;
+}
+
+.ant-tag-purple {
+  background: var(--color-purple-light) !important;
+  border-color: rgba(108, 43, 209, 0.22) !important;
+  color: var(--color-purple) !important;
+}
+
+.ant-tag-cyan {
+  background: var(--color-cyan-light) !important;
+  border-color: rgba(9, 134, 154, 0.22) !important;
+  color: var(--color-cyan) !important;
+}
+
+/* 琥珀金专属标签：表示认证/权威状态 */
+.ant-tag-accent,
+.tag-accent {
+  background: var(--color-accent-soft) !important;
+  border-color: rgba(176, 141, 87, 0.28) !important;
+  color: var(--color-accent-dark) !important;
+  position: relative;
+}
+
+.ant-tag-accent::before,
+.tag-accent::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  margin-right: 3px;
+  box-shadow: 0 0 4px rgba(176, 141, 87, 0.5);
+}
+
+/* ---- Ant Design Button：工业风 —— 柔光阴影 + 琥珀金重点色 ---- */
+.ant-btn {
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 8px !important;
+  font-weight: var(--font-weight-medium);
+  font-size: 13px;
+  letter-spacing: 0.1px;
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.ant-btn:hover {
+  transform: translateY(-1px);
+}
+
+.ant-btn-primary {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-primary-hover) 100%
+  ) !important;
+  border: none !important;
+  box-shadow:
+    0 3px 10px -2px rgba(59, 91, 219, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.ant-btn-primary:hover {
+  box-shadow:
+    0 6px 18px -3px rgba(59, 91, 219, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.ant-btn-default {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  box-shadow: var(--shadow-xs);
+}
+
+.ant-btn-default:hover {
+  border-color: var(--color-primary) !important;
+  color: var(--color-primary) !important;
+  box-shadow: 0 3px 10px -2px rgba(59, 91, 219, 0.18);
+}
+
+/* 琥珀金主按钮 —— 用于核心认证动作 */
+.ant-btn-accent,
+.btn-accent {
+  background: linear-gradient(
+    135deg,
+    #c9a36a 0%,
+    var(--color-accent) 50%,
+    var(--color-accent-dark) 100%
+  ) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow:
+    0 3px 12px -2px rgba(176, 141, 87, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.ant-btn-accent:hover,
+.btn-accent:hover {
+  box-shadow:
+    0 6px 20px -3px rgba(176, 141, 87, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  color: #ffffff !important;
+}
+
+/* ---- Ant Design Tabs：编辑杂志分栏感 ---- */
+.ant-tabs-nav {
+  margin-bottom: 18px !important;
+}
+
+.ant-tabs-nav::before {
+  border-bottom: 1px solid var(--color-border-light) !important;
+}
+
+.ant-tabs-tab {
+  padding: 10px 18px !important;
+  font-size: 13.5px !important;
+  color: var(--color-text-tertiary) !important;
+  font-weight: var(--font-weight-medium) !important;
+  letter-spacing: 0.1px;
+  margin: 0 !important;
+  transition: color var(--transition-fast);
+}
+
+.ant-tabs-tab:hover {
+  color: var(--color-primary) !important;
+}
+
+.ant-tabs-tab-active {
+  color: var(--color-text) !important;
+  font-weight: var(--font-weight-semibold) !important;
+}
+
+.ant-tabs-ink-bar {
+  height: 2.5px !important;
+  border-radius: 2px 2px 0 0;
+  background: linear-gradient(
+    90deg,
+    var(--color-accent) 0%,
+    var(--color-primary) 50%,
+    var(--color-primary) 100%
+  ) !important;
+}
+
+/* ---- Progress：工业刻度感 ---- */
+.ant-progress-inner {
+  border-radius: 3px !important;
+  background: var(--color-bg-sunken) !important;
+  overflow: hidden;
+}
+
+.ant-progress-bg {
+  border-radius: 3px !important;
+  background: linear-gradient(
+    90deg,
+    var(--color-primary) 0%,
+    #5c7bed 100%
+  ) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  position: relative;
+}
+
+.ant-progress-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent 0px,
+    transparent 10px,
+    rgba(255, 255, 255, 0.08) 10px,
+    rgba(255, 255, 255, 0.08) 11px
+  );
+  pointer-events: none;
+}
+
+.ant-progress-text {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-family: var(--font-number);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 琥珀金进度条 —— 认证达标率专属 */
+.progress-accent .ant-progress-bg,
+.ant-progress-accent .ant-progress-bg {
+  background: linear-gradient(
+    90deg,
+    #d4ac6f 0%,
+    var(--color-accent) 60%,
+    var(--color-accent-dark) 100%
+  ) !important;
+}
+
+/* ---- Statistic：Editorial 衬线数字 ---- */
+.ant-statistic-title {
+  color: var(--color-text-tertiary) !important;
+  font-size: 12px !important;
+  letter-spacing: 0.3px;
+  margin-bottom: 6px !important;
+}
+
+.ant-statistic-content {
+  color: var(--color-text) !important;
+}
+
+/* ---- Divider：细线 + 琥珀金点缀 ---- */
+.ant-divider {
+  border-block-start: 1px solid var(--color-border-light) !important;
+  margin: 22px 0 !important;
+  position: relative;
+}
+
+.ant-divider::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -0.5px;
+  width: 30px;
+  height: 1px;
+  background: var(--color-accent);
+  opacity: 0.6;
+}
+
+/* ---- Drawer / Modal：玻璃态 + 编辑感大标题 ---- */
+.ant-drawer-header,
+.ant-modal-header {
+  border-bottom: 1px solid var(--color-border-light) !important;
+  padding: 20px 24px 16px !important;
+}
+
+.ant-drawer-title,
+.ant-modal-title {
+  font-family: var(--font-display) !important;
+  font-size: var(--font-size-h2) !important;
+  font-weight: var(--font-display-weight) !important;
+  color: var(--color-text) !important;
+  letter-spacing: -0.01em;
+}
+
+.ant-drawer-body,
+.ant-modal-body {
+  padding: 22px 24px !important;
+}
+
+/* ---- Badge：工业脉冲点 ---- */
+.ant-badge-dot {
+  width: 8px !important;
+  height: 8px !important;
+  box-shadow: 0 0 0 2px var(--color-bg-card);
+}
+
+/* ---- Empty / Result：留白克制 ---- */
+.ant-empty-description {
+  color: var(--color-text-tertiary) !important;
+  font-size: 13px !important;
+}
+
+/* ---- 通用页面 Hero 区：所有 M2-M8 页面统一应用 ---- */
+.page-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 4px 0 22px;
+  margin-bottom: 6px;
+  position: relative;
+}
+
+.page-hero::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--color-border) 0%,
+    var(--color-border-light) 40%,
+    transparent 100%
+  );
+  opacity: 0.5;
+}
+
+.page-hero-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.page-hero-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  user-select: none;
+}
+
+.page-hero-kicker .kicker-accent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  padding: 0 8px;
+  font-family: var(--font-number);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.4px;
+  color: var(--color-accent-dark);
+  background: var(--color-accent-light);
+  border: 1px solid rgba(176, 141, 87, 0.28);
+  border-radius: 4px;
+}
+
+.page-hero-kicker .kicker-divider {
+  width: 22px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--color-border-strong) 0%,
+    transparent 100%
+  );
+}
+
+.page-hero-kicker .kicker-text {
+  font-size: 11.5px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-tertiary);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.page-title {
+  margin: 0 0 8px;
+  font-size: var(--font-size-hero);
+  line-height: 1.18;
+  color: var(--color-primary-ink);
+}
+
+.page-lead {
+  margin: 0;
+  max-width: 720px;
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.05px;
+}
+
+.page-lead strong {
+  color: var(--color-text);
+  font-weight: var(--font-weight-semibold);
+}
+
+.page-hero-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  padding-top: 6px;
+}
+
+.hero-cta {
+  height: 40px !important;
+  padding: 0 20px !important;
+  font-size: 14px !important;
+  border-radius: 10px !important;
+}
+
+.hero-pilot-tag {
+  background: var(--color-accent-soft) !important;
+  border: 1px solid rgba(176, 141, 87, 0.25) !important;
+  color: var(--color-accent-dark) !important;
+  height: 22px !important;
+  padding: 0 10px !important;
+  font-size: 11px !important;
+  font-weight: var(--font-weight-semibold) !important;
+  letter-spacing: 0.3px;
+  animation: accent-glow 3.2s ease-in-out infinite;
+}
+
+/* ---- 通用布局辅助：section 间距 ---- */
+.section {
+  margin-top: 22px;
+}
+
+.section + .section {
+  margin-top: 26px;
 }

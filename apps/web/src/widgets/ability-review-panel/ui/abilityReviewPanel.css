@@ -1,0 +1,128 @@
+.ability-review-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: #fff;
+  overflow: hidden;
+}
+
+.ability-review-panel-empty {
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.ability-review-panel-header {
+  padding: 14px 18px 10px;
+  border-bottom: 1px solid var(--mi-line, #f0f0f0);
+  flex-shrink: 0;
+}
+
+.ability-review-node-code {
+  font-family: var(--mi-font-number, 'SFMono-Regular', Consolas, monospace);
+  font-size: 12px;
+}
+
+.ability-review-node-desc {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.ability-review-panel-note {
+  margin: 8px 0 0 !important;
+  padding: 6px 10px;
+  background: var(--mi-bg-paper, #faf8f3);
+  border-left: 3px solid var(--mi-amber, #b08d57);
+  border-radius: 2px;
+  font-size: 11.5px;
+  line-height: 1.55;
+}
+
+.ability-review-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 18px 16px;
+}
+
+.ability-review-section {
+  margin-bottom: 18px;
+}
+
+.ability-review-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed var(--mi-line, #f0f0f0);
+}
+
+.ability-review-edge-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ability-review-edge-item {
+  border-radius: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--mi-line, #f0f0f0);
+}
+
+.ability-review-edge-item-pending {
+  border-color: #ffe0b3;
+  background: #fffbf2;
+}
+
+.ability-review-edge-item-approved {
+  background: #fff;
+}
+
+.ability-review-edge-head {
+  margin-bottom: 6px;
+}
+
+.ability-review-edge-target {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: var(--mi-bg-paper, #faf8f3);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.ability-review-edge-target:hover {
+  background: #f3efe4;
+}
+
+.ability-review-edge-target-name {
+  flex: 1;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ability-review-edge-target-arrow {
+  color: var(--mi-ink-faint, #aaa);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.ability-review-edge-reasoning {
+  margin: 6px 0 0 !important;
+  padding: 6px 8px;
+  background: #f6f8fa;
+  border-left: 3px solid #f5a524;
+  border-radius: 2px;
+  font-size: 11.5px;
+  line-height: 1.55;
+}
+
+.ability-review-goto-recognition {
+  margin-top: 10px;
+  font-weight: 600;
+}

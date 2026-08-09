@@ -11,5 +11,4 @@ export type {
   SupportTemplateKind,
   SupportTemplateRef,
 } from './model/supportPackage';
-export { prototypeOnlySupportPackages } from './model/prototypeOnlySupportPackages';
 export { SupportPackageStatusTag } from './ui/SupportPackageStatusTag';

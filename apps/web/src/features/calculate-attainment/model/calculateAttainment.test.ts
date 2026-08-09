@@ -4,9 +4,9 @@ import type { AttainmentEvaluationItem } from '../../../entities/attainment-eval
 import { calculateAttainment } from './calculateAttainment';
 
 const baseEvaluation: AttainmentEvaluationItem = {
-  abilityCode: 'BA-2',
-  abilityName: '算法分析与设计能力',
-  course: '数据结构',
+  abilityCode: 'C-01-01',
+  abilityName: '工程知识应用',
+  course: '数据结构与算法',
   evidence: [],
   graphVersion: '图谱 v0.3',
   id: 'evaluation-test',
@@ -30,8 +30,8 @@ const baseEvaluation: AttainmentEvaluationItem = {
       weight: 0.4,
     },
   ],
-  objectiveCode: 'CT-3',
-  objectiveName: '算法设计正确性',
+  objectiveCode: 'CO-DS-1',
+  objectiveName: '课程目标1：算法设计正确性',
   policyVersion: 'policy v1.2',
   programVersion: 'evaluator 0.8.0',
   readinessChecks: [],
