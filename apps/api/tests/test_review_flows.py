@@ -7,7 +7,6 @@ import asyncio
 from datetime import UTC, datetime
 
 import pytest
-
 from app.modules.diagnostics.application.decide_finding import DecideFinding
 from app.modules.diagnostics.domain.finding import (
     DiagnosticEvidenceRef,

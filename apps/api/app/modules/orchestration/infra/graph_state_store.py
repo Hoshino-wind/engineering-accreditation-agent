@@ -1,22 +1,17 @@
-# -*- coding: utf-8 -*-
-"""图谱运行状态持久化：把 LangGraph 提取出的学校节点和关系额外保存到 JSON。
+"""能力图谱的单一权威存储：JSON 持久化（必要时可替换为 PostgreSQL 实现）。
 
 背景：LangGraph 使用的 InMemorySaver 不支持后端重启后恢复，且 orchestrator
 内部的 `_runs` 字典也是进程内存级的。因此只要后端一重启，用户上传材料
 后生长出的能力图谱节点（Course / Experiment / KnowledgePoint /
 TeachingResource 及其 SUPPORTS 边）就全部丢失了，对用户体验影响很大。
 
-本模块额外维护一套「当前图谱投影」的 JSON 持久化，与 LangGraph 的内存
-checkpointer 并行写入、并行读取。读取逻辑：
-
-1. 优先返回 JSON 持久化中的图谱（因为重启后内存中一定是空的）
-2. 若 JSON 中无学校节点，则再回退去 LangGraph 最近一次运行 state 里拉，
-   并同步写回 JSON（补全持久化）
-3. 两者都空则返回种子图（仅有标准节点）
-
-删除逻辑（remove_course）：
-- 优先从 JSON 持久化中过滤，保证重启后也是干净的；
-- 再尝试在 LangGraph 内存运行 state 中做同样清理（如果存在的话）。
+职责划分（单一真源）：
+- 本存储是图谱状态的**唯一权威来源**；orchestrator 启动新运行时从本存储
+  读取当前图谱作为初始状态，运行结束后把生长出的图谱合并写回。
+- LangGraph 内存 checkpointer 只承担「单次运行内的执行与中断恢复」，
+  不再作为读取路径；`get_current_graph` 只读本存储，空则回退种子图。
+- 删除逻辑（remove_course）同样以本存储为准：先在持久化图中过滤，
+  再尽力同步仍在执行中的运行快照（避免展示层残留孤儿节点）。
 """
 
 from __future__ import annotations
@@ -26,13 +21,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from app.core.json_persistence import _DATA_DIR, _ensure_data_dir
+from app.core import json_persistence as jp
 from app.modules.courses.domain.course import Course
 
 
 def _graph_state_file(user_id: str = "template") -> Path:
-    _ensure_data_dir()
-    return _DATA_DIR / f"graph_state_{user_id}.json"
+    jp._ensure_data_dir()
+    return jp._DATA_DIR / f"graph_state_{user_id}.json"
 
 
 @dataclass
@@ -43,7 +38,7 @@ class _GraphMutationContext:
 
 
 class JsonGraphStateStore:
-    """JSON 文件持久化的能力图谱状态，与 LangGraph InMemorySaver 双写双读。"""
+    """JSON 文件持久化的能力图谱状态，作为图谱的单一权威存储。"""
 
     def __init__(self, user_id: str = "template") -> None:
         self._user_id = user_id

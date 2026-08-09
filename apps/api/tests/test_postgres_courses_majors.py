@@ -12,7 +12,6 @@ import os
 import uuid
 
 import pytest
-
 from app.infrastructure.postgres_repos import (
     PostgresCourseRepository,
     PostgresMajorRepository,
@@ -185,9 +184,8 @@ _DATABASE_URL = os.environ.get("EA_DATABASE_URL")
 class TestPostgresIntegration:
     @pytest.fixture
     async def store(self):
-        from sqlalchemy.ext.asyncio import create_async_engine
-
         from app.infrastructure.accreditation_store import AccreditationStore
+        from sqlalchemy.ext.asyncio import create_async_engine
 
         engine = create_async_engine(_DATABASE_URL, pool_pre_ping=True)
         s = AccreditationStore(engine)

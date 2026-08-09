@@ -8,7 +8,6 @@ from __future__ import annotations
 import os
 
 import pytest
-
 from app.modules.llm.infra.rag_pgvector import PostgresRAGRepository
 
 

@@ -61,8 +61,13 @@ def build_agent_graph(llm: LLMClientPort, rag: RAGSearchPort | None = None):
 
     async def plan_node(state: AgentState) -> dict[str, Any]:
         goal = state.get("goal", "")
-        seed = build_seed_graph()
-        nodes_d, edges_d = graph_to_state(seed)
+        # 优先沿用调用方（orchestrator）注入的当前图谱：多次上传会基于
+        # 已持久化的图谱继续生长；直接调用且未注入图谱时才回退种子图。
+        nodes_d = list(state.get("graph_nodes") or [])
+        edges_d = list(state.get("graph_edges") or [])
+        if not nodes_d:
+            seed = build_seed_graph()
+            nodes_d, edges_d = graph_to_state(seed)
         try:
             plan_resp = await llm.plan(goal)
             plan_titles = [f"{s.phase} · {s.title}" for s in plan_resp.data if s.title]

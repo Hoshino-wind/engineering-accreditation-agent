@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from fastapi import HTTPException
@@ -42,7 +42,7 @@ class RegisterUser:
             password_hash=password_hash,
             display_name=display_name or username,
             role=role,
-            created_at=datetime.now(timezone.utc).isoformat(),
+            created_at=datetime.now(UTC).isoformat(),
             avatar_url=None,
         )
         created = await self._repository.create(user)

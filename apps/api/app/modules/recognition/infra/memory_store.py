@@ -187,3 +187,21 @@ class InMemoryCandidateRepository(JsonPersistenceMixin):
             self._store.pop(cid, None)
         self._schedule_save()
         return len(to_delete)
+
+
+    async def delete_by_evidence_resource(self, resource_name: str) -> int:
+        """删除证据引用指定材料名的识别候选（删除材料时联动清理）。"""
+        target = (resource_name or "").strip()
+        if not target:
+            return 0
+        to_delete = [
+            cid
+            for cid, c in self._store.items()
+            if any(ev.resource_name == target for ev in c.evidence)
+        ]
+        if not to_delete:
+            return 0
+        for cid in to_delete:
+            self._store.pop(cid, None)
+        self._schedule_save()
+        return len(to_delete)

@@ -1,4 +1,5 @@
 from dataclasses import replace
+from datetime import UTC
 
 from app.core.json_persistence import JsonPersistenceMixin
 from app.infrastructure.accreditation_store import AccreditationStore
@@ -82,8 +83,8 @@ class InMemoryImprovementRepository(JsonPersistenceMixin):
         existing = self._store.get(improvement_id)
         if existing is None:
             return None
-        from datetime import datetime, timezone
-        now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
+        from datetime import datetime
+        now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M")
         updated = replace(existing, status=status, updated_at=now)
         self._store[improvement_id] = updated
         self._schedule_save()
@@ -107,3 +108,26 @@ class InMemoryImprovementRepository(JsonPersistenceMixin):
             entity_id=improvement.id,
             detail={"status": improvement.status, "major_id": improvement.major_id},
         )
+
+
+    async def delete_by_course(self, course_name: str) -> int:
+        """按 course 字段删除关联改进建议（删除课程时联动清理）。"""
+        target = (course_name or "").strip()
+        target_norm = target.lower()
+        if not target_norm:
+            return 0
+        to_delete = [
+            iid
+            for iid, imp in self._store.items()
+            if (imp.course or "").strip()
+            and (
+                (imp.course or "").strip() == target
+                or target_norm in (imp.course or "").strip().lower()
+            )
+        ]
+        if not to_delete:
+            return 0
+        for iid in to_delete:
+            self._store.pop(iid, None)
+        self._schedule_save()
+        return len(to_delete)

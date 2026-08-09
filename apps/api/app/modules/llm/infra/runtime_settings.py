@@ -1,4 +1,4 @@
-"""LLM 运行时配置（页面可配置，落盘 JSON，覆盖 .env）。
+"""LLM 运行时配置存储实现（页面可配置，落盘 JSON，覆盖 .env）。
 
 此前 API Key 只能写在后端 .env 里，重启才生效。
 现在改为：后端读取持久化的 llm_settings.json，优先级高于 .env；
@@ -11,6 +11,8 @@
 - 该配置为「按用户隔离」配置：每位登录用户各自保存、读取自己的 Key / 模型，
   互不可见（按 user_id 落盘到 data/llm_settings/<user_id>.json）。
   未配置的用户回落到 mock，不影响他人。
+
+模型与预设常量见 app.modules.llm.domain.settings；本文件只负责 IO / 缓存 / env 合并。
 """
 
 from __future__ import annotations
@@ -23,9 +25,10 @@ import time
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, Field
-
 from app.core.json_persistence import _DATA_DIR
+from app.modules.llm.domain.settings import (
+    LLMRuntimeSettings,
+)
 from app.modules.llm.infra.llm_client import LLMConfig
 
 _SETTINGS_DIR = _DATA_DIR / "llm_settings"
@@ -40,111 +43,6 @@ def _user_file(user_id: str) -> Path:
     """按 user_id 生成安全的落盘文件名（防路径穿越）。"""
     safe = re.sub(r"[^A-Za-z0-9_.-]", "_", str(user_id))
     return _SETTINGS_DIR / f"{safe}.json"
-
-
-# ── 厂商预设（单一事实来源，前端 GET 时一并下发）──────────────
-# 均为 OpenAI 兼容接口；base_url 指向 /v1 或等价路径，调用时拼 /chat/completions。
-VENDOR_PRESETS: dict[str, dict[str, Any]] = {
-    "deepseek": {
-        "label": "DeepSeek",
-        "base_url": "https://api.deepseek.com/v1",
-        "models": ["deepseek-chat", "deepseek-reasoner"],
-        "supports_embedding": False,
-    },
-    "openai": {
-        "label": "OpenAI",
-        "base_url": "https://api.openai.com/v1",
-        "models": [
-            "gpt-4o",
-            "gpt-4o-mini",
-            "gpt-4-turbo",
-            "text-embedding-3-small",
-            "text-embedding-3-large",
-        ],
-        "supports_embedding": True,
-    },
-    "moonshot": {
-        "label": "Moonshot（Kimi）",
-        "base_url": "https://api.moonshot.cn/v1",
-        "models": ["moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k"],
-        "supports_embedding": False,
-    },
-    "qwen": {
-        "label": "阿里通义千问",
-        "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
-        "models": [
-            "qwen-plus",
-            "qwen-max",
-            "qwen-turbo",
-            "qwen-long",
-            "text-embedding-v3",
-        ],
-        "supports_embedding": True,
-    },
-    "zhipu": {
-        "label": "智谱 GLM",
-        "base_url": "https://open.bigmodel.cn/api/paas/v4",
-        "models": ["glm-4-plus", "glm-4-air", "glm-4-flash"],
-        "supports_embedding": False,
-    },
-    "hunyuan": {
-        "label": "腾讯混元",
-        "base_url": "https://api.hunyuan.cloud.tencent.com/v1",
-        "models": ["hunyuan-pro", "hunyuan-standard", "hunyuan-lite"],
-        "supports_embedding": False,
-    },
-    "qianfan": {
-        "label": "百度千帆",
-        "base_url": "https://qianfan.baidubce.com/v2",
-        "models": ["ernie-4.0-8k", "ernie-3.5-8k", "ernie-speed-8k"],
-        "supports_embedding": False,
-    },
-    "doubao": {
-        "label": "字节豆包（火山方舟）",
-        "base_url": "https://ark.cn-beijing.volces.com/api/v3",
-        "models": ["doubao-pro-32k", "doubao-lite-32k"],
-        "supports_embedding": False,
-    },
-    "siliconflow": {
-        "label": "SiliconFlow（硅基流动）",
-        "base_url": "https://api.siliconflow.cn/v1",
-        "models": [
-            "deepseek-ai/DeepSeek-V3",
-            "deepseek-ai/DeepSeek-R1",
-            "Qwen/Qwen2.5-72B-Instruct",
-            "BAAI/bge-m3",
-        ],
-        "supports_embedding": True,
-    },
-    "ollama": {
-        "label": "Ollama（本地）",
-        "base_url": "http://localhost:11434/v1",
-        "models": ["llama3", "qwen2.5", "deepseek-r1"],
-        "supports_embedding": True,
-    },
-    "custom": {
-        "label": "自定义 / 其他兼容服务",
-        "base_url": "",
-        "models": [],
-        "supports_embedding": True,
-    },
-}
-
-
-class LLMProviderSettings(BaseModel):
-    """单个提供方（对话 or embedding）的配置。"""
-
-    vendor: str = "custom"
-    api_key: str = ""
-    base_url: str = ""
-    model: str = ""
-
-
-class LLMRuntimeSettings(BaseModel):
-    """页面可配置的全局 LLM 设置。"""
-
-    chat: LLMProviderSettings = Field(default_factory=LLMProviderSettings)
-    embedding: LLMProviderSettings = Field(default_factory=LLMProviderSettings)
 
 
 def load_user_llm_settings(user_id: str) -> LLMRuntimeSettings | None:
@@ -215,12 +113,3 @@ def resolve_user_llm_config(static_config: LLMConfig, user_id: str | None = None
         cfg.embedding_model = emb.model or cfg.embedding_model
 
     return cfg
-
-
-def mask_api_key(key: str) -> str | None:
-    """脱敏：保留前缀与末 4 位，中间用 **** 替代。"""
-    if not key:
-        return None
-    if len(key) <= 8:
-        return key[:2] + "****"
-    return key[:6] + "****" + key[-4:]

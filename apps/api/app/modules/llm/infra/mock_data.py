@@ -158,56 +158,54 @@ def get_mock_extraction_items(
     ]
 
 
-def get_mock_relation_items() -> list[RelationItem]:
-    """返回 mock 推断关系。
+def get_mock_relation_items(
+    school_nodes: list[dict],
+    standard_nodes: list[dict],
+) -> list[RelationItem]:
+    """基于当前图谱节点动态生成 mock 支撑关系（模拟 LLM 的推断行为）。
 
-    【修复】只有 course 和 experiment 节点才能作为支撑源，
-    knowledge 节点不作为支撑源。
+    【与真实 LLM 对齐】仅 kind=course / kind=experiment 的学校节点能作为
+    支撑源（source_id），地址用节点真实 id；目标从标准 Competency 取 code。
+    这样无论提取出哪些节点，关系都与图谱始终自洽，不会产生悬空端点。
+    节点不足时返回空列表（与真实 LLM 输出一致，不会硬凑关系）。
     """
-    return [
-        # 课程支撑毕业要求
-        RelationItem(
-            source_id="co-ds",
-            target_id="C-01-01",
-            relation_type="SUPPORTS",
-            strength="strong",
-            confidence=0.88,
-            reasoning="数据结构与算法核心课程直接覆盖'问题推演与建模'指标要求",
-        ),
-        RelationItem(
-            source_id="co-mcu",
-            target_id="C-05-01",
-            relation_type="SUPPORTS",
-            strength="strong",
-            confidence=0.90,
-            reasoning="单片机基础课程包含电子产品设计与实现的完整流程",
-        ),
-        # 实验项目支撑毕业要求
-        RelationItem(
-            source_id="exp-mcu-01",
-            target_id="C-02-01",
-            relation_type="SUPPORTS",
-            strength="medium",
-            confidence=0.82,
-            reasoning="单片机GPIO与中断实验训练了工程问题分析与解决能力",
-        ),
-        RelationItem(
-            source_id="exp-system-01",
-            target_id="C-04-01",
-            relation_type="SUPPORTS",
-            strength="strong",
-            confidence=0.91,
-            reasoning="嵌入式综合设计实验涉及系统级设计、实现与测试全流程",
-        ),
-        RelationItem(
-            source_id="exp-mcu-03",
-            target_id="C-03-01",
-            relation_type="SUPPORTS",
-            strength="medium",
-            confidence=0.78,
-            reasoning="串口通信实验涉及跨模块接口设计与调试",
-        ),
+    sources = [
+        n for n in school_nodes if str(n.get("kind", "")).lower() in ("course", "experiment")
     ]
+    target_codes = [
+        n.get("code", "") for n in standard_nodes
+        if str(n.get("kind", "")).lower() == "competency"
+    ]
+    if not school_nodes or not sources:
+        return []
+
+    # 标准指标缺失时回退到种子毕业要求指标——模拟 LLM 对认证标准的先验知识
+    if not target_codes:
+        target_codes = [
+            "C-01-01", "C-05-01", "C-02-01", "C-04-01", "C-03-01",
+            "C-03-02", "C-04-02",
+        ]
+
+    items: list[RelationItem] = []
+    for i, node in enumerate(sources):
+        target_code = target_codes[i % len(target_codes)]
+        is_course = str(node.get("kind", "")).lower() == "course"
+        name = node.get("name") or node.get("code") or "节点"
+        items.append(
+            RelationItem(
+                source_id=str(node.get("id") or node.get("code") or ""),
+                target_id=target_code,
+                relation_type="SUPPORTS",
+                strength="strong" if is_course else "medium",
+                confidence=0.90 if is_course else 0.78,
+                reasoning=(
+                    f"核心课程「{name}」直接覆盖指标 {target_code} 的教学与考核要求"
+                    if is_course
+                    else f"实验「{name}」训练了指标 {target_code} 对应的实践能力（间接支撑）"
+                ),
+            )
+        )
+    return items
 
 
 def get_mock_suggestion_items(gaps: list[dict]) -> list[SuggestionItem]:
@@ -235,15 +233,15 @@ def get_mock_suggestion_items(gaps: list[dict]) -> list[SuggestionItem]:
                 root_cause=f"能力指标 {code}（{name}）支撑强度不足，仅有 1 门课程 weak 支撑。",
                 suggestion=f"建议为现有支撑课程增加实验课时，或新增综合实验项目"
                 f"以强化 {name} 的实践支撑。",
-                expected_effect=f"预计可将支撑强度从 weak 提升至 medium，"
-                f"达成度提升 15-20%。",
+                expected_effect="预计可将支撑强度从 weak 提升至 medium，"
+                "达成度提升 15-20%。",
             ))
         else:
             items.append(SuggestionItem(
                 target_code=code,
                 target_name=name,
                 root_cause=f"能力指标 {code}（{name}）存在数据孤岛，部分支撑节点未关联到实验或知识点。",
-                suggestion=f"建议完善课程-实验-知识点之间的覆盖关系边。",
+                suggestion="建议完善课程-实验-知识点之间的覆盖关系边。",
                 expected_effect="消除数据孤岛，提升图谱连通性和覆盖完整性。",
             ))
     return items

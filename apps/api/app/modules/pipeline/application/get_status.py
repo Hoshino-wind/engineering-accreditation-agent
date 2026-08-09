@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from app.modules.pipeline.application.ports import (
     CoverageStatusProvider,
@@ -85,5 +85,5 @@ class GetPipelineStatus:
             pending_run_review_count=pending_run_review,
             gap_count=gaps,
             suggestion_count=suggestions,
-            last_updated=datetime.now(timezone.utc).isoformat(),
+            last_updated=datetime.now(UTC).isoformat(),
         )

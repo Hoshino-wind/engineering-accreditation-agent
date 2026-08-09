@@ -13,7 +13,6 @@ from app.modules.orchestration.domain.models import (
     GraphNode,
 )
 
-
 # ── PPT 原文：精选 5 条毕业要求（知识→分析→设计→研究→工具核心链条）──
 _GRADUATION_REQUIREMENTS: list[tuple[str, str, str, str]] = [
     ("std-gr-01", "GR-01", "工程知识",

@@ -1,3 +1,4 @@
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Annotated
@@ -56,6 +57,7 @@ from app.modules.orchestration.routes.runs import create_orchestration_router
 from app.modules.pipeline.application import GetPipelineStatus
 from app.modules.pipeline.routes import create_pipeline_router
 from app.modules.recognition.application import ListCandidates, ReviewCandidate
+from app.modules.recognition.domain.candidate import RecognitionCandidate
 from app.modules.recognition.routes import create_recognition_router
 from app.modules.resources.application import (
     ClassifyResource,
@@ -218,7 +220,12 @@ def create_app() -> FastAPI:
         current_user: Annotated[User, Depends(get_current_user)],
     ) -> DeleteResource:
         repos = per_user_mgr.get(current_user.id)
-        return DeleteResource(repository=repos.resources, cancellation=task_registry)
+        return DeleteResource(
+            repository=repos.resources,
+            cancellation=task_registry,
+            candidates_repo=repos.candidates,
+            findings_repo=repos.findings,
+        )
 
     def provide_classify_resource(
         current_user: Annotated[User, Depends(get_current_user)],
@@ -265,6 +272,8 @@ def create_app() -> FastAPI:
             repository=repos.courses,
             graph_projection=get_orchestrator(current_user.id, active_major_id),
             candidates_repo=repos.candidates,
+            findings_repo=repos.findings,
+            improvements_repo=repos.improvements,
         )
 
     # --- Majors（专业实体，认证评判单元）---
@@ -332,7 +341,27 @@ def create_app() -> FastAPI:
         current_user: Annotated[User, Depends(get_current_user)],
     ) -> ReviewCandidate:
         repos = per_user_mgr.get(current_user.id)
-        return ReviewCandidate(repository=repos.candidates)
+        inner = ReviewCandidate(repository=repos.candidates)
+
+        class _ReviewAndProject:
+            """审核后把裁决投影进该用户的能力图谱（审核闭环的落地端）。"""
+
+            async def execute(
+                self, candidate_id: str, decision: str
+            ) -> RecognitionCandidate | None:
+                result = await inner.execute(candidate_id, decision)
+                if result is None:
+                    return result
+                try:
+                    orchestrator = get_orchestrator(current_user.id, None)
+                    await orchestrator.review_project_candidates([result])
+                except Exception:  # noqa: BLE001
+                    logging.getLogger(__name__).exception(
+                        "识别中心审核 → 图谱投影失败 (candidate=%s)", candidate_id
+                    )
+                return result
+
+        return _ReviewAndProject()
 
     # --- M5 Diagnostics ---
     def provide_list_findings(
@@ -404,6 +433,36 @@ def create_app() -> FastAPI:
     ) -> LLMClientPort:
         # 按当前用户构造客户端，使用其自己配置的 Key / 模型
         return OpenAICompatibleLLMClient(config=llm_config, user_id=current_user.id)
+
+    # --- LLM 设置路由的装配（routes 不触 infra，这里做适配）---
+    from app.modules.llm.application.settings_service import (
+        LLMDefaults,
+        UserLLMSettingsStore,
+    )
+    from app.modules.llm.infra.runtime_settings import (
+        load_user_llm_settings,
+        save_user_llm_settings,
+    )
+
+    def provide_llm_settings_store() -> UserLLMSettingsStore:
+        class _Store:
+            def load(self, user_id: str):
+                return load_user_llm_settings(user_id)
+
+            def save(self, user_id: str, settings) -> None:
+                save_user_llm_settings(user_id, settings)
+
+        return _Store()
+
+    def provide_llm_settings_defaults() -> LLMDefaults:
+        return LLMDefaults(
+            api_key=llm_config.api_key,
+            base_url=llm_config.base_url,
+            model=llm_config.model,
+            embedding_api_key=llm_config.embedding_api_key,
+            embedding_base_url=llm_config.embedding_base_url,
+            embedding_model=llm_config.embedding_model,
+        )
 
     def provide_rag_search(
         current_user: Annotated[User, Depends(get_current_user)],
@@ -791,7 +850,12 @@ def create_app() -> FastAPI:
         prefix=settings.api_v1_prefix,
     )
     application.include_router(
-        create_settings_router(provide_user_repo_provider, get_settings),
+        create_settings_router(
+            provide_user_repo_provider,
+            get_settings,
+            provide_llm_settings_store,
+            provide_llm_settings_defaults,
+        ),
         prefix=settings.api_v1_prefix,
     )
     application.include_router(

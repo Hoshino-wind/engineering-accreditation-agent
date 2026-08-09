@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """PostgreSQL 仓储集成测试。
 
 覆盖：
@@ -20,8 +19,6 @@ import uuid
 from datetime import UTC, datetime
 
 import pytest
-from sqlalchemy.ext.asyncio import create_async_engine
-
 from app.infrastructure.accreditation_store import AccreditationStore
 from app.infrastructure.postgres_repos import (
     PostgresCandidateRepository,
@@ -50,6 +47,7 @@ from app.modules.resources.domain.resource import (
     TeachingResourceStatus,
     TeachingResourceType,
 )
+from sqlalchemy.ext.asyncio import create_async_engine
 
 # ---------------------------------------------------------------------------
 # 环境检测：无 EA_DATABASE_URL 则 skip 全部
@@ -352,14 +350,13 @@ async def test_tenant_isolation(clean_store):
 
 async def test_delete_preserves_evidence(clean_store):
     """删除资源后：快照被删除，audit_events 追加，evidence_records 保留。"""
-    from sqlalchemy import func, select, text
-    from sqlalchemy.ext.asyncio import AsyncSession
-
     from app.infrastructure.accreditation_store import (
         AuditEventRow,
         EntitySnapshotRow,
         EvidenceRecordRow,
     )
+    from sqlalchemy import func, select
+    from sqlalchemy.ext.asyncio import AsyncSession
 
     repo = PostgresResourceRepository(
         with_seed=False, user_id="user-test-del", persistence=clean_store

@@ -631,7 +631,7 @@ export function GraphViewPage() {
                         optionRender={(option) => {
                           const presentation =
                             option.data.presentation ?? nodeKindPresentation['KnowledgePoint'];
-                          const kind = option.data.kind as AbilityGraphNodeKind;
+                          const kind = option.data.kind;
                           const kindLabel = NODE_KIND_OPTIONS.find((o) => o.value === kind)?.label ?? kind;
                           return (
                             <Space size={6}>
@@ -681,7 +681,7 @@ export function GraphViewPage() {
                         optionRender={(option) => {
                           const presentation =
                             option.data.presentation ?? nodeKindPresentation['KnowledgePoint'];
-                          const kind = option.data.kind as AbilityGraphNodeKind;
+                          const kind = option.data.kind;
                           const kindLabel = NODE_KIND_OPTIONS.find((o) => o.value === kind)?.label ?? kind;
                           return (
                             <Space size={6}>

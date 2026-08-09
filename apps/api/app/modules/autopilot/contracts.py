@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Autopilot 请求/响应契约。"""
 from __future__ import annotations
 

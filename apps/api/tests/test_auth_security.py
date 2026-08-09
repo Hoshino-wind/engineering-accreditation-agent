@@ -7,10 +7,9 @@
 from pathlib import Path
 
 import pytest
-from fastapi.testclient import TestClient
-
 from app.core.config import get_settings
 from app.main import create_app
+from fastapi.testclient import TestClient
 
 
 @pytest.fixture(autouse=True)
@@ -93,9 +92,8 @@ def test_unauthenticated_request_with_major_header_rejected() -> None:
 
 
 def test_jwt_secret_required_outside_development() -> None:
-    from pydantic import ValidationError
-
     from app.core.config import Settings
+    from pydantic import ValidationError
 
     with pytest.raises(ValidationError) as exc_info:
         Settings(environment="production")

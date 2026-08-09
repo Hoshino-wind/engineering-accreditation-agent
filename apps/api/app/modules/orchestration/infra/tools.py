@@ -4,7 +4,7 @@
 以及步骤日志构造。这些把「LLM 能力 / 覆盖度计算 / RAG」包装为智能体可调用的工具。
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from app.modules.llm.domain.models import RelationItem
@@ -19,7 +19,7 @@ from app.modules.orchestration.domain.models import (
 
 
 def now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 def make_step(
@@ -104,7 +104,12 @@ def standard_node_dicts(nodes: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def _resolve_node_ref(ref: str, nodes: list[dict[str, Any]]) -> str:
-    """把 LLM 返回的节点引用（可能是 id / code / name）解析为真实节点 id。"""
+    """把 LLM 返回的节点引用（可能是 id / code / name）解析为真实节点 id。
+
+    第二遍忽略大小写：LLM 输出的引用可能与节点 code 大小写不一致
+    （如 'co-ds' vs 'CO-DS'），兜底解析避免生成悬空边。
+    """
+    ref_lower = ref.lower()
     for node in nodes:
         if node.get("id") == ref:
             return node["id"]
@@ -114,6 +119,15 @@ def _resolve_node_ref(ref: str, nodes: list[dict[str, Any]]) -> str:
     for node in nodes:
         if node.get("name") == ref:
             return node["id"]
+    for node in nodes:
+        if str(node.get("id") or "").lower() == ref_lower:
+            return node["id"]
+    for node in nodes:
+        if str(node.get("code") or "").lower() == ref_lower:
+            return node["id"]
+    for node in nodes:
+        if str(node.get("name") or "").lower() == ref_lower:
+            return node["id"]
     return ref
 
 
@@ -121,13 +135,21 @@ def relations_to_pending_edges(
     relations: list[RelationItem],
     nodes: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
+    """把 LLM 推断的关系转为待审核边。
+
+    边 id 必须包含随机后缀：LLM 可能在不同运行中对同一 (source, target)
+    重复推断，若 id 固定，后一次运行的 pending 边会覆盖前一次已审核的
+    边（approved/rejected 状态丢失）。随机后缀保证每次推断是独立证据。
+    """
+    import uuid
+
     edges: list[dict[str, Any]] = []
-    for i, rel in enumerate(relations):
+    for rel in relations:
         source = _resolve_node_ref(rel.source_id, nodes)
         target = _resolve_node_ref(rel.target_id, nodes)
         edges.append(
             {
-                "id": f"ai-rel-{i}-{source}-{target}",
+                "id": f"ai-rel-{uuid.uuid4().hex[:8]}-{source}-{target}",
                 "source": source,
                 "target": target,
                 "kind": "SUPPORTS",

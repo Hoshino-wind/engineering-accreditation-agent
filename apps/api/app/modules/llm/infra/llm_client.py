@@ -12,8 +12,8 @@
 from __future__ import annotations
 
 import json
-import time
 import logging
+import time
 from typing import Any
 
 import httpx
@@ -70,7 +70,7 @@ class OpenAICompatibleLLMClient(LLMClientPort):
         self._user_id = user_id
 
     @property
-    def _config(self) -> "LLMConfig":
+    def _config(self) -> LLMConfig:
         """实时解析配置：env 基础 + 当前用户页面运行时配置（运行时优先级更高）。
 
         改为动态解析后，页面修改 API Key / 模型后立即生效，无需重启服务。
@@ -136,7 +136,7 @@ class OpenAICompatibleLLMClient(LLMClientPort):
         text = content.strip()
         if text.startswith("```"):
             lines = text.split("\n")
-            lines = [l for l in lines if not l.startswith("```")]
+            lines = [line for line in lines if not line.startswith("```")]
             text = "\n".join(lines)
         return json.loads(text)
 
@@ -273,7 +273,6 @@ class OpenAICompatibleLLMClient(LLMClientPort):
                     break
 
         # 文本内容二次校验（提高置信度）
-        text_lower = text_preview[:500].lower()
         if category == "其他" and text_preview:
             if "毕业要求" in text_preview or "培养目标" in text_preview:
                 category = "培养方案"
@@ -564,7 +563,7 @@ class OpenAICompatibleLLMClient(LLMClientPort):
         latency = int((time.time() - start) * 1000)
 
         if raw.get("mock"):
-            return self._mock_relations(latency)
+            return self._mock_relations(school_nodes, standard_nodes, latency)
 
         content = raw["choices"][0]["message"]["content"]
         parsed = self._parse_json_content(content)
@@ -850,10 +849,15 @@ RAG 检索到的材料原文：
             latency=latency,
         )
 
-    def _mock_relations(self, latency: int) -> LLMResponse[list[RelationItem]]:
+    def _mock_relations(
+        self,
+        school_nodes: list[dict],
+        standard_nodes: list[dict],
+        latency: int,
+    ) -> LLMResponse[list[RelationItem]]:
         from app.modules.llm.infra.mock_data import get_mock_relation_items
 
-        items = get_mock_relation_items()
+        items = get_mock_relation_items(school_nodes, standard_nodes)
         return LLMResponse(
             data=items,
             model="deepseek-v2 (mock)",

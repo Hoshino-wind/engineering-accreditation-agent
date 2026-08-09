@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """一次性迁移：data/ 目录 JSON 数据 → PostgreSQL 快照表（部署时运行）。
 
 用法（在配置了 EA_DATABASE_URL 的环境）：
@@ -18,10 +17,9 @@ import json
 import sys
 from pathlib import Path
 
-from sqlalchemy.ext.asyncio import create_async_engine
-
 from app.core.config import get_settings
 from app.infrastructure.accreditation_store import AccreditationStore
+from sqlalchemy.ext.asyncio import create_async_engine
 
 _ENTITY_TYPE = {
     "resources": "resource",

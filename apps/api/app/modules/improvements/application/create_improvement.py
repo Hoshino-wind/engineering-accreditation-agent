@@ -1,3 +1,5 @@
+from datetime import UTC
+
 from app.modules.improvements.application.ports import ImprovementRepository
 from app.modules.improvements.domain.improvement import (
     Improvement,
@@ -27,9 +29,9 @@ class CreateImprovement:
         priority: str = "medium",
     ) -> Improvement:
         import time
-        from datetime import datetime, timezone
+        from datetime import datetime
 
-        now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
+        now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M")
         improvement = Improvement(
             id=f"imp-{int(time.time() * 1000) % 100000000}",
             title=title,

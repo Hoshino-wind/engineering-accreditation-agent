@@ -148,3 +148,59 @@ class InMemoryFindingRepository(JsonPersistenceMixin):
                 "rule_version": finding.rule_version,
             },
         )
+
+
+    async def delete_by_course(self, course_name: str) -> int:
+        """按 course 字段删除关联诊断发现（删除课程时联动清理）。"""
+        target = (course_name or "").strip()
+        target_norm = target.lower()
+        if not target_norm:
+            return 0
+        to_delete = [
+            fid
+            for fid, f in self._store.items()
+            if (f.course or "").strip()
+            and (
+                (f.course or "").strip() == target
+                or target_norm in (f.course or "").strip().lower()
+            )
+        ]
+        if not to_delete:
+            return 0
+        for fid in to_delete:
+            self._store.pop(fid, None)
+        self._schedule_save()
+        return len(to_delete)
+
+    async def delete_by_nodes(self, node_ids: set[str]) -> int:
+        """删除引用已移除图谱节点的诊断发现（source/target 命中）。"""
+        if not node_ids:
+            return 0
+        to_delete = [
+            fid
+            for fid, f in self._store.items()
+            if f.source_node in node_ids or f.target_node in node_ids
+        ]
+        if not to_delete:
+            return 0
+        for fid in to_delete:
+            self._store.pop(fid, None)
+        self._schedule_save()
+        return len(to_delete)
+
+    async def delete_by_evidence_object(self, object_name: str) -> int:
+        """删除证据引用指定材料对象的诊断发现（删除材料时联动清理）。"""
+        target = (object_name or "").strip()
+        if not target:
+            return 0
+        to_delete = [
+            fid
+            for fid, f in self._store.items()
+            if any(ev.object_name == target for ev in f.evidence)
+        ]
+        if not to_delete:
+            return 0
+        for fid in to_delete:
+            self._store.pop(fid, None)
+        self._schedule_save()
+        return len(to_delete)

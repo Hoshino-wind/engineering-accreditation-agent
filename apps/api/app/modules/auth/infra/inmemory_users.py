@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from app.core.json_persistence import JsonPersistenceMixin
@@ -20,7 +20,7 @@ def _seed_user(
         password_hash=_crypt_context.hash(password),
         display_name=display_name,
         role=role,
-        created_at=datetime.now(timezone.utc).isoformat(),
+        created_at=datetime.now(UTC).isoformat(),
         avatar_url=None,
     )
 

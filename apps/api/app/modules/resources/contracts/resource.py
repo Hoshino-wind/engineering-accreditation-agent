@@ -1,8 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 
 from app.modules.resources.domain.resource import (
-    EvidenceFragment,
-    ProcessingStage,
     SuggestedCourse,
     TeachingResource,
     TeachingResourceSensitivity,

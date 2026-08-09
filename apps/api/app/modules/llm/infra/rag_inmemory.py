@@ -6,9 +6,9 @@
 
 from __future__ import annotations
 
+import logging
 import math
 import re
-import logging
 from collections import defaultdict
 
 from app.modules.llm.application.rag_port import RAGSearchPort
@@ -155,7 +155,7 @@ class InMemoryRAGRepository(RAGSearchPort):
         logger.info(f"RAG ingest_standard_library: {count} standards")
         return count
 
-    def clone(self) -> "InMemoryRAGRepository":
+    def clone(self) -> InMemoryRAGRepository:
         new_repo = InMemoryRAGRepository(
             chunk_size=self._chunk_size,
             overlap=self._overlap,

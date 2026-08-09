@@ -1,5 +1,5 @@
 import { CloudUploadOutlined, ReloadOutlined } from '@ant-design/icons';
-import { Alert, Button, Card, Empty, Segmented, Spin, Tag } from 'antd';
+import { Alert, Button, Card, Empty, Spin, Tag } from 'antd';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 

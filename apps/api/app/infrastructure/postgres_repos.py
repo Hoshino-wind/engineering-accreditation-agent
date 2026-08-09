@@ -338,7 +338,63 @@ class PostgresCandidateRepository(_PostgresLazyLoadMixin):
         return new_repo
 
 
-class PostgresFindingRepository(_PostgresLazyLoadMixin):
+class PostgresFindingCascadeMixin:
+    """PG 版发现仓储级联删除（复用 _store + 快照删除）。"""
+
+    async def _delete_ids(self, ids: list[str]) -> int:
+        if not ids:
+            return 0
+        for fid in ids:
+            self._store.pop(fid, None)
+        if self._persistence is not None:
+            for fid in ids:
+                await self._persistence.delete_snapshot(
+                    tenant_id=self._user_id,
+                    entity_type=self._entity_type,
+                    entity_id=fid,
+                    actor_id=self._user_id,
+                )
+        return len(ids)
+
+    async def delete_by_course(self, course_name: str) -> int:
+        target = (course_name or "").strip()
+        target_norm = target.lower()
+        if not target_norm:
+            return 0
+        ids = [
+            fid
+            for fid, f in self._store.items()
+            if (f.course or "").strip()
+            and (
+                (f.course or "").strip() == target
+                or target_norm in (f.course or "").strip().lower()
+            )
+        ]
+        return await self._delete_ids(ids)
+
+    async def delete_by_nodes(self, node_ids: set[str]) -> int:
+        if not node_ids:
+            return 0
+        ids = [
+            fid
+            for fid, f in self._store.items()
+            if f.source_node in node_ids or f.target_node in node_ids
+        ]
+        return await self._delete_ids(ids)
+
+    async def delete_by_evidence_object(self, object_name: str) -> int:
+        target = (object_name or "").strip()
+        if not target:
+            return 0
+        ids = [
+            fid
+            for fid, f in self._store.items()
+            if any(ev.object_name == target for ev in f.evidence)
+        ]
+        return await self._delete_ids(ids)
+
+
+class PostgresFindingRepository(_PostgresLazyLoadMixin, PostgresFindingCascadeMixin):
     """PostgreSQL-backed diagnostic finding repository."""
 
     _repo_name = "findings"
@@ -637,3 +693,4 @@ class PostgresMajorRepository(_PostgresLazyLoadMixin):
         return PostgresMajorRepository(
             with_seed=False, user_id=user_id, persistence=self._persistence
         )
+

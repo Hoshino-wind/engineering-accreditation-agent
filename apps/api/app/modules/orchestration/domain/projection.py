@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """识别中心审核决策 → 能力图谱投影（领域层，纯函数）。
 
 设计原则：**图谱是审核决策的投影，不是复制品。**
@@ -43,17 +42,22 @@ def strength_from_confidence(confidence: int) -> str:
 
 
 def _resolve_node(ref: str, nodes: list[dict[str, Any]]) -> dict[str, Any] | None:
-    """把候选里的节点引用（可能是 id / code / name）解析为图谱节点。"""
+    """把候选里的节点引用（可能是 id / code / name）解析为图谱节点。
+
+    第一遍精确匹配，第二遍忽略大小写：LLM 返回的引用可能与节点 id/code
+    大小写不一致（如 'co-ds' vs 'CO-DS'），避免有效审核决策被静默丢弃。
+    """
     if not ref:
         return None
+    ref_lower = ref.lower()
     for node in nodes:
-        if node.get("id") == ref:
+        if node.get("id") == ref or str(node.get("id") or "").lower() == ref_lower:
             return node
     for node in nodes:
-        if node.get("code") == ref:
+        if node.get("code") == ref or str(node.get("code") or "").lower() == ref_lower:
             return node
     for node in nodes:
-        if node.get("name") == ref:
+        if node.get("name") == ref or str(node.get("name") or "").lower() == ref_lower:
             return node
     return None
 

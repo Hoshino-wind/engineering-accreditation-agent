@@ -59,7 +59,7 @@ def get_current_user_factory(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="无效或已过期的认证令牌",
                 headers={"WWW-Authenticate": "Bearer"},
-            )
+            ) from None
         user_id: str | None = payload.get("sub")
         if user_id is None:
             raise HTTPException(

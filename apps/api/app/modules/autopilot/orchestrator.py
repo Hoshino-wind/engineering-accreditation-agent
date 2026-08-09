@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Autopilot 编排器：一键触发真实多智能体 pipeline。
 
 委托 LangGraph pipeline 完成全链路：
@@ -14,7 +13,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from app.core.task_registry import TaskCancelledError
 from app.modules.diagnostics.domain.finding import (
@@ -81,12 +80,11 @@ class AutopilotOrchestrator:
 
     async def run(self, resource_id: str, course: str | None = None) -> dict:
         started = time.time()
-        started_at = datetime.now(timezone.utc).isoformat()
+        started_at = datetime.now(UTC).isoformat()
 
         # 注册取消令牌，删除资源时会触发取消
-        token = None
         if self._task_registry is not None:
-            token = await self._task_registry.register(resource_id)
+            await self._task_registry.register(resource_id)
 
         try:
             return await self._do_run(resource_id, course, started, started_at)
@@ -184,7 +182,7 @@ class AutopilotOrchestrator:
         )
         findings_created = await self._persist_findings(explanations, resource, course_name)
 
-        finished_at = datetime.now(timezone.utc).isoformat()
+        finished_at = datetime.now(UTC).isoformat()
         total_ms = int((time.time() - started) * 1000)
 
         return {
@@ -247,9 +245,8 @@ class AutopilotOrchestrator:
     async def _find_awaiting_run(self, material_name: str) -> AgentRun | None:
         """在现有运行中查找与该材料匹配、正停在审核网关的运行。"""
         for run in await self._pipeline.list_runs():
-            if material_name and material_name in (run.goal or ""):
-                if run.status == RunStatus.AWAITING_REVIEW:
-                    return run
+            if material_name and material_name in (run.goal or "") and run.status == RunStatus.AWAITING_REVIEW:
+                return run
         return None
 
     async def _wait_for_awaiting_run(
@@ -399,7 +396,7 @@ class AutopilotOrchestrator:
         resource,
         course_name: str,
     ) -> int:
-        now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
+        now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M")
         seq = int(time.time() * 1000)
         candidates: list[RecognitionCandidate] = []
         for i, rel in enumerate(relations):
@@ -444,7 +441,7 @@ class AutopilotOrchestrator:
     async def _persist_findings(
         self, explanations: list[dict], resource, course_name: str
     ) -> int:
-        now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
+        now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M")
         seq = int(time.time() * 1000)
         findings: list[DiagnosticFinding] = []
         for i, item in enumerate(explanations):

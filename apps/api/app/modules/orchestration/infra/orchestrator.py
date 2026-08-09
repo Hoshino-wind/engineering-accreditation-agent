@@ -123,6 +123,12 @@ class LangGraphAgentOrchestrator(AgentOrchestratorPort):
             "material_name": material_name or "",
             "material_text": material_text or "",
         }
+        # 单一真源：从持久化图谱读取当前状态作为运行起点（空则 plan_node 回退种子图），
+        # 使多次上传在同一张能力图谱上持续生长，而不是每次都从种子重新开始。
+        persisted = self._graph_store.load()
+        if persisted is not None:
+            initial["graph_nodes"] = list(persisted["nodes"])
+            initial["graph_edges"] = list(persisted["edges"])
         config = self._config(run_id)
         try:
             await self._graph.ainvoke(initial, config)
@@ -227,47 +233,19 @@ class LangGraphAgentOrchestrator(AgentOrchestratorPort):
         yield {"event": "snapshot", "runId": run_id, "data": run.to_dict()}
 
     async def get_current_graph(self) -> dict[str, Any]:
-        """返回当前能力图谱。
+        """返回当前能力图谱（单一真源）。
 
-        读取优先级（保证重启后仍能看到 AI 提取出的学校节点）：
-        1. JSON 持久化图谱（graph_state_{user}.json）—— 包含学校节点时直接返回；
-        2. 最近一次 LangGraph 运行内存中的 state；
-           命中后会同步写回 JSON 持久化（补齐历史）；
-        3. 种子图（仅标准毕业要求 + 能力指标）。
+        读取优先级：
+        1. JSON 持久化图谱（graph_state_{user}.json）—— 唯一权威存储；
+        2. 二者皆空 → 种子图（标准毕业要求 + 能力指标），不读取运行内存。
         """
         from app.modules.orchestration.infra.seed_graph import build_seed_graph
         from app.modules.orchestration.infra.tools import graph_to_state
 
-        # 1. 优先读 JSON 持久化（后端重启后内存 checkpointer 是空的，
-        #    但用户昨天上传过材料，我们仍需要展示旧的图谱数据）
         persisted = self._graph_store.load()
         if persisted is not None:
             return persisted
 
-        # 2. 找最近的运行
-        runs = sorted(
-            self._runs.values(),
-            key=lambda r: r.created_at or "",
-            reverse=True,
-        )
-        for run in runs:
-            config = self._config(run.run_id)
-            try:
-                snapshot = self._graph.get_state(config)
-                values = dict(snapshot.values or {})
-                nodes = values.get("graph_nodes", [])
-                edges = values.get("graph_edges", [])
-                if nodes:
-                    # 同步到 JSON 持久化（补齐历史缺失的持久化数据）
-                    try:
-                        self._graph_store.save(nodes, edges)
-                    except Exception:  # noqa: BLE001
-                        logger.exception("补齐图谱持久化失败，忽略")
-                    return {"nodes": nodes, "edges": edges}
-            except Exception:  # noqa: BLE001
-                continue
-
-        # 3. 无运行 → 种子图
         seed = build_seed_graph()
         nodes_d, edges_d = graph_to_state(seed)
         return {"nodes": nodes_d, "edges": edges_d}
@@ -281,6 +259,24 @@ class LangGraphAgentOrchestrator(AgentOrchestratorPort):
         graph = state_to_graph(graph_data["nodes"], graph_data["edges"])
         report = analyze_coverage(graph)
         return report.to_dict()
+
+    async def review_project_candidates(
+        self, candidates: list[Any]
+    ) -> dict[str, list[dict[str, Any]]]:
+        """把识别中心审核决策投影进权威图谱（已采纳/驳回的关系候选）。
+
+        「图谱是审核决策的投影」：教师在识别中心的采纳/驳回会真实改变
+        能力图谱的边与覆盖度；不受裁决影响的候选保持原样。
+        投影结果落回 JSON 权威存储，重启后依然生效。
+        """
+        from app.modules.orchestration.domain.projection import apply_review_decisions
+
+        persisted = self._graph_store.load()
+        nodes = list(persisted["nodes"]) if persisted else []
+        edges = list(persisted["edges"]) if persisted else []
+        merged = apply_review_decisions(nodes, edges, candidates)
+        self._graph_store.save(merged["nodes"], merged["edges"])
+        return merged
 
     async def remove_course(self, course: Course) -> set[str]:
         """从能力图谱中移除指定课程及其下游子节点，返回被移除节点的 id 集合。

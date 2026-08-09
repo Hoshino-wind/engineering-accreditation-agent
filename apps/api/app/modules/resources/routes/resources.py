@@ -1,32 +1,41 @@
-from collections.abc import Callable
 import hashlib
+from collections.abc import Callable
 from typing import Annotated
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Query, UploadFile
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Query,
+    UploadFile,
+)
 
 from app.modules.resources.application import (
     ClassifyResource,
     ConfirmMaterialHealthAction,
     ConfirmSuggestedCourse,
     DeleteResource,
-    GetResource,
     GetMaterialHealth,
-    PlanMaterialHealthActions,
+    GetResource,
     ListResources,
-    ResourceNotFoundError,
     MaterialHealthActionNotFoundError,
+    PlanMaterialHealthActions,
+    ResourceNotFoundError,
     UploadResource,
 )
 from app.modules.resources.contracts import (
+    RESOURCE_CATEGORIES,
     ClassifyResourceResponse,
     ConfirmCourseRequest,
     ConfirmCourseResponse,
-    RESOURCE_CATEGORIES,
-    TeachingResourceResponse,
-    MaterialHealthResponse,
-    MaterialHealthActionResponse,
     ConfirmMaterialHealthActionRequest,
     ConfirmMaterialHealthActionResponse,
+    MaterialHealthActionResponse,
+    MaterialHealthResponse,
+    TeachingResourceResponse,
 )
 
 
@@ -193,9 +202,9 @@ def create_resources_router(
                 description=payload.description,
             )
         except ResourceNotFoundError as e:
-            raise HTTPException(status_code=404, detail=str(e))
+            raise HTTPException(status_code=404, detail=str(e)) from None
         except ValueError as e:
-            raise HTTPException(status_code=422, detail=str(e))
+            raise HTTPException(status_code=422, detail=str(e)) from None
         return ConfirmCourseResponse(
             resourceId=resource_id,
             courseId=course.id,

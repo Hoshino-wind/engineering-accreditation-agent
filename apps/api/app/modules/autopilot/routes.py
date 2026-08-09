@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Autopilot 路由：一键触发材料→图谱→诊断→建议全链路。"""
 from collections.abc import Callable
 from typing import Annotated
@@ -6,12 +5,12 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 
 from app.modules.autopilot.contracts import (
+    AutopilotFindingItem,
+    AutopilotNodeItem,
+    AutopilotRelationItem,
     AutopilotRunRequest,
     AutopilotRunResponse,
     AutopilotStepResult,
-    AutopilotNodeItem,
-    AutopilotRelationItem,
-    AutopilotFindingItem,
     AutopilotSuggestionItem,
 )
 from app.modules.autopilot.orchestrator import AutopilotOrchestrator

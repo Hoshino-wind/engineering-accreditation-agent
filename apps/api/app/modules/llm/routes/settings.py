@@ -15,20 +15,20 @@ from collections.abc import Callable
 from typing import Annotated, Any
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
 from app.modules.auth.application.deps import get_current_user_factory
 from app.modules.auth.application.ports import AuthenticatedUser
-from app.modules.llm.infra.llm_client import LLMConfig
-from app.modules.llm.infra.runtime_settings import (
+from app.modules.llm.application.settings_service import (
+    VENDOR_PRESETS,
+    LLMDefaults,
     LLMProviderSettings,
     LLMRuntimeSettings,
-    VENDOR_PRESETS,
-    load_user_llm_settings,
+    UserLLMSettingsStore,
     mask_api_key,
-    resolve_user_llm_config,
-    save_user_llm_settings,
+    merge_effective_config,
+    merge_provider,
 )
 
 
@@ -88,11 +88,10 @@ def _provider_public(provider: LLMProviderSettings, effective_key: str) -> Provi
     )
 
 
-def _build_response(user_id: str) -> SettingsResponse:
+def _build_response(store: UserLLMSettingsStore, defaults: LLMDefaults, user_id: str) -> SettingsResponse:
     """组装 GET 响应：取该用户自己的运行时配置，回落到 env 默认值。"""
-    runtime = load_user_llm_settings(user_id)
-    static = LLMConfig()
-    effective = resolve_user_llm_config(static, user_id)
+    runtime = store.load(user_id)
+    effective = merge_effective_config(defaults, runtime)
 
     chat_provider = runtime.chat if runtime else LLMProviderSettings()
     emb_provider = runtime.embedding if runtime else LLMProviderSettings()
@@ -123,17 +122,12 @@ def _merge_provider(
     incoming: ProviderInput,
 ) -> LLMProviderSettings:
     """按语义合并：api_key 为 None 时保留原值。"""
-    api_key = existing.api_key
-    if incoming.api_key is None:
-        api_key = existing.api_key
-    else:
-        api_key = incoming.api_key  # "" 表示清空，非空表示覆盖
-
-    return LLMProviderSettings(
-        vendor=incoming.vendor or existing.vendor or "custom",
-        api_key=api_key,
-        base_url=incoming.base_url or existing.base_url,
-        model=incoming.model or existing.model,
+    return merge_provider(
+        existing,
+        api_key=incoming.api_key,
+        vendor=incoming.vendor,
+        base_url=incoming.base_url,
+        model=incoming.model,
     )
 
 
@@ -159,12 +153,10 @@ def _resolve_provider(
 async def _fetch_available_models(base_url: str, api_key: str, vendor: str) -> list[str]:
     """调用 OpenAI 兼容的 /models 接口（Ollama 用原生 /api/tags）读取可用模型。"""
     base = base_url.rstrip("/")
-    if vendor == "ollama":
-        # Ollama 原生接口返回 {"models":[{"name":...}]}
-        models_url = base.replace("/v1", "") + "/api/tags"
-    else:
-        # OpenAI 兼容接口返回 {"data":[{"id":...}]}
-        models_url = base + "/models"
+    # Ollama 原生接口返回 {"models":[{"name":...}]}，其余用 OpenAI 兼容 /models
+    models_url = (
+        base.replace("/v1", "") + "/api/tags" if vendor == "ollama" else base + "/models"
+    )
 
     headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
     async with httpx.AsyncClient(timeout=20.0) as client:
@@ -182,6 +174,8 @@ async def _fetch_available_models(base_url: str, api_key: str, vendor: str) -> l
 def create_settings_router(
     provide_user_repository: Callable[..., Any],
     provide_settings: Callable[..., Any],
+    provide_llm_store: Callable[[], UserLLMSettingsStore],
+    provide_llm_defaults: Callable[[], LLMDefaults],
 ) -> APIRouter:
     router = APIRouter(prefix="/settings", tags=["settings"])
 
@@ -195,31 +189,35 @@ def create_settings_router(
     async def get_llm_settings(
         _current_user: Annotated[AuthenticatedUser, Depends(get_current_user)],
     ) -> SettingsResponse:
-        return _build_response(_current_user.id)
+        return _build_response(
+            provide_llm_store(), provide_llm_defaults(), _current_user.id
+        )
 
     @router.put("/llm", response_model=SettingsResponse)
     async def update_llm_settings(
         body: SettingsUpdateRequest,
         current_user: Annotated[AuthenticatedUser, Depends(get_current_user)],
     ) -> SettingsResponse:
+        store = provide_llm_store()
         # 每位用户仅能保存「自己」的配置，互不可见（不再限制 admin）。
-        runtime = load_user_llm_settings(current_user.id) or LLMRuntimeSettings()
+        runtime = store.load(current_user.id) or LLMRuntimeSettings()
         runtime.chat = _merge_provider(runtime.chat, body.chat)
         runtime.embedding = _merge_provider(runtime.embedding, body.embedding)
-        save_user_llm_settings(current_user.id, runtime)
-        return _build_response(current_user.id)
+        store.save(current_user.id, runtime)
+        return _build_response(store, provide_llm_defaults(), current_user.id)
 
     @router.post("/llm/test", response_model=TestResponse)
     async def test_connection(
         body: TestRequest,
         _current_user: Annotated[AuthenticatedUser, Depends(get_current_user)],
     ) -> TestResponse:
-        runtime = load_user_llm_settings(_current_user.id)
+        store = provide_llm_store()
+        runtime = store.load(_current_user.id)
+        defaults = provide_llm_defaults()
 
-        static = LLMConfig()
         chat_key, chat_url, chat_model = _resolve_provider(
             body.chat, runtime.chat if runtime else None,
-            static.api_key, static.base_url, static.model,
+            defaults.api_key, defaults.base_url, defaults.model,
         )
 
         if not chat_key or not chat_url or not chat_model:
@@ -262,11 +260,12 @@ def create_settings_router(
         用于前端「读取模型」按钮：用户选好厂商、填好 Key 后，一键拉取
         此 key 实际可用的模型，避免手动猜模型名。
         """
-        runtime = load_user_llm_settings(_current_user.id)
-        static = LLMConfig()
+        store = provide_llm_store()
+        runtime = store.load(_current_user.id)
+        defaults = provide_llm_defaults()
         key, base_url, _ = _resolve_provider(
             body, runtime.chat if runtime else None,
-            static.api_key, static.base_url, static.model,
+            defaults.api_key, defaults.base_url, defaults.model,
         )
 
         if not key or not base_url:

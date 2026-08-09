@@ -160,6 +160,20 @@ def create_orchestration_router(
         return await orchestrator.get_current_graph()
 
     @router.get(
+        "/coverage",
+        summary="获取当前图谱覆盖度分析（兼容别名，等价 /graph/coverage）",
+        dependencies=auth_deps,
+        include_in_schema=False,
+    )
+    async def get_graph_coverage_alias(
+        orchestrator: Annotated[AgentOrchestratorPort, Depends(provide_orchestrator)],
+        graph_query: Annotated[
+            QueryProjectedGraph | None, Depends(provide_graph_query)
+        ] = None,
+    ) -> dict[str, Any]:
+        return await get_graph_coverage(orchestrator, graph_query)
+
+    @router.get(
         "/graph/coverage",
         summary="获取当前图谱覆盖度分析（含识别中心审核决策投影）",
         dependencies=auth_deps,

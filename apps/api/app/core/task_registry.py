@@ -34,7 +34,7 @@ class CancellationToken:
             raise TaskCancelledError(self.resource_id)
         try:
             await asyncio.wait_for(self._event.wait(), timeout=timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return
         # 收到信号后抛出取消异常
         raise TaskCancelledError(self.resource_id)

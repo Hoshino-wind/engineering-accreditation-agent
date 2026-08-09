@@ -18,9 +18,9 @@ from app.modules.llm.contracts.llm import (
     GenerateSuggestionsResponse,
     InferRelationsRequest,
     InferRelationsResponse,
+    RAGChunkResponse,
     RAGSearchRequest,
     RAGSearchResponse,
-    RAGChunkResponse,
 )
 
 

@@ -11,7 +11,6 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
-
 from app.modules.recognition.domain.candidate import (
     CandidateEvidence,
     CandidateReviewStatus,

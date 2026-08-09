@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """识别中心审核决策 → 能力图谱投影 的领域测试。
 
 验证「图谱是审核决策的投影」这一设计：采纳/驳回关系候选会真实改变
@@ -34,14 +33,14 @@ def _graph_dicts() -> tuple[list[dict], list[dict]]:
 def _make_candidate(**overrides) -> RecognitionCandidate:
     base = dict(
         id="candidate-test",
-        title="「链表实现」实验支撑能力指标「工程知识应用」",
+        title="「链表实现」实验支撑能力指标「1-1 工程知识应用」",
         course="数据结构",
         candidate_type=RecognitionCandidateType.RELATION,
         confidence=90,
         risk=RecognitionCandidateRisk.HIGH_IMPACT,
         source_node="链表实现",
         relation="支撑",
-        target_node="工程知识应用",
+        target_node="1-1 工程知识应用",
         explanation="测试候选",
         processor_version="test",
         generated_at="2026-08-01 10:00",
@@ -109,7 +108,6 @@ def test_rejected_candidate_demotes_existing_edge() -> None:
     nodes, edges = _graph_dicts()
     _add_source_node(nodes, "exp-list", "链表实现")
     accepted = _make_candidate(review_status=CandidateReviewStatus.ACCEPTED)
-    merged = apply_review_decisions(nodes, edges, [accepted])
 
     later_reject = replace(
         accepted,
@@ -135,14 +133,14 @@ def test_low_confidence_acceptance_is_partial() -> None:
     weak = _make_candidate(
         id="candidate-weak",
         source_node="排序对比",
-        target_node="问题推演与分析",
+        target_node="1-1 工程知识应用",
         confidence=66,
         review_status=CandidateReviewStatus.ACCEPTED,
     )
     merged = apply_review_decisions(nodes, edges, [weak])
     comps = _coverage_of(merged)
-    assert comps["C-01-02"].status == "partial"
-    assert comps["C-01-02"].attainment < 1.0
+    assert comps["C-01-01"].status == "partial"
+    assert comps["C-01-01"].attainment < 1.0
 
 
 def test_unresolvable_candidate_is_not_projected() -> None:

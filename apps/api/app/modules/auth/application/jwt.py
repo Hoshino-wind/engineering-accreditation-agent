@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import jwt
 
@@ -9,7 +9,7 @@ def create_access_token(
     secret: str,
     algorithm: str,
 ) -> str:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     expire = now + timedelta(minutes=ttl_minutes)
     payload = {
         "sub": sub,
