@@ -223,8 +223,10 @@ def create_app() -> FastAPI:
     def provide_classify_resource(
         current_user: Annotated[User, Depends(get_current_user)],
     ) -> ClassifyResource:
-        # 分类用全局 LLM 客户端（不依赖 per-user 数据，只读文件内容）
-        return ClassifyResource(llm=llm_client)
+        # 按当前用户构造客户端，使用其自己配置的 Key / 模型
+        return ClassifyResource(
+            llm=OpenAICompatibleLLMClient(config=llm_config, user_id=current_user.id)
+        )
 
     def provide_confirm_suggested_course(
         current_user: Annotated[User, Depends(get_current_user)],
@@ -382,8 +384,9 @@ def create_app() -> FastAPI:
         )
 
     # --- LLM + RAG ---
+    # LLM 客户端不再使用全局单例：在请求 / 任务级别按当前用户构造，
+    # 以便每个用户使用自己配置的 Key / 模型（见 provide_llm_client / get_orchestrator）。
     llm_config = LLMConfig()
-    llm_client = OpenAICompatibleLLMClient(config=llm_config)
     orchestrators: dict[tuple[str, str], LangGraphAgentOrchestrator] = {}
 
     def get_orchestrator(user_id: str, major_id: str | None) -> LangGraphAgentOrchestrator:
@@ -391,14 +394,16 @@ def create_app() -> FastAPI:
         key = (user_id, scope)
         if key not in orchestrators:
             orchestrators[key] = LangGraphAgentOrchestrator(
-                llm=llm_client, rag=None, user_id=f"{user_id}__{scope}"
+                llm=OpenAICompatibleLLMClient(config=llm_config, user_id=user_id),
+                rag=None, user_id=f"{user_id}__{scope}"
             )
         return orchestrators[key]
 
     def provide_llm_client(
         current_user: Annotated[User, Depends(get_current_user)],
     ) -> LLMClientPort:
-        return llm_client
+        # 按当前用户构造客户端，使用其自己配置的 Key / 模型
+        return OpenAICompatibleLLMClient(config=llm_config, user_id=current_user.id)
 
     def provide_rag_search(
         current_user: Annotated[User, Depends(get_current_user)],
@@ -407,16 +412,13 @@ def create_app() -> FastAPI:
         # PG 模式 + 配置了 embedding key 时启用 pgvector 向量检索；
         # 否则回退内存实现（Demo 可用）。
         # embedding 配置优先取页面运行时设置，回落到 .env。
-        from app.modules.llm.infra.runtime_settings import load_runtime_llm_settings
+        # embedding 配置按当前用户解析（优先用该用户自己配置的，回落到 env 默认值）
+        from app.modules.llm.infra.runtime_settings import resolve_user_llm_config
 
-        _rt = load_runtime_llm_settings()
-        embed_key = settings.llm_embedding_api_key.get_secret_value()
-        embed_base = settings.llm_embedding_base_url
-        embed_model = settings.llm_embedding_model
-        if _rt and _rt.embedding.api_key:
-            embed_key = _rt.embedding.api_key
-            embed_base = _rt.embedding.base_url or embed_base
-            embed_model = _rt.embedding.model or embed_model
+        _eff = resolve_user_llm_config(llm_config, current_user.id)
+        embed_key = _eff.embedding_api_key
+        embed_base = _eff.embedding_base_url
+        embed_model = _eff.embedding_model
 
         if persistence is not None and embed_key:
             from app.modules.llm.infra.rag_pgvector import PostgresRAGRepository
@@ -635,7 +637,9 @@ def create_app() -> FastAPI:
             if not resource.course or resource.course == "未分类":
                 try:
                     from app.modules.resources.domain.resource import SuggestedCourse
-                    extract_resp = await llm_client.extract_nodes(
+                    extract_resp = await OpenAICompatibleLLMClient(
+                        config=llm_config, user_id=resource_owner_id
+                    ).extract_nodes(
                         material_text=material_text,
                         material_category=category or "其他",
                         material_name=resource.name,

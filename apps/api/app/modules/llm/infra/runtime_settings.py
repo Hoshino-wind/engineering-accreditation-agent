@@ -8,15 +8,19 @@
 - 该 JSON 与业务数据同目录（apps/api/data/），已被 .gitignore 忽略，不会进版本库。
 - GET 接口对 api_key 做脱敏（仅返回掩码 + 是否已配置），前端保存时通过
   "传 None=保留原值 / 传空串=清空 / 传非空=覆盖" 的语义避免明文回传。
-- 该配置为单租户全局配置（与现有内存存储架构一致），仅登录用户可读写，
-  写入额外要求 admin 角色。
+- 该配置为「按用户隔离」配置：每位登录用户各自保存、读取自己的 Key / 模型，
+  互不可见（按 user_id 落盘到 data/llm_settings/<user_id>.json）。
+  未配置的用户回落到 mock，不影响他人。
 """
 
 from __future__ import annotations
 
 import json
+import logging
+import re
 import threading
 import time
+from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -24,12 +28,18 @@ from pydantic import BaseModel, Field
 from app.core.json_persistence import _DATA_DIR
 from app.modules.llm.infra.llm_client import LLMConfig
 
-_RUNTIME_FILE = _DATA_DIR / "llm_settings.json"
+_SETTINGS_DIR = _DATA_DIR / "llm_settings"
 _LOCK = threading.Lock()
 
-# 读取缓存（1 秒 TTL），避免每次 LLM 调用都读盘
-_cache: dict[str, Any] = {"data": None, "ts": 0.0}
+# 读取缓存（按 user_id 维度，1 秒 TTL），避免每次 LLM 调用都读盘
+_cache: dict[str, dict[str, Any]] = {}
 _CACHE_TTL = 1.0
+
+
+def _user_file(user_id: str) -> Path:
+    """按 user_id 生成安全的落盘文件名（防路径穿越）。"""
+    safe = re.sub(r"[^A-Za-z0-9_.-]", "_", str(user_id))
+    return _SETTINGS_DIR / f"{safe}.json"
 
 
 # ── 厂商预设（单一事实来源，前端 GET 时一并下发）──────────────
@@ -137,46 +147,45 @@ class LLMRuntimeSettings(BaseModel):
     embedding: LLMProviderSettings = Field(default_factory=LLMProviderSettings)
 
 
-def load_runtime_llm_settings() -> LLMRuntimeSettings | None:
-    """读取落盘配置（带 1s TTL 缓存）。文件不存在返回 None。"""
+def load_user_llm_settings(user_id: str) -> LLMRuntimeSettings | None:
+    """读取某用户的落盘配置（带 1s TTL 缓存）。文件不存在返回 None。"""
     now = time.time()
-    if _cache["data"] is not None and now - _cache["ts"] < _CACHE_TTL:
-        return _cache["data"]
+    cached = _cache.get(user_id)
+    if cached is not None and cached["data"] is not None and now - cached["ts"] < _CACHE_TTL:
+        return cached["data"]
     data: LLMRuntimeSettings | None = None
-    if _RUNTIME_FILE.exists():
+    f = _user_file(user_id)
+    if f.exists():
         try:
-            raw = json.loads(_RUNTIME_FILE.read_text(encoding="utf-8"))
+            raw = json.loads(f.read_text(encoding="utf-8"))
             data = LLMRuntimeSettings.model_validate(raw)
         except (json.JSONDecodeError, ValueError) as exc:  # noqa: BLE001
-            import logging
-
             logging.getLogger(__name__).warning(
-                "[LLM-SETTINGS] 读取 %s 失败: %s", _RUNTIME_FILE, exc
+                "[LLM-SETTINGS] 读取 %s 失败: %s", f, exc
             )
-    _cache["data"] = data
-    _cache["ts"] = now
+    _cache[user_id] = {"data": data, "ts": now}
     return data
 
 
-def save_runtime_llm_settings(settings: LLMRuntimeSettings) -> None:
-    """原子落盘并失效缓存。"""
-    _DATA_DIR.mkdir(parents=True, exist_ok=True)
-    tmp = _RUNTIME_FILE.with_suffix(".tmp")
+def save_user_llm_settings(user_id: str, settings: LLMRuntimeSettings) -> None:
+    """原子落盘到该用户的文件并失效其缓存。"""
+    _SETTINGS_DIR.mkdir(parents=True, exist_ok=True)
+    f = _user_file(user_id)
+    tmp = f.with_suffix(".tmp")
     tmp.write_text(
         json.dumps(settings.model_dump(), ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
     with _LOCK:
-        tmp.replace(_RUNTIME_FILE)
-    _cache["data"] = settings
-    _cache["ts"] = time.time()
+        tmp.replace(f)
+    _cache[user_id] = {"data": settings, "ts": time.time()}
 
 
-def resolve_runtime_llm_config(static_config: LLMConfig) -> LLMConfig:
-    """合并 env 配置（static）与页面运行时配置。
+def resolve_user_llm_config(static_config: LLMConfig, user_id: str | None = None) -> LLMConfig:
+    """合并 env 配置（static）与「某用户」的页面运行时配置。
 
-    运行时配置中「已填写 api_key」的提供方覆盖 env 对应字段；
-    未填写的部分回落到 env 默认值，保证两种方式可共存。
+    按 user_id 解析该用户自己配置的 Key / 模型，覆盖 env 对应字段；
+    user_id 为 None（或该用户未配置）时回落到 env 默认值（通常为空 → mock）。
     """
     cfg = LLMConfig()
     cfg.api_key = static_config.api_key
@@ -186,7 +195,10 @@ def resolve_runtime_llm_config(static_config: LLMConfig) -> LLMConfig:
     cfg.embedding_base_url = static_config.embedding_base_url
     cfg.embedding_model = static_config.embedding_model
 
-    runtime = load_runtime_llm_settings()
+    if user_id is None:
+        return cfg
+
+    runtime = load_user_llm_settings(user_id)
     if runtime is None:
         return cfg
 

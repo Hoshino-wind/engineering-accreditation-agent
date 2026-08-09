@@ -1,6 +1,6 @@
 // LLM 模型设置接口封装（页面可配置 API Key，覆盖 .env，运行时生效）
 // 后端路由：/api/v1/settings/llm  （GET 读取 / PUT 保存 / POST /test 测试连通性）
-// 鉴权与 X-Major-Id 注入统一由 apiFetch 负责（此处 skipMajorId，因为模型配置是全局的）
+// 鉴权与 X-Major-Id 注入统一由 apiFetch 负责（此处 skipMajorId，因为模型配置按用户隔离，由登录 token 识别，不与专业绑定）
 
 import { browserEnv } from '../config/env';
 import { apiFetch } from './apiClient';
@@ -16,25 +16,25 @@ export interface VendorPreset {
 
 export interface ProviderConfig {
   vendor: string;
-  apiKeySet: boolean;
-  apiKeyMasked: string | null;
-  baseUrl: string;
+  api_key_set: boolean;
+  api_key_masked: string | null;
+  base_url: string;
   model: string;
 }
 
 export interface LLMSettings {
   chat: ProviderConfig;
   embedding: ProviderConfig;
-  isConfigured: boolean;
+  is_configured: boolean;
   vendors: Record<string, VendorPreset>;
 }
 
 /** 单个提供方（对话 / embedding）的写入入参。 */
 export interface ProviderInput {
   vendor: string;
-  // apiKey 语义：null=保留原值；""=清空；非空=覆盖
-  apiKey: string | null;
-  baseUrl: string;
+  // api_key 语义：null=保留原值；""=清空；非空=覆盖
+  api_key: string | null;
+  base_url: string;
   model: string;
 }
 

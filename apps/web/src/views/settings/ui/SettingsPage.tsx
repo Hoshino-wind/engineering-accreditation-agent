@@ -83,8 +83,8 @@ function ProviderSection(props: {
     try {
       const res: ModelsResult = await fetchLLMModels({
         vendor,
-        apiKey: resolveApiKey(apiKey, originalMask),
-        baseUrl,
+        api_key: resolveApiKey(apiKey, originalMask),
+        base_url: baseUrl,
         model,
       });
       if (res.ok) {
@@ -241,15 +241,15 @@ export function SettingsPage() {
     getLLMSettings()
       .then((s) => {
         setSettings(s);
-        origChatMask.current = s.chat.apiKeyMasked;
-        origEmbMask.current = s.embedding.apiKeyMasked;
+        origChatMask.current = s.chat.api_key_masked;
+        origEmbMask.current = s.embedding.api_key_masked;
         setChatVendor(s.chat.vendor);
-        setChatKey(s.chat.apiKeyMasked ?? '');
-        setChatBaseUrl(s.chat.baseUrl);
+        setChatKey(s.chat.api_key_masked ?? '');
+        setChatBaseUrl(s.chat.base_url);
         setChatModel(s.chat.model);
         setEmbVendor(s.embedding.vendor);
-        setEmbKey(s.embedding.apiKeyMasked ?? '');
-        setEmbBaseUrl(s.embedding.baseUrl);
+        setEmbKey(s.embedding.api_key_masked ?? '');
+        setEmbBaseUrl(s.embedding.base_url);
         setEmbModel(s.embedding.model);
       })
       .catch((e) => message.error((e as Error).message))
@@ -258,15 +258,15 @@ export function SettingsPage() {
 
   const buildChatInput = (): ProviderInput => ({
     vendor: chatVendor,
-    apiKey: resolveApiKey(chatKey, origChatMask.current),
-    baseUrl: chatBaseUrl,
+    api_key: resolveApiKey(chatKey, origChatMask.current),
+    base_url: chatBaseUrl,
     model: chatModel,
   });
 
   const buildEmbInput = (): ProviderInput => ({
     vendor: embVendor,
-    apiKey: resolveApiKey(embKey, origEmbMask.current),
-    baseUrl: embBaseUrl,
+    api_key: resolveApiKey(embKey, origEmbMask.current),
+    base_url: embBaseUrl,
     model: embModel,
   });
 
@@ -279,15 +279,15 @@ export function SettingsPage() {
         embedding: buildEmbInput(),
       });
       setSettings(updated);
-      origChatMask.current = updated.chat.apiKeyMasked;
-      origEmbMask.current = updated.embedding.apiKeyMasked;
+      origChatMask.current = updated.chat.api_key_masked;
+      origEmbMask.current = updated.embedding.api_key_masked;
       setChatVendor(updated.chat.vendor);
-      setChatKey(updated.chat.apiKeyMasked ?? '');
-      setChatBaseUrl(updated.chat.baseUrl);
+      setChatKey(updated.chat.api_key_masked ?? '');
+      setChatBaseUrl(updated.chat.base_url);
       setChatModel(updated.chat.model);
       setEmbVendor(updated.embedding.vendor);
-      setEmbKey(updated.embedding.apiKeyMasked ?? '');
-      setEmbBaseUrl(updated.embedding.baseUrl);
+      setEmbKey(updated.embedding.api_key_masked ?? '');
+      setEmbBaseUrl(updated.embedding.base_url);
       setEmbModel(updated.embedding.model);
       message.success('模型设置已保存，立即生效（无需重启）');
     } catch (e) {
@@ -329,11 +329,11 @@ export function SettingsPage() {
         模型设置
       </Title>
       <Paragraph type="secondary">
-        在此配置大模型提供方与 API Key，覆盖后端 <Text code>.env</Text> 中的 LLM 配置，
-        保存后立即生效，无需重启服务。配置仅保存在服务器本地（<Text code>apps/api/data/llm_settings.json</Text>，已被 gitignore 忽略）。
+        在此配置<Text strong>你自己的</Text>大模型提供方与 API Key，覆盖后端 <Text code>.env</Text> 中的 LLM 配置，
+        保存后立即生效，无需重启服务。配置按账号隔离保存在服务器本地（<Text code>apps/api/data/llm_settings/&lt;你的用户ID&gt;.json</Text>，已被 gitignore 忽略），仅你自己可见、可用；未配置时系统自动回落到演示用 Mock。
       </Paragraph>
 
-      {settings.isConfigured ? (
+      {settings.is_configured ? (
         <Alert
           type="success"
           showIcon

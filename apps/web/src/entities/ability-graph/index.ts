@@ -7,13 +7,6 @@ export {
   useAbilityGraphData,
   type UseAbilityGraphResult,
 } from './model/useAbilityGraphData';
-export {
-  STANDARD_VERSION,
-  standardCompetencies,
-  standardEdges,
-  standardGraduationRequirements,
-  standardLibrary,
-} from './model/standardLibrary';
 export { filterGraphByCourse } from './model/filterGraphByCourse';
 export type {
   AbilityGraphData,

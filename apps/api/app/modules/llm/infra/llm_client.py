@@ -62,19 +62,22 @@ class OpenAICompatibleLLMClient(LLMClientPort):
     未配置 API Key 时自动降级为 mock 响应，保证 Demo 可用。
     """
 
-    def __init__(self, config: LLMConfig | None = None) -> None:
+    def __init__(self, config: LLMConfig | None = None, user_id: str | None = None) -> None:
         # 保存启动时从 .env 读取的配置作为基础；实际调用时再与页面运行时配置合并。
         self._static_config = config or LLMConfig()
+        # 绑定到具体用户：配置按 user_id 隔离，每个用户使用自己配置的 Key / 模型。
+        # 为 None 时回落到 env（通常为空 → mock）。
+        self._user_id = user_id
 
     @property
     def _config(self) -> "LLMConfig":
-        """实时解析配置：env 基础 + 页面运行时配置（运行时优先级更高）。
+        """实时解析配置：env 基础 + 当前用户页面运行时配置（运行时优先级更高）。
 
         改为动态解析后，页面修改 API Key / 模型后立即生效，无需重启服务。
         """
-        from app.modules.llm.infra.runtime_settings import resolve_runtime_llm_config
+        from app.modules.llm.infra.runtime_settings import resolve_user_llm_config
 
-        return resolve_runtime_llm_config(self._static_config)
+        return resolve_user_llm_config(self._static_config, self._user_id)
 
     async def _call_chat(self, messages: list[dict], temperature: float = 0.3) -> dict:
         """调用 chat/completions 接口，返回 raw response dict。"""

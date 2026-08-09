@@ -1,7 +1,7 @@
 """LLM 设置接口：页面可配置的模型 / API Key（覆盖 .env，运行时生效）。
 
 - GET  /api/v1/settings/llm        读取当前配置（api_key 脱敏）+ 厂商预设 + 是否已配置
-- PUT  /api/v1/settings/llm        保存配置（仅 admin 可写）
+- PUT  /api/v1/settings/llm        保存配置（每位用户保存自己的，互不可见）
 - POST /api/v1/settings/llm/test   用「未落库」的配置做连通性测试（发送一次 chat/completions）
 - POST /api/v1/settings/llm/models 用当前 key 读取该厂商可用模型列表（OpenAI 兼容 /models）
 
@@ -15,7 +15,7 @@ from collections.abc import Callable
 from typing import Annotated, Any
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from app.modules.auth.application.deps import get_current_user_factory
@@ -25,10 +25,10 @@ from app.modules.llm.infra.runtime_settings import (
     LLMProviderSettings,
     LLMRuntimeSettings,
     VENDOR_PRESETS,
-    load_runtime_llm_settings,
+    load_user_llm_settings,
     mask_api_key,
-    resolve_runtime_llm_config,
-    save_runtime_llm_settings,
+    resolve_user_llm_config,
+    save_user_llm_settings,
 )
 
 
@@ -88,11 +88,11 @@ def _provider_public(provider: LLMProviderSettings, effective_key: str) -> Provi
     )
 
 
-def _build_response() -> SettingsResponse:
-    """组装 GET 响应：优先取运行时配置，回落到 env 默认值。"""
-    runtime = load_runtime_llm_settings()
+def _build_response(user_id: str) -> SettingsResponse:
+    """组装 GET 响应：取该用户自己的运行时配置，回落到 env 默认值。"""
+    runtime = load_user_llm_settings(user_id)
     static = LLMConfig()
-    effective = resolve_runtime_llm_config(static)
+    effective = resolve_user_llm_config(static, user_id)
 
     chat_provider = runtime.chat if runtime else LLMProviderSettings()
     emb_provider = runtime.embedding if runtime else LLMProviderSettings()
@@ -195,31 +195,26 @@ def create_settings_router(
     async def get_llm_settings(
         _current_user: Annotated[AuthenticatedUser, Depends(get_current_user)],
     ) -> SettingsResponse:
-        return _build_response()
+        return _build_response(_current_user.id)
 
     @router.put("/llm", response_model=SettingsResponse)
     async def update_llm_settings(
         body: SettingsUpdateRequest,
         current_user: Annotated[AuthenticatedUser, Depends(get_current_user)],
     ) -> SettingsResponse:
-        if current_user.role != "admin":
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="仅管理员可修改模型设置",
-            )
-
-        runtime = load_runtime_llm_settings() or LLMRuntimeSettings()
+        # 每位用户仅能保存「自己」的配置，互不可见（不再限制 admin）。
+        runtime = load_user_llm_settings(current_user.id) or LLMRuntimeSettings()
         runtime.chat = _merge_provider(runtime.chat, body.chat)
         runtime.embedding = _merge_provider(runtime.embedding, body.embedding)
-        save_runtime_llm_settings(runtime)
-        return _build_response()
+        save_user_llm_settings(current_user.id, runtime)
+        return _build_response(current_user.id)
 
     @router.post("/llm/test", response_model=TestResponse)
     async def test_connection(
         body: TestRequest,
         _current_user: Annotated[AuthenticatedUser, Depends(get_current_user)],
     ) -> TestResponse:
-        runtime = load_runtime_llm_settings()
+        runtime = load_user_llm_settings(_current_user.id)
 
         static = LLMConfig()
         chat_key, chat_url, chat_model = _resolve_provider(
@@ -267,7 +262,7 @@ def create_settings_router(
         用于前端「读取模型」按钮：用户选好厂商、填好 Key 后，一键拉取
         此 key 实际可用的模型，避免手动猜模型名。
         """
-        runtime = load_runtime_llm_settings()
+        runtime = load_user_llm_settings(_current_user.id)
         static = LLMConfig()
         key, base_url, _ = _resolve_provider(
             body, runtime.chat if runtime else None,
