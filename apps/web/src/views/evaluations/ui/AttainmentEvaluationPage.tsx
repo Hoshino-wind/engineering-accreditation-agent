@@ -1,5 +1,7 @@
 import {
+  DownloadOutlined,
   InfoCircleOutlined,
+  PlayCircleOutlined,
   WarningOutlined,
 } from '@ant-design/icons';
 import {
@@ -9,6 +11,7 @@ import {
   Col,
   Drawer,
   Empty,
+  message,
   Progress,
   Row,
   Space,
@@ -26,6 +29,11 @@ import type {
   CoverageData,
   RequirementCoverageData,
 } from '../../../shared/api/graphClient';
+import {
+  type EvaluationRunData,
+  downloadEvaluationAudit,
+  runEvaluation,
+} from '../../../shared/api/evaluationsClient';
 import { EmptyStateGuide } from '../../../widgets/empty-state-guide';
 import { NextStepBanner } from '../../../widgets/next-step-banner/ui/NextStepBanner';
 import { useCourseState } from '../../../shared/course/useCourseState';
@@ -132,6 +140,9 @@ export function AttainmentEvaluationPage() {
 
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [drawerComp, setDrawerComp] = useState<CompetencyCoverageData | null>(null);
+  const [evaluationRun, setEvaluationRun] = useState<EvaluationRunData | null>(null);
+  const [runningEvaluation, setRunningEvaluation] = useState(false);
+  const [exportingAudit, setExportingAudit] = useState(false);
 
   // 默认展开所有毕业要求行
   useEffect(() => {
@@ -154,6 +165,39 @@ export function AttainmentEvaluationPage() {
       competencies: byReq.get(req.code) ?? [],
     }));
   }, [coverage]);
+
+  const handleRunEvaluation = async () => {
+    setRunningEvaluation(true);
+    try {
+      const result = await runEvaluation('rules-v1');
+      if (!result) {
+        message.error('评价运行失败，请确认后端服务已启动且图谱数据可读取');
+        return;
+      }
+      setEvaluationRun(result);
+      message.success('达成度评价已完成，并写入审计记录');
+    } finally {
+      setRunningEvaluation(false);
+    }
+  };
+
+  const handleExportAudit = async () => {
+    if (!evaluationRun) {
+      message.warning('请先运行一次达成度评价');
+      return;
+    }
+    setExportingAudit(true);
+    try {
+      const ok = await downloadEvaluationAudit(evaluationRun.id);
+      if (!ok) {
+        message.error('审计文件导出失败，请确认后端服务可用');
+        return;
+      }
+      message.success('评价审计文件已导出');
+    } finally {
+      setExportingAudit(false);
+    }
+  };
 
   const reqColumns = [
     {
@@ -347,6 +391,24 @@ export function AttainmentEvaluationPage() {
             能力指标累计强度达到 3 记为达标；毕业要求覆盖率 = 达标能力指标占比。
           </Paragraph>
         </div>
+        <Space className="attainment-run-actions" size={10} wrap>
+          <Button
+            type="primary"
+            icon={<PlayCircleOutlined />}
+            loading={runningEvaluation}
+            onClick={() => void handleRunEvaluation()}
+          >
+            运行评价
+          </Button>
+          <Button
+            icon={<DownloadOutlined />}
+            disabled={!evaluationRun}
+            loading={exportingAudit}
+            onClick={() => void handleExportAudit()}
+          >
+            导出审计
+          </Button>
+        </Space>
       </div>
 
       {/* 计算口径说明 */}
@@ -366,6 +428,31 @@ export function AttainmentEvaluationPage() {
       />
 
       {/* 总览 */}
+      {evaluationRun && (
+        <Card className="attainment-run-card mi-card" size="small">
+          <Space size={18} wrap>
+            <div>
+              <Text type="secondary">评价运行</Text>
+              <div className="attainment-run-value">{evaluationRun.id}</div>
+            </div>
+            <div>
+              <Text type="secondary">规则版本</Text>
+              <div className="attainment-run-value">{evaluationRun.ruleVersion}</div>
+            </div>
+            <div>
+              <Text type="secondary">图谱版本</Text>
+              <div className="attainment-run-value">{evaluationRun.graphVersion}</div>
+            </div>
+            <div>
+              <Text type="secondary">输入快照</Text>
+              <div className="attainment-run-value">
+                {evaluationRun.inputSnapshotHash.slice(0, 12)}
+              </div>
+            </div>
+          </Space>
+        </Card>
+      )}
+
       <Card className="attainment-stats mi-card" size="small">
         <Row gutter={24}>
           <Col>
