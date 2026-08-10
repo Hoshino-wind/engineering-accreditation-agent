@@ -1,5 +1,5 @@
 import { BookOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
-import { Button, Card, Empty, Spin, Typography } from 'antd';
+import { Alert, Button, Card, Empty, Spin, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { fetchMajors, type MajorResponse } from '../../../shared/api/majorsClient';
 import { getToken } from '../../../shared/auth/authStore';
@@ -15,6 +15,7 @@ const { Paragraph, Title } = Typography;
 export function SelectMajorPage() {
   const [majors, setMajors] = useState<MajorResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [submitting, setSubmitting] = useState<string | null>(null);
 
   // 未登录则重定向到登录页
@@ -29,6 +30,13 @@ export function SelectMajorPage() {
     void (async () => {
       setLoading(true);
       const data = await fetchMajors();
+      if (data === null) {
+        setMajors([]);
+        setLoadFailed(true);
+        setLoading(false);
+        return;
+      }
+      setLoadFailed(false);
       if (data) {
         setMajors(data);
         // 只有从登录后首次进入（?auto=true）且只有一个专业时，才自动绑定并跳转，
@@ -82,6 +90,28 @@ export function SelectMajorPage() {
           <div className="select-major-loading">
             <Spin size="large" />
             <span>正在加载专业列表…</span>
+          </div>
+        ) : loadFailed ? (
+          <div className="select-major-empty">
+            <Alert
+              type="error"
+              showIcon
+              message="专业列表加载失败"
+              description="请确认后端服务已启动，或重新登录后再试。"
+            />
+            <Button
+              type="primary"
+              className="select-major-retry"
+              onClick={() => window.location.reload()}
+            >
+              刷新重试
+            </Button>
+            <Button
+              className="select-major-retry"
+              onClick={() => window.location.replace('/login')}
+            >
+              重新登录
+            </Button>
           </div>
         ) : majors.length === 0 ? (
           <div className="select-major-empty">
