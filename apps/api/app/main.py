@@ -339,6 +339,7 @@ def create_app() -> FastAPI:
 
     def provide_review_candidate(
         current_user: Annotated[User, Depends(get_current_user)],
+        active_major_id: Annotated[str | None, Depends(get_active_major_id)] = None,
     ) -> ReviewCandidate:
         repos = per_user_mgr.get(current_user.id)
         inner = ReviewCandidate(repository=repos.candidates)
@@ -353,7 +354,7 @@ def create_app() -> FastAPI:
                 if result is None:
                     return result
                 try:
-                    orchestrator = get_orchestrator(current_user.id, None)
+                    orchestrator = get_orchestrator(current_user.id, active_major_id)
                     await orchestrator.review_project_candidates([result])
                 except Exception:  # noqa: BLE001
                     logging.getLogger(__name__).exception(

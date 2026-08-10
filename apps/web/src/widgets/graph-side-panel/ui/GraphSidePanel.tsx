@@ -136,6 +136,21 @@ export function GraphSidePanel({
     [candidates],
   );
 
+  const candidatesForEdgeLookup = useMemo(() => {
+    const statusRank: Record<NonNullable<RecognitionCandidate['reviewStatus']>, number> = {
+      pending: 0,
+      accepted: 1,
+      modified: 2,
+      rejected: 3,
+    };
+    return [...candidates].sort((a, b) => {
+      const aRank = statusRank[a.reviewStatus ?? 'pending'] ?? 4;
+      const bRank = statusRank[b.reviewStatus ?? 'pending'] ?? 4;
+      if (aRank !== bRank) return aRank - bRank;
+      return (b.generatedAt ?? '').localeCompare(a.generatedAt ?? '');
+    });
+  }, [candidates]);
+
   const effectiveEdgeCandidateMap = useMemo(() => {
     const map: Record<string, string> = { ...(edgeCandidateMap ?? {}) };
     const nodeAliases = new Map<string, Set<string>>();
@@ -150,7 +165,7 @@ export function GraphSidePanel({
       if (edge.reviewStatus !== 'pending') continue;
       const sourceAliases = nodeAliases.get(edge.source) ?? new Set([edge.source]);
       const targetAliases = nodeAliases.get(edge.target) ?? new Set([edge.target]);
-      const match = pendingCandidates.find(
+      const match = candidatesForEdgeLookup.find(
         (candidate) =>
           sourceAliases.has(candidate.sourceNode) &&
           targetAliases.has(candidate.targetNode),
@@ -161,7 +176,7 @@ export function GraphSidePanel({
     }
 
     return map;
-  }, [candidates, edgeCandidateMap, edges, nodes, pendingCandidates]);
+  }, [candidatesForEdgeLookup, edgeCandidateMap, edges, nodes]);
 
   // 覆盖缺口：后端权威计算（仅 approved 边计入）
   const gapCompetencies = useMemo(() => {

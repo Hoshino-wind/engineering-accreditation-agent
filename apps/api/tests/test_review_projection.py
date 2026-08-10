@@ -104,6 +104,48 @@ def test_accepted_candidate_projects_approved_edge_and_covers() -> None:
     assert comps["C-03-01"].status == "gap"
 
 
+def test_accepted_candidate_updates_duplicate_pending_edges() -> None:
+    nodes, edges = _graph_dicts()
+    _add_source_node(nodes, "exp-list", "链表实现")
+    edges.extend(
+        [
+            {
+                "id": "ai-rel-old-exp-list-std-c-01-01",
+                "source": "exp-list",
+                "target": "std-c-01-01",
+                "kind": "SUPPORTS",
+                "sourceType": "ai",
+                "reviewStatus": "pending",
+                "strength": "weak",
+                "confidence": 0.62,
+                "reasoning": "older duplicate",
+            },
+            {
+                "id": "ai-rel-new-exp-list-std-c-01-01",
+                "source": "exp-list",
+                "target": "std-c-01-01",
+                "kind": "SUPPORTS",
+                "sourceType": "ai",
+                "reviewStatus": "pending",
+                "strength": "medium",
+                "confidence": 0.78,
+                "reasoning": "newer duplicate",
+            },
+        ]
+    )
+    accepted = _make_candidate(review_status=CandidateReviewStatus.ACCEPTED)
+
+    merged = apply_review_decisions(nodes, edges, [accepted])
+
+    matching = [
+        e
+        for e in merged["edges"]
+        if e["source"] == "exp-list" and e["target"] == "std-c-01-01"
+    ]
+    assert len(matching) == 2
+    assert {e["reviewStatus"] for e in matching} == {"approved"}
+
+
 def test_rejected_candidate_demotes_existing_edge() -> None:
     nodes, edges = _graph_dicts()
     _add_source_node(nodes, "exp-list", "链表实现")

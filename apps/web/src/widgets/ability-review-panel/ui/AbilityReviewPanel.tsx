@@ -101,7 +101,7 @@ export function AbilityReviewPanel({
   const handleReview = async (edgeId: string, decision: BackendCandidateDecision) => {
     const candidateId = edgeCandidateMap[edgeId];
     if (!candidateId) {
-      onReviewed?.(edgeId, decision === 'accept' ? 'approved' : 'rejected');
+      message.error('未找到这条图谱边对应的后端候选记录，请先刷新图谱或到 M4 识别与审核处理');
       return;
     }
     const ok = await reviewCandidate(candidateId, decision);
