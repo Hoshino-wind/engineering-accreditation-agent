@@ -35,4 +35,5 @@ coverage/
 apps/api/test_integration.db
 apps/api/fix_encoding*.py
 apps/api/_verify_persistence.py
-
+*.log
+apps/api/var/

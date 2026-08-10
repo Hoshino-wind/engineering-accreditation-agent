@@ -409,6 +409,12 @@
   flex-direction: column;
   gap: 14px;
 }
+.imp-detail-form {
+  padding: 2px 0 4px;
+}
+.imp-detail-form .ant-form-item {
+  margin-bottom: 12px;
+}
 .imp-detail-header {
   display: flex;
   align-items: center;

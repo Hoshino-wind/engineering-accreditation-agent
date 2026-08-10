@@ -13,8 +13,29 @@ from app.modules.improvements.contracts import (
     CreateImprovementRequest,
     ImprovementCompletionResponse,
     ImprovementResponse,
+    UpdateImprovementRequest,
     UpdateImprovementStatusRequest,
 )
+
+_UPDATE_FIELD_MAP = {
+    "findingId": "finding_id",
+    "targetCode": "target_code",
+    "targetName": "target_name",
+    "rootCause": "root_cause",
+    "expectedEffect": "expected_effect",
+    "sourceModule": "source_module",
+    "sourceLabel": "source_label",
+    "verificationMethod": "verification_method",
+    "completionSummary": "completion_summary",
+    "evidenceUri": "evidence_uri",
+    "reevaluationResult": "reevaluation_result",
+    "targetValue": "target_value",
+}
+
+
+def _update_payload(body: UpdateImprovementRequest) -> dict:
+    data = body.model_dump(exclude_unset=True)
+    return {_UPDATE_FIELD_MAP.get(key, key): value for key, value in data.items()}
 
 
 def create_improvements_router(
@@ -60,8 +81,31 @@ def create_improvements_router(
             expected_effect=body.expectedEffect,
             deadline=body.deadline,
             priority=body.priority,
+            source_module=body.sourceModule,
+            source_label=body.sourceLabel,
+            verification_method=body.verificationMethod,
+            completion_summary=body.completionSummary,
+            evidence_uri=body.evidenceUri,
+            reevaluation_result=body.reevaluationResult,
+            baseline=body.baseline,
+            target_value=body.targetValue,
         )
         return ImprovementResponse.from_domain(improvement)
+
+    @router.patch(
+        "/{improvement_id}",
+        response_model=ImprovementResponse,
+        summary="编辑改进措施详情",
+    )
+    async def update_improvement(
+        improvement_id: str,
+        body: UpdateImprovementRequest,
+        use_case: Annotated[UpdateImprovement, Depends(update_improvement_use_case)],
+    ) -> ImprovementResponse:
+        result = await use_case.execute_changes(improvement_id, _update_payload(body))
+        if result is None:
+            raise HTTPException(status_code=404, detail="改进措施不存在")
+        return ImprovementResponse.from_domain(result)
 
     @router.patch(
         "/{improvement_id}/status",

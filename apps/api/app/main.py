@@ -377,7 +377,7 @@ def create_app() -> FastAPI:
         current_user: Annotated[User, Depends(get_current_user)],
     ) -> DecideFinding:
         repos = per_user_mgr.get(current_user.id)
-        return DecideFinding(repository=repos.findings)
+        return DecideFinding(repository=repos.findings, improvements=repos.improvements)
 
     # --- M7 Improvements ---
     def provide_list_improvements(

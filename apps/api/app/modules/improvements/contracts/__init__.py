@@ -2,12 +2,14 @@ from app.modules.improvements.contracts.completion import ImprovementCompletionR
 from app.modules.improvements.contracts.improvement import (
     CreateImprovementRequest,
     ImprovementResponse,
+    UpdateImprovementRequest,
     UpdateImprovementStatusRequest,
 )
 
 __all__ = [
     "CreateImprovementRequest",
     "ImprovementResponse",
+    "UpdateImprovementRequest",
     "UpdateImprovementStatusRequest",
     "ImprovementCompletionResponse",
 ]

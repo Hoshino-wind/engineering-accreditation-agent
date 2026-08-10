@@ -17,6 +17,15 @@ export interface ImprovementData {
   expectedEffect: string | null;
   owner: string;
   deadline: string | null;
+  sourceModule: string;
+  sourceLabel: string;
+  verificationMethod: string;
+  completionSummary: string;
+  evidenceUri: string;
+  reevaluationResult: number | null;
+  baseline: number | null;
+  targetValue: number | null;
+  closedAt: string | null;
   status: string;
   priority: string;
   createdAt: string;
@@ -42,6 +51,38 @@ export interface CreateImprovementPayload {
   expectedEffect?: string | null;
   deadline?: string | null;
   priority?: string;
+  sourceModule?: string;
+  sourceLabel?: string;
+  verificationMethod?: string;
+  completionSummary?: string;
+  evidenceUri?: string;
+  reevaluationResult?: number | null;
+  baseline?: number | null;
+  targetValue?: number | null;
+}
+
+export interface UpdateImprovementPayload {
+  title?: string;
+  description?: string;
+  course?: string;
+  action?: string;
+  owner?: string;
+  findingId?: string | null;
+  targetCode?: string | null;
+  targetName?: string | null;
+  rootCause?: string | null;
+  expectedEffect?: string | null;
+  deadline?: string | null;
+  priority?: string;
+  status?: string;
+  sourceModule?: string;
+  sourceLabel?: string;
+  verificationMethod?: string;
+  completionSummary?: string;
+  evidenceUri?: string;
+  reevaluationResult?: number | null;
+  baseline?: number | null;
+  targetValue?: number | null;
 }
 
 // 鉴权与 X-Major-Id 注入统一由 apiFetch 负责
@@ -90,6 +131,23 @@ export async function updateImprovementStatus(
     const resp = await apiFetch(`${ENDPOINT}/${improvementId}/status`, {
       method: 'PATCH',
       body: JSON.stringify({ status }),
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!resp.ok) return null;
+    return (await resp.json()) as ImprovementData;
+  } catch {
+    return null;
+  }
+}
+
+export async function updateImprovement(
+  improvementId: string,
+  payload: UpdateImprovementPayload,
+): Promise<ImprovementData | null> {
+  try {
+    const resp = await apiFetch(`${ENDPOINT}/${improvementId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
       signal: AbortSignal.timeout(10_000),
     });
     if (!resp.ok) return null;

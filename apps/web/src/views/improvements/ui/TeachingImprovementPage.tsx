@@ -6,6 +6,7 @@ import {
   LoadingOutlined,
   PlusOutlined,
   RocketOutlined,
+  SaveOutlined,
 } from '@ant-design/icons';
 import {
   Badge,
@@ -21,6 +22,7 @@ import {
   Steps,
   Tag,
 } from 'antd';
+import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
@@ -31,6 +33,7 @@ import {
   completeImprovement,
   createImprovement,
   fetchImprovements,
+  updateImprovement,
   updateImprovementStatus,
 } from '../../../shared/api/improvementsClient';
 import { NextStepBanner } from '../../../widgets/next-step-banner/ui/NextStepBanner';
@@ -64,12 +67,19 @@ interface ImprovementFormValues {
   deadline?: Dayjs;
   description?: string;
   expectedEffect?: string;
+  evidenceUri?: string;
+  findingId?: string | null;
   owner?: string;
   priority?: 'high' | 'low' | 'medium';
+  reevaluationResult?: number | string;
   rootCause?: string;
+  sourceLabel?: string;
+  sourceModule?: string;
   targetCode?: string;
   targetName?: string;
   title: string;
+  verificationMethod?: string;
+  completionSummary?: string;
 }
 
 export function TeachingImprovementPage() {
@@ -82,15 +92,22 @@ export function TeachingImprovementPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [createStep, setCreateStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [savingDetail, setSavingDetail] = useState(false);
   const [form] = Form.useForm<ImprovementFormValues>();
+  const [detailForm] = Form.useForm<ImprovementFormValues>();
   const requestedImprovementId = useMemo(
     () => new URLSearchParams(location.search).get('selected'),
+    [location.search],
+  );
+  const requestedFindingId = useMemo(
+    () => new URLSearchParams(location.search).get('finding'),
     [location.search],
   );
 
   // 从诊断页跳转而来时，自动打开创建表单并预填关联指标
   useEffect(() => {
     const payload = (location.state as {
+      findingId?: string;
       targetCode?: string;
       targetName?: string;
       summary?: string;
@@ -100,8 +117,12 @@ export function TeachingImprovementPage() {
     form.setFieldsValue({
       targetCode: payload.targetCode,
       targetName: payload.targetName,
+      findingId: payload.findingId ?? null,
       title: `补充 ${payload.targetCode} ${payload.targetName ?? ''} 的教学支撑`,
       rootCause: payload.summary,
+      sourceModule: payload.findingId ? 'M5' : 'manual',
+      sourceLabel: payload.findingId ? '图谱诊断' : '',
+      verificationMethod: '补充材料或修正关系后，重新运行图谱诊断和达成度评价。',
     });
     setModalOpen(true);
     setCreateStep(0);
@@ -114,12 +135,17 @@ export function TeachingImprovementPage() {
       setImprovements(data);
       if (requestedImprovementId && data.some((item) => item.id === requestedImprovementId)) {
         setSelectedId(requestedImprovementId);
+      } else if (
+        requestedFindingId &&
+        data.some((item) => item.findingId === requestedFindingId)
+      ) {
+        setSelectedId(data.find((item) => item.findingId === requestedFindingId)?.id);
       } else if (data.length > 0 && !selectedId) {
         setSelectedId(data[0]!.id);
       }
     }
     setLoading(false);
-  }, [selectedId, currentCourseName, requestedImprovementId]);
+  }, [selectedId, currentCourseName, requestedFindingId, requestedImprovementId]);
 
   useEffect(() => {
     void loadData();
@@ -135,12 +161,16 @@ export function TeachingImprovementPage() {
         course: values.course || currentCourseName || '数据结构',
         action: values.action || '',
         owner: values.owner || '',
+        findingId: values.findingId ?? null,
         priority: values.priority || 'medium',
         targetCode: values.targetCode || null,
         targetName: values.targetName || null,
         rootCause: values.rootCause || null,
         expectedEffect: values.expectedEffect || null,
         deadline: values.deadline ? values.deadline.format('YYYY-MM-DD') : null,
+        sourceModule: values.sourceModule || 'manual',
+        sourceLabel: values.sourceLabel || '',
+        verificationMethod: values.verificationMethod || '',
       };
       const created = await createImprovement(payload);
       if (created) {
@@ -182,6 +212,77 @@ export function TeachingImprovementPage() {
 
   const selected = improvements.find((i) => i.id === selectedId);
 
+  useEffect(() => {
+    if (!selected) {
+      detailForm.resetFields();
+      return;
+    }
+    detailForm.setFieldsValue({
+      title: selected.title,
+      course: selected.course,
+      owner: selected.owner,
+      priority: selected.priority as 'high' | 'low' | 'medium',
+      deadline: selected.deadline ? dayjs(selected.deadline) : undefined,
+      targetCode: selected.targetCode ?? '',
+      targetName: selected.targetName ?? '',
+      description: selected.description,
+      rootCause: selected.rootCause ?? '',
+      action: selected.action,
+      expectedEffect: selected.expectedEffect ?? '',
+      verificationMethod: selected.verificationMethod ?? '',
+      completionSummary: selected.completionSummary ?? '',
+      evidenceUri: selected.evidenceUri ?? '',
+      reevaluationResult:
+        selected.reevaluationResult === null || selected.reevaluationResult === undefined
+          ? ''
+          : selected.reevaluationResult,
+    });
+  }, [detailForm, selected]);
+
+  const patchImprovement = (updated: ImprovementData) => {
+    setImprovements((prev) =>
+      prev.map((item) => (item.id === updated.id ? updated : item)),
+    );
+  };
+
+  const handleSaveDetail = async () => {
+    if (!selected) return;
+    setSavingDetail(true);
+    try {
+      const values = await detailForm.validateFields();
+      const rawReevaluation = values.reevaluationResult;
+      const reevaluationText =
+        rawReevaluation === undefined || rawReevaluation === null
+          ? ''
+          : String(rawReevaluation).trim();
+      const updated = await updateImprovement(selected.id, {
+        title: values.title,
+        course: values.course,
+        owner: values.owner,
+        priority: values.priority,
+        deadline: values.deadline ? values.deadline.format('YYYY-MM-DD') : null,
+        targetCode: values.targetCode || null,
+        targetName: values.targetName || null,
+        description: values.description || '',
+        rootCause: values.rootCause || null,
+        action: values.action || '',
+        expectedEffect: values.expectedEffect || null,
+        verificationMethod: values.verificationMethod || '',
+        completionSummary: values.completionSummary || '',
+        evidenceUri: values.evidenceUri || '',
+        reevaluationResult: reevaluationText ? Number(reevaluationText) : null,
+      });
+      if (!updated) {
+        message.error('保存失败，请检查后端服务是否运行');
+        return;
+      }
+      patchImprovement(updated);
+      message.success('改进详情已保存');
+    } finally {
+      setSavingDetail(false);
+    }
+  };
+
   const openCount = improvements.filter((i) => i.status === 'open').length;
   const inProgressCount = improvements.filter((i) => i.status === 'in-progress').length;
   const resolvedCount = improvements.filter((i) => i.status === 'resolved').length;
@@ -190,6 +291,11 @@ export function TeachingImprovementPage() {
 
   const openCreateModal = useCallback(() => {
     form.resetFields();
+    form.setFieldsValue({
+      sourceModule: 'manual',
+      sourceLabel: '',
+      verificationMethod: '重新运行图谱诊断和达成度评价，确认缺口已关闭。',
+    });
     setCreateStep(0);
     setModalOpen(true);
   }, [form]);
@@ -380,73 +486,118 @@ export function TeachingImprovementPage() {
                 {selected.targetCode && <Tag color="red">{selected.targetCode}</Tag>}
               </div>
 
-              <h3 className="imp-detail-title">{selected.title}</h3>
+              <Form
+                className="imp-detail-form"
+                form={detailForm}
+                layout="vertical"
+              >
+                <Form.Item
+                  label="改进标题"
+                  name="title"
+                  rules={[{ required: true, message: '请输入改进标题' }]}
+                >
+                  <Input />
+                </Form.Item>
 
-              {/* 来源关联 */}
-              {(selected.targetCode || selected.targetName || selected.rootCause) && (
-                <div className="imp-detail-section imp-detail-source-card">
+                <Space size={12} wrap>
+                  <Form.Item label="课程" name="course">
+                    <Input style={{ width: 180 }} />
+                  </Form.Item>
+                  <Form.Item label="责任人" name="owner">
+                    <Input style={{ width: 140 }} />
+                  </Form.Item>
+                  <Form.Item label="优先级" name="priority">
+                    <Select
+                      style={{ width: 110 }}
+                      options={[
+                        { value: 'high', label: '高' },
+                        { value: 'medium', label: '中' },
+                        { value: 'low', label: '低' },
+                      ]}
+                    />
+                  </Form.Item>
+                  <Form.Item label="截止日期" name="deadline">
+                    <DatePicker style={{ width: 150 }} />
+                  </Form.Item>
+                </Space>
+
+                <div className="imp-detail-source-card">
                   <span className="imp-detail-section-label">
                     <LinkOutlined /> 来源关联
                   </span>
-                  <div className="imp-detail-source-body">
-                    <div className="imp-detail-source-tags">
-                      {selected.targetCode && (
-                        <Tag color="red" style={{ margin: 0 }}>
-                          {selected.targetCode}
-                        </Tag>
-                      )}
-                      {selected.targetName && (
-                        <span className="imp-detail-source-name">{selected.targetName}</span>
-                      )}
-                    </div>
-                    {selected.rootCause && (
-                      <div className="imp-detail-source-text">{selected.rootCause}</div>
-                    )}
-                    <Button
-                      type="link"
-                      size="small"
-                      icon={<LinkOutlined />}
-                      onClick={() => navigate('/diagnostics')}
-                      style={{ padding: 0, marginTop: 4 }}
-                    >
-                      查看对应诊断
-                    </Button>
-                  </div>
+                  <Space size={12} wrap>
+                    <Form.Item label="指标编码" name="targetCode">
+                      <Input style={{ width: 150 }} placeholder="如：C-01-01" />
+                    </Form.Item>
+                    <Form.Item label="指标名称" name="targetName">
+                      <Input style={{ width: 260 }} />
+                    </Form.Item>
+                  </Space>
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<LinkOutlined />}
+                    onClick={() =>
+                      navigate(
+                        selected.findingId
+                          ? `/diagnostics?finding=${selected.findingId}`
+                          : '/diagnostics',
+                      )
+                    }
+                    style={{ padding: 0 }}
+                  >
+                    查看对应诊断
+                  </Button>
                 </div>
-              )}
 
-              {selected.description && (
-                <div className="imp-detail-section">
-                  <span className="imp-detail-section-label">问题描述</span>
-                  <div className="imp-detail-section-text">{selected.description}</div>
-                </div>
-              )}
-
-              <div className="imp-detail-section">
-                <span className="imp-detail-section-label">改进措施</span>
-                <div className="imp-detail-section-text imp-detail-section-text--action">
-                  {selected.action}
-                </div>
-              </div>
-
-              {selected.expectedEffect && (
-                <div className="imp-detail-section">
-                  <span className="imp-detail-section-label">预期效果</span>
-                  <div className="imp-detail-section-text imp-detail-section-text--effect">
-                    {selected.expectedEffect}
-                  </div>
-                </div>
-              )}
+                <Form.Item label="问题描述" name="description">
+                  <Input.TextArea rows={2} />
+                </Form.Item>
+                <Form.Item label="根因分析" name="rootCause">
+                  <Input.TextArea rows={2} />
+                </Form.Item>
+                <Form.Item
+                  label="改进措施"
+                  name="action"
+                  rules={[{ required: true, message: '请输入改进措施' }]}
+                >
+                  <Input.TextArea rows={3} />
+                </Form.Item>
+                <Form.Item label="预期效果" name="expectedEffect">
+                  <Input.TextArea rows={2} />
+                </Form.Item>
+                <Form.Item label="验证方法" name="verificationMethod">
+                  <Input.TextArea
+                    rows={2}
+                    placeholder="例如：重新上传修订版材料后运行 M5 诊断和 M6 达成度评价"
+                  />
+                </Form.Item>
+                <Space size={12} wrap>
+                  <Form.Item label="完成证据链接/位置" name="evidenceUri">
+                    <Input style={{ width: 280 }} placeholder="材料版本、报告路径或附件位置" />
+                  </Form.Item>
+                  <Form.Item label="复评结果" name="reevaluationResult">
+                    <Input style={{ width: 120 }} placeholder="0-1 或百分比" />
+                  </Form.Item>
+                </Space>
+                <Form.Item label="完成说明" name="completionSummary">
+                  <Input.TextArea rows={2} placeholder="记录实际变更、证据和复查结论" />
+                </Form.Item>
+              </Form>
 
               <div className="imp-detail-meta">
                 <Space size={16} wrap>
-                  <span className="imp-detail-meta-text">责任人：{selected.owner}</span>
-                  {selected.deadline && (
-                    <span className="imp-detail-meta-text">截止：{selected.deadline}</span>
-                  )}
-                  <span className="imp-detail-meta-text">课程：{selected.course}</span>
+                  <span className="imp-detail-meta-text">
+                    来源：{selected.sourceLabel || selected.sourceModule || '手动创建'}
+                  </span>
                   {selected.createdAt && (
                     <span className="imp-detail-meta-text">创建：{selected.createdAt}</span>
+                  )}
+                  {selected.updatedAt && (
+                    <span className="imp-detail-meta-text">更新：{selected.updatedAt}</span>
+                  )}
+                  {selected.closedAt && (
+                    <span className="imp-detail-meta-text">关闭：{selected.closedAt}</span>
                   )}
                 </Space>
               </div>
@@ -464,6 +615,13 @@ export function TeachingImprovementPage() {
                   items={statusStepItems}
                   size="small"
                 />
+                <Button
+                  icon={<SaveOutlined />}
+                  loading={savingDetail}
+                  onClick={() => void handleSaveDetail()}
+                >
+                  保存详情
+                </Button>
                 {selected.status !== 'closed' && (
                   <Button
                     type="primary"
@@ -495,6 +653,15 @@ export function TeachingImprovementPage() {
         width={560}
       >
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
+          <Form.Item hidden name="findingId">
+            <Input />
+          </Form.Item>
+          <Form.Item hidden name="sourceModule">
+            <Input />
+          </Form.Item>
+          <Form.Item hidden name="sourceLabel">
+            <Input />
+          </Form.Item>
           <Steps
             className="imp-create-steps"
             current={createStep}
@@ -550,6 +717,12 @@ export function TeachingImprovementPage() {
               </Form.Item>
               <Form.Item name="expectedEffect" label="预期效果">
                 <Input.TextArea rows={2} placeholder="预期改进效果" />
+              </Form.Item>
+              <Form.Item name="verificationMethod" label="验证方法">
+                <Input.TextArea
+                  rows={2}
+                  placeholder="说明后续如何复查：如重新运行图谱诊断、达成度评价或人工复核"
+                />
               </Form.Item>
               <Space size={16}>
                 <Form.Item name="targetCode" label="目标编码">

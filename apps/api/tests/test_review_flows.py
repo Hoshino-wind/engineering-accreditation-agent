@@ -7,6 +7,7 @@ import asyncio
 from datetime import UTC, datetime
 
 import pytest
+
 from app.modules.diagnostics.application.decide_finding import DecideFinding
 from app.modules.diagnostics.domain.finding import (
     DiagnosticEvidenceRef,
@@ -16,6 +17,7 @@ from app.modules.diagnostics.domain.finding import (
     FindingDecisionStatus,
 )
 from app.modules.diagnostics.infra.memory_store import InMemoryFindingRepository
+from app.modules.improvements.infra.memory_store import InMemoryImprovementRepository
 from app.modules.recognition.application.review_candidate import ReviewCandidate
 from app.modules.recognition.domain.candidate import (
     CandidateEvidence,
@@ -147,6 +149,27 @@ class TestFindingDecisionFlow:
         converted = asyncio.run(use_case.execute("finding-review-1", "convert"))
         assert converted is not None
         assert converted.decision_status == FindingDecisionStatus.CONVERTED
+
+    def test_convert_creates_traceable_improvement(self) -> None:
+        user_id = f"test-convert-{datetime.now(UTC).strftime('%Y%m%d%H%M%S%f')}"
+        findings = InMemoryFindingRepository(with_seed=False, user_id=user_id)
+        improvements = InMemoryImprovementRepository(with_seed=False, user_id=user_id)
+        findings._store = {_finding().id: _finding()}
+        use_case = DecideFinding(findings, improvements)
+
+        converted = asyncio.run(use_case.execute("finding-review-1", "convert"))
+        created = asyncio.run(improvements.list_all())
+
+        assert converted is not None
+        assert converted.decision_status == FindingDecisionStatus.CONVERTED
+        assert len(created) == 1
+        assert created[0].finding_id == "finding-review-1"
+        assert created[0].source_module == "M5"
+        assert created[0].verification_method
+
+        # 重复转入不会产生重复 M7 项
+        asyncio.run(use_case.execute("finding-review-1", "convert"))
+        assert len(asyncio.run(improvements.list_all())) == 1
 
     def test_unknown_decision_raises_instead_of_silent_confirm(self) -> None:
         repo = InMemoryFindingRepository(with_seed=False, user_id="t")

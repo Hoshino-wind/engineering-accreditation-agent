@@ -513,14 +513,71 @@ class PostgresImprovementRepository(_PostgresLazyLoadMixin):
         await self._base._record(improvement, "improvement.created")
         return improvement
 
-    async def update_status(self, improvement_id: str, status: ImprovementStatus) -> Improvement | None:
+    async def update_status(
+        self,
+        improvement_id: str,
+        status: ImprovementStatus,
+    ) -> Improvement | None:
         await self._ensure_loaded()
         current = self._store.get(improvement_id)
         if current is None:
             return None
-        updated = replace(current, status=status)
+        from datetime import UTC, datetime
+
+        now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M")
+        closed_at = now if status == ImprovementStatus.CLOSED else None
+        updated = replace(current, status=status, updated_at=now, closed_at=closed_at)
         self._store[improvement_id] = updated
         await self._base._record(updated, "improvement.status_updated")
+        return updated
+
+    async def update(self, improvement_id: str, changes: dict) -> Improvement | None:
+        await self._ensure_loaded()
+        current = self._store.get(improvement_id)
+        if current is None:
+            return None
+        from datetime import UTC, datetime
+
+        allowed = {
+            "title",
+            "description",
+            "course",
+            "finding_id",
+            "target_code",
+            "target_name",
+            "root_cause",
+            "action",
+            "expected_effect",
+            "owner",
+            "deadline",
+            "source_module",
+            "source_label",
+            "verification_method",
+            "completion_summary",
+            "evidence_uri",
+            "reevaluation_result",
+            "baseline",
+            "target_value",
+            "major_id",
+            "priority",
+            "status",
+        }
+        payload = {key: value for key, value in changes.items() if key in allowed}
+        if "priority" in payload and payload["priority"] is not None:
+            from app.modules.improvements.domain.improvement import ImprovementPriority
+
+            payload["priority"] = ImprovementPriority(payload["priority"])
+        if "status" in payload and payload["status"] is not None:
+            payload["status"] = ImprovementStatus(payload["status"])
+        now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M")
+        payload["updated_at"] = now
+        if payload.get("status") == ImprovementStatus.CLOSED and current.closed_at is None:
+            payload["closed_at"] = now
+        elif payload.get("status") and payload.get("status") != ImprovementStatus.CLOSED:
+            payload["closed_at"] = None
+        updated = replace(current, **payload)
+        self._store[improvement_id] = updated
+        await self._base._record(updated, "improvement.updated")
         return updated
 
 
