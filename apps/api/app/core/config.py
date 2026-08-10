@@ -26,7 +26,24 @@ class Settings(BaseSettings):
     object_storage_access_key: str = ""
     object_storage_secret_key: SecretStr = SecretStr("")
     object_storage_region: str = "us-east-1"
-    cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
+    cors_origins: list[str] = Field(
+        default_factory=lambda: [
+            "http://localhost:5173",
+            "http://localhost:5174",
+            "http://localhost:5175",
+            "http://localhost:5176",
+            "http://localhost:5177",
+            "http://localhost:5178",
+            "http://localhost:5179",
+            "http://127.0.0.1:5173",
+            "http://127.0.0.1:5174",
+            "http://127.0.0.1:5175",
+            "http://127.0.0.1:5176",
+            "http://127.0.0.1:5177",
+            "http://127.0.0.1:5178",
+            "http://127.0.0.1:5179",
+        ]
+    )
 
     # ── 认证 / 用户 ─────────────────────────────────────
     jwt_secret: SecretStr = SecretStr(_DEFAULT_JWT_SECRET)
