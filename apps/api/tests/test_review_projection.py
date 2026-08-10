@@ -4,8 +4,12 @@
 图谱边与覆盖度结果；待审与不可解析的候选不改变图谱。
 """
 
+import asyncio
 from dataclasses import replace
 
+from app.modules.orchestration.application.graph_query import (
+    reconcile_orphan_pending_edges,
+)
 from app.modules.orchestration.domain.coverage import analyze_coverage
 from app.modules.orchestration.domain.models import (
     AbilityGraph,
@@ -203,3 +207,92 @@ def test_input_lists_are_not_mutated() -> None:
     accepted = _make_candidate(review_status=CandidateReviewStatus.ACCEPTED)
     apply_review_decisions(nodes, edges, [accepted])
     assert edges == edges_before
+
+
+class _CandidateRepo:
+    def __init__(self, candidates: list[RecognitionCandidate] | None = None) -> None:
+        self.candidates = list(candidates or [])
+
+    async def list_all(
+        self,
+        *,
+        course: str | None = None,
+        risk: str | None = None,
+        candidate_type: str | None = None,
+        review_status: str | None = None,
+    ) -> list[RecognitionCandidate]:
+        return list(self.candidates)
+
+    async def get_by_id(self, candidate_id: str) -> RecognitionCandidate | None:
+        return next((c for c in self.candidates if c.id == candidate_id), None)
+
+    async def add_many(
+        self,
+        candidates: list[RecognitionCandidate],
+    ) -> list[RecognitionCandidate]:
+        self.candidates.extend(candidates)
+        return candidates
+
+    async def update_review_status(
+        self,
+        candidate_id: str,
+        status: CandidateReviewStatus,
+    ) -> RecognitionCandidate | None:
+        return None
+
+    async def delete_by_course(self, course_name: str) -> int:
+        return 0
+
+    async def delete_by_source_nodes(self, source_node_ids: set[str]) -> int:
+        return 0
+
+
+def test_orphan_pending_graph_edge_creates_review_candidate() -> None:
+    async def _run() -> None:
+        nodes = [
+            {
+                "id": "exp-a",
+                "code": "EXP-A",
+                "name": "实验A",
+                "kind": "Experiment",
+                "origin": "school",
+                "properties": {"course": "单片机基础"},
+            },
+            {
+                "id": "std-c-01-01",
+                "code": "C-01-01",
+                "name": "工程知识应用",
+                "kind": "Competency",
+                "origin": "standard",
+            },
+        ]
+        edges = [
+            {
+                "id": "ai-rel-exp-a-std-c-01-01",
+                "source": "exp-a",
+                "target": "std-c-01-01",
+                "kind": "SUPPORTS",
+                "sourceType": "ai",
+                "reviewStatus": "pending",
+                "strength": "medium",
+                "confidence": 0.82,
+                "reasoning": "实验覆盖工程知识应用。",
+            }
+        ]
+        repo = _CandidateRepo()
+
+        candidates = await reconcile_orphan_pending_edges(nodes, edges, repo)
+        candidates_again = await reconcile_orphan_pending_edges(nodes, edges, repo)
+
+        assert len(candidates) == 1
+        assert len(candidates_again) == 1
+        assert len(repo.candidates) == 1
+        candidate = repo.candidates[0]
+        assert candidate.id == "candidate-reconciled-ai-rel-exp-a-std-c-01-01"
+        assert candidate.source_node == "exp-a"
+        assert candidate.target_node == "std-c-01-01"
+        assert candidate.course == "单片机基础"
+        assert candidate.confidence == 82
+        assert candidate.review_status == CandidateReviewStatus.PENDING
+
+    asyncio.run(_run())

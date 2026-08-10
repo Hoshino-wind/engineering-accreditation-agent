@@ -51,7 +51,10 @@ from app.modules.majors.application import (
     ListMajors,
 )
 from app.modules.majors.routes import create_majors_router
-from app.modules.orchestration.application.graph_query import QueryProjectedGraph
+from app.modules.orchestration.application.graph_query import (
+    QueryProjectedGraph,
+    reconcile_orphan_pending_edges,
+)
 from app.modules.orchestration.infra.orchestrator import LangGraphAgentOrchestrator
 from app.modules.orchestration.routes.runs import create_orchestration_router
 from app.modules.pipeline.application import GetPipelineStatus
@@ -333,9 +336,42 @@ def create_app() -> FastAPI:
     # --- M4 Recognition ---
     def provide_list_candidates(
         current_user: Annotated[User, Depends(get_current_user)],
+        active_major_id: Annotated[str | None, Depends(get_active_major_id)] = None,
     ) -> ListCandidates:
         repos = per_user_mgr.get(current_user.id)
-        return ListCandidates(repository=repos.candidates)
+        inner = ListCandidates(repository=repos.candidates)
+
+        class _ListAndReconcile:
+            async def execute(
+                self,
+                *,
+                course: str | None = None,
+                risk: str | None = None,
+                candidate_type: str | None = None,
+                review_status: str | None = None,
+            ) -> list[RecognitionCandidate]:
+                try:
+                    graph = await get_orchestrator(
+                        current_user.id,
+                        active_major_id,
+                    ).get_current_graph()
+                    await reconcile_orphan_pending_edges(
+                        list(graph.get("nodes", [])),
+                        list(graph.get("edges", [])),
+                        repos.candidates,
+                    )
+                except Exception:  # noqa: BLE001
+                    logging.getLogger(__name__).exception(
+                        "Graph review candidate reconciliation failed"
+                    )
+                return await inner.execute(
+                    course=course,
+                    risk=risk,
+                    candidate_type=candidate_type,
+                    review_status=review_status,
+                )
+
+        return _ListAndReconcile()
 
     def provide_review_candidate(
         current_user: Annotated[User, Depends(get_current_user)],

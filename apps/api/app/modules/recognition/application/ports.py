@@ -13,9 +13,15 @@ class CandidateRepository(Protocol):
         course: str | None = None,
         risk: str | None = None,
         candidate_type: str | None = None,
+        review_status: str | None = None,
     ) -> list[RecognitionCandidate]: ...
 
     async def get_by_id(self, candidate_id: str) -> RecognitionCandidate | None: ...
+
+    async def add_many(
+        self,
+        candidates: list[RecognitionCandidate],
+    ) -> list[RecognitionCandidate]: ...
 
     async def update_review_status(
         self,
