@@ -274,6 +274,7 @@ class PostgresCandidateRepository(_PostgresLazyLoadMixin):
         candidate_id: str,
         status: Any,
     ) -> RecognitionCandidate | None:
+        await self._ensure_loaded()
         existing = self._store.get(candidate_id)
         if existing is None:
             return None

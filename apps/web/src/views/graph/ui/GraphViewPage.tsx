@@ -186,17 +186,8 @@ export function GraphViewPage() {
     }
   }, [location.state, initialNodes]);
 
-  // 构建 edge → candidate 映射（用于就地审核写回后端）
-  const edgeCandidateMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    // 图谱边上的 ai 推荐 id 前缀映射到候选 id
-    localEdges.forEach((e) => {
-      if (e.sourceType === 'ai') {
-        map[e.id] = `c-${e.id}`;
-      }
-    });
-    return map;
-  }, [localEdges]);
+  // Candidate ids must come from the review API; edge ids are graph-local ids.
+  const edgeCandidateMap = useMemo<Record<string, string>>(() => ({}), []);
 
   const handlePreviewEdge = (edge: AbilityGraphPreviewEdge | null) => {
     setPreviewEdge(edge);

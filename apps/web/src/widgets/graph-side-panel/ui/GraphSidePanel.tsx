@@ -136,6 +136,33 @@ export function GraphSidePanel({
     [candidates],
   );
 
+  const effectiveEdgeCandidateMap = useMemo(() => {
+    const map: Record<string, string> = { ...(edgeCandidateMap ?? {}) };
+    const nodeAliases = new Map<string, Set<string>>();
+    for (const nodeItem of nodes) {
+      nodeAliases.set(
+        nodeItem.id,
+        new Set([nodeItem.id, nodeItem.code, nodeItem.name].filter(Boolean)),
+      );
+    }
+
+    for (const edge of edges) {
+      if (edge.reviewStatus !== 'pending') continue;
+      const sourceAliases = nodeAliases.get(edge.source) ?? new Set([edge.source]);
+      const targetAliases = nodeAliases.get(edge.target) ?? new Set([edge.target]);
+      const match = pendingCandidates.find(
+        (candidate) =>
+          sourceAliases.has(candidate.sourceNode) &&
+          targetAliases.has(candidate.targetNode),
+      );
+      if (match) {
+        map[edge.id] = match.id;
+      }
+    }
+
+    return map;
+  }, [candidates, edgeCandidateMap, edges, nodes, pendingCandidates]);
+
   // 覆盖缺口：后端权威计算（仅 approved 边计入）
   const gapCompetencies = useMemo(() => {
     if (!coverage) return [];
@@ -456,7 +483,7 @@ export function GraphSidePanel({
           node={node}
           edges={edges}
           nodes={nodes}
-          edgeCandidateMap={edgeCandidateMap}
+          edgeCandidateMap={effectiveEdgeCandidateMap}
           onJumpToNode={onJumpToNode}
           onReviewed={(edgeId, decision) => {
             const nextEdges = edges.map((e) =>
@@ -466,7 +493,7 @@ export function GraphSidePanel({
             );
             onEdgesChanged?.(nextEdges);
             // 同步刷新候选列表
-            const candidateId = edgeCandidateMap?.[edgeId];
+            const candidateId = effectiveEdgeCandidateMap[edgeId];
             const matchedCandidate = candidates.find((c) => c.id === candidateId);
             if (candidateId && matchedCandidate) {
               updateCandidate({
