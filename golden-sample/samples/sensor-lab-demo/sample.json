@@ -1,0 +1,912 @@
+{
+  "sample_id": "GS-SENSOR-2026",
+  "schema_version": 1,
+  "synthetic": true,
+  "_说明": [
+    "示范用完整填充示例。课程、学生与分数均为虚构，用于演示四份教学文档如何填满金标准。",
+    "四份源文档见同目录 01~04 文件。"
+  ],
+  "context": {
+    "program": "自动化",
+    "program_version": "2024 版培养方案",
+    "course_code": "EXP-2031",
+    "course_name": "传感器与检测技术（实验）",
+    "evaluation_cycle": "2025-2026 学年第二学期",
+    "graph_version": "最小本体 v1 / 大纲 v1.2 / 评分表 v1.0",
+    "compiled_by": "课程负责人（示例）",
+    "compiled_at": "2026-08-04"
+  },
+  "policy": {
+    "policy_version": "policy-v1",
+    "method": "mean_score_ratio",
+    "missing_score": "exclude",
+    "sample_basis": "submitted",
+    "rounding": "half_up",
+    "score_rate_dp": 3,
+    "contribution_dp": 3,
+    "attainment_dp": 3,
+    "weight_tolerance": "0.0001",
+    "passing_score_ratio": null
+  },
+  "nodes": [
+    {
+      "node_id": "PI-4.2",
+      "node_type": "PerformanceIndicator",
+      "label": "能够针对检测对象特征选择合理的测量方案并设计实验步骤",
+      "source": {
+        "material": "《自动化专业本科培养方案》",
+        "material_version": "2024 版",
+        "locator": "第 18 页 / 表 4 毕业要求 4 指标点分解",
+        "digest": "sha256:21bbdc9e350b8ee3454abafcaec23ed169a7cccabfe1cdeda469356e3f7aaaf9"
+      }
+    },
+    {
+      "node_id": "PI-4.3",
+      "node_type": "PerformanceIndicator",
+      "label": "能够正确采集与处理实验数据，分析误差来源并得出有效结论",
+      "source": {
+        "material": "《自动化专业本科培养方案》",
+        "material_version": "2024 版",
+        "locator": "第 18 页 / 表 4 毕业要求 4 指标点分解",
+        "digest": "sha256:c23196319bf2f0e12fef23e1e701a9f1490cba48c707c44a2d47b2e3610a5151"
+      }
+    },
+    {
+      "node_id": "COURSE-EXP2031",
+      "node_type": "Course",
+      "label": "传感器与检测技术（实验）",
+      "source": {
+        "material": "《传感器与检测技术》实验教学大纲",
+        "material_version": "v1.2",
+        "locator": "第 1 页 / 表A 课程基本信息",
+        "digest": "sha256:e2253eb0ee928b3a9debc877ce27f69684872836eb570535253803a2b8f29e91"
+      }
+    },
+    {
+      "node_id": "CO-1",
+      "node_type": "CourseOutcome",
+      "label": "能够根据被测物理量特性选择合适的传感器与测量电路，并设计可行的实验方案",
+      "source": {
+        "material": "《传感器与检测技术》实验教学大纲",
+        "material_version": "v1.2",
+        "locator": "第 2 页 / 表B 课程目标",
+        "digest": "sha256:0413d0da907b78b59660c201973731b69d51874dbd4a13fb7814f2d08be80b55"
+      }
+    },
+    {
+      "node_id": "CO-2",
+      "node_type": "CourseOutcome",
+      "label": "能够正确搭建测量系统、规范采集数据，并完成标定与数据处理",
+      "source": {
+        "material": "《传感器与检测技术》实验教学大纲",
+        "material_version": "v1.2",
+        "locator": "第 2 页 / 表B 课程目标",
+        "digest": "sha256:e95c30be4bef69100140740f0718f1b7eeeb053dfa4d6a6d837c239422d58077"
+      }
+    },
+    {
+      "node_id": "CO-3",
+      "node_type": "CourseOutcome",
+      "label": "能够分析测量误差来源，评价测量结果有效性并提出改进方案",
+      "source": {
+        "material": "《传感器与检测技术》实验教学大纲",
+        "material_version": "v1.2",
+        "locator": "第 2 页 / 表B 课程目标",
+        "digest": "sha256:4498b40ab0531c1ac5f2f0a314d59b187a9d0b1a342e59cd0d32c1a4fc97f0cf"
+      }
+    },
+    {
+      "node_id": "EXP-01",
+      "node_type": "Experiment",
+      "label": "实验一：应变式传感器特性与标定",
+      "source": {
+        "material": "《传感器与检测技术》实验指导书",
+        "material_version": "v2.0",
+        "locator": "第 3 页 / 实验一",
+        "digest": "sha256:186c2acd76e454248a1319e3af0ab2e01155c731114f15b8991d94bb6993faa4"
+      }
+    },
+    {
+      "node_id": "EXP-02",
+      "node_type": "Experiment",
+      "label": "实验二：热电偶温度测量与冷端补偿",
+      "source": {
+        "material": "《传感器与检测技术》实验指导书",
+        "material_version": "v2.0",
+        "locator": "第 11 页 / 实验二",
+        "digest": "sha256:6cbbc82cbc849df772d8f7c0cb8f362092785a0aa02353381cbdfccdaee11d08"
+      }
+    },
+    {
+      "node_id": "EXP-03",
+      "node_type": "Experiment",
+      "label": "实验三：电容式位移传感器设计性实验",
+      "source": {
+        "material": "《传感器与检测技术》实验指导书",
+        "material_version": "v2.0",
+        "locator": "第 19 页 / 实验三",
+        "digest": "sha256:8b1e7039abe0a80f91e43bbd038478a47383159a79149c6c401694d84e73c869"
+      }
+    },
+    {
+      "node_id": "AT-01",
+      "node_type": "AssessmentTask",
+      "label": "实验一实验报告",
+      "source": {
+        "material": "《传感器与检测技术》实验指导书",
+        "material_version": "v2.0",
+        "locator": "第 9 页 / 实验一考核要求",
+        "digest": "sha256:490ceb0898dde8e2d3cd56831ee59599906af97e5861b764766c838a2ebd1154"
+      }
+    },
+    {
+      "node_id": "AT-02",
+      "node_type": "AssessmentTask",
+      "label": "实验二实验报告",
+      "source": {
+        "material": "《传感器与检测技术》实验指导书",
+        "material_version": "v2.0",
+        "locator": "第 17 页 / 实验二考核要求",
+        "digest": "sha256:fbd8fdb858fca0df1ff30c8a01c1f3f81297c4d75aeaa55b2d8f2d2e2a62d9e5"
+      }
+    },
+    {
+      "node_id": "AT-03",
+      "node_type": "AssessmentTask",
+      "label": "实验三设计报告",
+      "source": {
+        "material": "《传感器与检测技术》实验指导书",
+        "material_version": "v2.0",
+        "locator": "第 27 页 / 实验三考核要求",
+        "digest": "sha256:bf8f3f86a013517f6f54595b3f3f2e88f0fbc9c43653f1a72e15219f29b5c9a4"
+      }
+    },
+    {
+      "node_id": "RC-0101",
+      "node_type": "RubricCriterion",
+      "label": "传感器选型与测量电路连接正确性",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 1 页 / 表 1 第 1 行",
+        "digest": "sha256:ec0528b167db9051097dbb09840891a9535cea9a51608eaef017a10573dcb061"
+      }
+    },
+    {
+      "node_id": "RC-0102",
+      "node_type": "RubricCriterion",
+      "label": "标定数据采集规范性",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 1 页 / 表 1 第 2 行",
+        "digest": "sha256:e97d8c617affeb1a88ce22c20d096e6d24be1bfe40bfcafd931bac59cad9858d"
+      }
+    },
+    {
+      "node_id": "RC-0201",
+      "node_type": "RubricCriterion",
+      "label": "测量系统搭建与调试",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 2 页 / 表 2 第 1 行",
+        "digest": "sha256:e8e2ba325ff937eb32245d3b340f67958cca451229cb9cab1f3da0d42f21d055"
+      }
+    },
+    {
+      "node_id": "RC-0202",
+      "node_type": "RubricCriterion",
+      "label": "温度数据采集与记录完整性",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 2 页 / 表 2 第 2 行",
+        "digest": "sha256:5cb483f1e797032d70c5bc6ef215f1d4cb8b1837bbac563401bb1dfac983e474"
+      }
+    },
+    {
+      "node_id": "RC-0203",
+      "node_type": "RubricCriterion",
+      "label": "冷端补偿误差分析",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 2 页 / 表 2 第 3 行（2024 版大纲新增，v1.0 评分表尚未设列）",
+        "digest": "sha256:f2f0135e6da8224e287b60b5512f232fee2ec53e284a351dbe1ed7447e5130de"
+      }
+    },
+    {
+      "node_id": "RC-0301",
+      "node_type": "RubricCriterion",
+      "label": "测量方案设计合理性",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 3 页 / 表 3 第 1 行",
+        "digest": "sha256:77b62506ed70b26934f96d5606bfc15cdd4ac0e94f348a5480fabe1fd9c5e29b"
+      }
+    },
+    {
+      "node_id": "RC-0302",
+      "node_type": "RubricCriterion",
+      "label": "元件参数选择与论证",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 3 页 / 表 3 第 2 行",
+        "digest": "sha256:480ad824f872f696dd7e10f9270b94ec437fd0b2530b506e7c458f5093b53c51"
+      }
+    },
+    {
+      "node_id": "RC-0303",
+      "node_type": "RubricCriterion",
+      "label": "实验数据处理与曲线拟合",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 3 页 / 表 3 第 3 行",
+        "digest": "sha256:e7d81b67caac62ae62caa542424a010b2e929fc33570e43b9d0adf80ec278172"
+      }
+    },
+    {
+      "node_id": "RC-0304",
+      "node_type": "RubricCriterion",
+      "label": "误差来源分析与改进建议",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 3 页 / 表 3 第 4 行（2024 版大纲新增，v1.0 评分表尚未设列）",
+        "digest": "sha256:b754958301f1baab39ba6fe83e19a4e0105318176c33c311705e70be7ad066ee"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "relation": "DEFINES",
+      "from_node": "COURSE-EXP2031",
+      "to_node": "CO-1",
+      "source": {
+        "material": "《传感器与检测技术》实验教学大纲",
+        "material_version": "v1.2",
+        "locator": "第 2 页 / 表B",
+        "digest": "sha256:87b3bd09a6e04415d442d5bd6f0e69ff32d89539e307b1cb8e872e74d89cfcb3"
+      }
+    },
+    {
+      "relation": "DEFINES",
+      "from_node": "COURSE-EXP2031",
+      "to_node": "CO-2",
+      "source": {
+        "material": "《传感器与检测技术》实验教学大纲",
+        "material_version": "v1.2",
+        "locator": "第 2 页 / 表B",
+        "digest": "sha256:13962eb9392d564fe815c422a5501b3f58c84af055a178af26e2d72ad7332c7f"
+      }
+    },
+    {
+      "relation": "DEFINES",
+      "from_node": "COURSE-EXP2031",
+      "to_node": "CO-3",
+      "source": {
+        "material": "《传感器与检测技术》实验教学大纲",
+        "material_version": "v1.2",
+        "locator": "第 2 页 / 表B",
+        "digest": "sha256:a90839ede3ee1fa42af357d4eb8d5f45861be915fdfb3f4268a12bf964f36b2d"
+      }
+    },
+    {
+      "relation": "BELONGS_TO",
+      "from_node": "EXP-01",
+      "to_node": "COURSE-EXP2031",
+      "source": {
+        "material": "《传感器与检测技术》实验教学大纲",
+        "material_version": "v1.2",
+        "locator": "第 3 页 / 表D 实验项目一览",
+        "digest": "sha256:0965ef9f5d69ee94620be6b74df324e2687c9b25041efa86652d0bd0842cbaec"
+      }
+    },
+    {
+      "relation": "BELONGS_TO",
+      "from_node": "EXP-02",
+      "to_node": "COURSE-EXP2031",
+      "source": {
+        "material": "《传感器与检测技术》实验教学大纲",
+        "material_version": "v1.2",
+        "locator": "第 3 页 / 表D 实验项目一览",
+        "digest": "sha256:c2ff09587928aff659f66e2a073bb76ec6697040bb7aa1ec52200bd0bea2e5a6"
+      }
+    },
+    {
+      "relation": "BELONGS_TO",
+      "from_node": "EXP-03",
+      "to_node": "COURSE-EXP2031",
+      "source": {
+        "material": "《传感器与检测技术》实验教学大纲",
+        "material_version": "v1.2",
+        "locator": "第 3 页 / 表D 实验项目一览",
+        "digest": "sha256:0b4cabe006b7bf8bb28f86f61223dbe0e89e928ceed3f91bd79b7a74efd4795a"
+      }
+    },
+    {
+      "relation": "SUPPORTS",
+      "from_node": "CO-1",
+      "to_node": "PI-4.2",
+      "source": {
+        "material": "《传感器与检测技术》实验教学大纲",
+        "material_version": "v1.2",
+        "locator": "第 2 页 / 表C 课程目标与指标点对应矩阵",
+        "digest": "sha256:ebafcc44d769e329749785db31d4f43823e33f31b6079637007589ecb9faad21"
+      }
+    },
+    {
+      "relation": "SUPPORTS",
+      "from_node": "CO-2",
+      "to_node": "PI-4.3",
+      "source": {
+        "material": "《传感器与检测技术》实验教学大纲",
+        "material_version": "v1.2",
+        "locator": "第 2 页 / 表C 课程目标与指标点对应矩阵",
+        "digest": "sha256:d6d25579a8f7fbf5638a7d2550b39a768ff689a8f46572660562e532df3ff0b5"
+      }
+    },
+    {
+      "relation": "SUPPORTS",
+      "from_node": "CO-3",
+      "to_node": "PI-4.3",
+      "source": {
+        "material": "《传感器与检测技术》实验教学大纲",
+        "material_version": "v1.2",
+        "locator": "第 2 页 / 表C 课程目标与指标点对应矩阵",
+        "digest": "sha256:2782e2603ebda298e65f7144f310e5c283561eb5b2b807da872fe6d130c48255"
+      }
+    },
+    {
+      "relation": "CONTRIBUTES_TO",
+      "from_node": "EXP-01",
+      "to_node": "CO-1",
+      "source": {
+        "material": "《传感器与检测技术》实验指导书",
+        "material_version": "v2.0",
+        "locator": "第 3 页 / 对应课程目标",
+        "digest": "sha256:44abdc33c2a17b7c91e3f5d755245951a808a1480d0b215c5faeb36b3b06985a"
+      }
+    },
+    {
+      "relation": "CONTRIBUTES_TO",
+      "from_node": "EXP-01",
+      "to_node": "CO-2",
+      "source": {
+        "material": "《传感器与检测技术》实验指导书",
+        "material_version": "v2.0",
+        "locator": "第 3 页 / 对应课程目标",
+        "digest": "sha256:0c51bc5b229f34346b1ac25d2cbc8081ad855c1603298a885f1c742934066eda"
+      }
+    },
+    {
+      "relation": "CONTRIBUTES_TO",
+      "from_node": "EXP-02",
+      "to_node": "CO-2",
+      "source": {
+        "material": "《传感器与检测技术》实验指导书",
+        "material_version": "v2.0",
+        "locator": "第 11 页 / 对应课程目标",
+        "digest": "sha256:beb1bd8e4b0aa0469fa65e37db5a7c932c45c4bf870de888563b43dffad13d57"
+      }
+    },
+    {
+      "relation": "CONTRIBUTES_TO",
+      "from_node": "EXP-02",
+      "to_node": "CO-3",
+      "source": {
+        "material": "《传感器与检测技术》实验指导书",
+        "material_version": "v2.0",
+        "locator": "第 11 页 / 对应课程目标",
+        "digest": "sha256:345f147ec8cb5b380e50040982c4d0278be208718f807d485e2609e2eedfd4bf"
+      }
+    },
+    {
+      "relation": "CONTRIBUTES_TO",
+      "from_node": "EXP-03",
+      "to_node": "CO-1",
+      "source": {
+        "material": "《传感器与检测技术》实验指导书",
+        "material_version": "v2.0",
+        "locator": "第 19 页 / 对应课程目标",
+        "digest": "sha256:0a96d6460dc0cfec11db2bbf47651e96281629eaf1caf895084de150ab3f552d"
+      }
+    },
+    {
+      "relation": "CONTRIBUTES_TO",
+      "from_node": "EXP-03",
+      "to_node": "CO-2",
+      "source": {
+        "material": "《传感器与检测技术》实验指导书",
+        "material_version": "v2.0",
+        "locator": "第 19 页 / 对应课程目标",
+        "digest": "sha256:03a28d4ba99609d84279de809ee9e976f197e3e839adbc02c7963c216a937a81"
+      }
+    },
+    {
+      "relation": "CONTRIBUTES_TO",
+      "from_node": "EXP-03",
+      "to_node": "CO-3",
+      "source": {
+        "material": "《传感器与检测技术》实验指导书",
+        "material_version": "v2.0",
+        "locator": "第 19 页 / 对应课程目标",
+        "digest": "sha256:0493f909eca067657e305e013aecc64573fdfa7d65c37e6e6e97627f48402d25"
+      }
+    },
+    {
+      "relation": "CONTAINS_TASK",
+      "from_node": "EXP-01",
+      "to_node": "AT-01",
+      "source": {
+        "material": "《传感器与检测技术》实验指导书",
+        "material_version": "v2.0",
+        "locator": "第 9 页 / 考核要求",
+        "digest": "sha256:a9f7a17d273acfa5bd3a80b91b8f737ae27b98f8b2aa6aa259826a3fb3e39552"
+      }
+    },
+    {
+      "relation": "CONTAINS_TASK",
+      "from_node": "EXP-02",
+      "to_node": "AT-02",
+      "source": {
+        "material": "《传感器与检测技术》实验指导书",
+        "material_version": "v2.0",
+        "locator": "第 17 页 / 考核要求",
+        "digest": "sha256:0a21b0448c62ba73d476092ce07fb3078deaec2806dcfc9b5d360b61ee0f2df7"
+      }
+    },
+    {
+      "relation": "CONTAINS_TASK",
+      "from_node": "EXP-03",
+      "to_node": "AT-03",
+      "source": {
+        "material": "《传感器与检测技术》实验指导书",
+        "material_version": "v2.0",
+        "locator": "第 27 页 / 考核要求",
+        "digest": "sha256:42ea94b1c7d7695e9a5da524f6507eb944349f399d40571add77124f0dd152c6"
+      }
+    },
+    {
+      "relation": "CONTAINS_CRITERION",
+      "from_node": "AT-01",
+      "to_node": "RC-0101",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 1 页 / 表 1 第 1 行",
+        "digest": "sha256:2e45be774e3415e68f79e1a2f99ca1a25398a9b1f28b1b9485a4500aecf0c472"
+      }
+    },
+    {
+      "relation": "CONTRIBUTES_TO",
+      "from_node": "RC-0101",
+      "to_node": "CO-1",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 1 页 / 表 1 第 1 行／对应课程目标列",
+        "digest": "sha256:380a1f497b290b829a8c4a703c10b077e04cbfb50b94bd6d4d523a24395c3e58"
+      }
+    },
+    {
+      "relation": "CONTAINS_CRITERION",
+      "from_node": "AT-01",
+      "to_node": "RC-0102",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 1 页 / 表 1 第 2 行",
+        "digest": "sha256:212dc7edbde2559587cb76ea28fa0f51f0aedde841ffbc63af2aaf165ea4a6fe"
+      }
+    },
+    {
+      "relation": "CONTRIBUTES_TO",
+      "from_node": "RC-0102",
+      "to_node": "CO-2",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 1 页 / 表 1 第 2 行／对应课程目标列",
+        "digest": "sha256:8fdc2ca53279e57fd469c24ed8ae2fd94121a1099906851fab900fd5056b6b9b"
+      }
+    },
+    {
+      "relation": "CONTAINS_CRITERION",
+      "from_node": "AT-02",
+      "to_node": "RC-0201",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 2 页 / 表 2 第 1 行",
+        "digest": "sha256:9555f207ee4b71cc1261551fd17fe8aee6d85425a3e440ac4b99787aa2d2159f"
+      }
+    },
+    {
+      "relation": "CONTRIBUTES_TO",
+      "from_node": "RC-0201",
+      "to_node": "CO-2",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 2 页 / 表 2 第 1 行／对应课程目标列",
+        "digest": "sha256:b450d0a94cce1172233b6bcbfe46485cffe2214d7ab5766c147c70d1bf56a700"
+      }
+    },
+    {
+      "relation": "CONTAINS_CRITERION",
+      "from_node": "AT-02",
+      "to_node": "RC-0202",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 2 页 / 表 2 第 2 行",
+        "digest": "sha256:86fe5933c7dae50818984ce679781eb9b301e36365cfb099ee2ce868c53d8a80"
+      }
+    },
+    {
+      "relation": "CONTRIBUTES_TO",
+      "from_node": "RC-0202",
+      "to_node": "CO-2",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 2 页 / 表 2 第 2 行／对应课程目标列",
+        "digest": "sha256:8e221622e062970fa0e6649a9729fae7a9ed44a6187a21740bc3fc111815a593"
+      }
+    },
+    {
+      "relation": "CONTAINS_CRITERION",
+      "from_node": "AT-02",
+      "to_node": "RC-0203",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 2 页 / 表 2 第 3 行（2024 版大纲新增，v1.0 评分表尚未设列）",
+        "digest": "sha256:2d6d384aa08bdf3202c88e8158fd493747bcfe4a481b6c2be004494670b0b0bc"
+      }
+    },
+    {
+      "relation": "CONTRIBUTES_TO",
+      "from_node": "RC-0203",
+      "to_node": "CO-3",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 2 页 / 表 2 第 3 行／对应课程目标列",
+        "digest": "sha256:6bc8c2db9e4ae32682770a751a88e75cc448c48542562b558056cf56f80501d6"
+      }
+    },
+    {
+      "relation": "CONTAINS_CRITERION",
+      "from_node": "AT-03",
+      "to_node": "RC-0301",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 3 页 / 表 3 第 1 行",
+        "digest": "sha256:d51960ec438a396f88b130f16d0e31a11db116de64dc6c19fffe43849583bce7"
+      }
+    },
+    {
+      "relation": "CONTRIBUTES_TO",
+      "from_node": "RC-0301",
+      "to_node": "CO-1",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 3 页 / 表 3 第 1 行／对应课程目标列",
+        "digest": "sha256:2ab5c8a5573464d5e37a850fb7a3caddf75abea486691f3355582ef9079c1369"
+      }
+    },
+    {
+      "relation": "CONTAINS_CRITERION",
+      "from_node": "AT-03",
+      "to_node": "RC-0302",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 3 页 / 表 3 第 2 行",
+        "digest": "sha256:daa3fe01540ae77f99f218a657d1cb6a791c47addbdc7c49746ec905fcde82cd"
+      }
+    },
+    {
+      "relation": "CONTRIBUTES_TO",
+      "from_node": "RC-0302",
+      "to_node": "CO-1",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 3 页 / 表 3 第 2 行／对应课程目标列",
+        "digest": "sha256:9c14cf5cc32f90f0ea8c8ba1631de1549a405189073e33a7af7c1113204ee3fb"
+      }
+    },
+    {
+      "relation": "CONTAINS_CRITERION",
+      "from_node": "AT-03",
+      "to_node": "RC-0303",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 3 页 / 表 3 第 3 行",
+        "digest": "sha256:f094aa14d5195b3cebd485419cb96f0848156f674f75cf96b50302202c485f44"
+      }
+    },
+    {
+      "relation": "CONTRIBUTES_TO",
+      "from_node": "RC-0303",
+      "to_node": "CO-2",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 3 页 / 表 3 第 3 行／对应课程目标列",
+        "digest": "sha256:56472fc80c2aece07c1a65445890d6addd19ae853acbd831ca114083d9b631ed"
+      }
+    },
+    {
+      "relation": "CONTAINS_CRITERION",
+      "from_node": "AT-03",
+      "to_node": "RC-0304",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 3 页 / 表 3 第 4 行（2024 版大纲新增，v1.0 评分表尚未设列）",
+        "digest": "sha256:e799717042558f56d65b78d0d5467ef4b632d3c012e6b0c55ef94bba43fcd1dc"
+      }
+    },
+    {
+      "relation": "CONTRIBUTES_TO",
+      "from_node": "RC-0304",
+      "to_node": "CO-3",
+      "source": {
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "material_version": "v1.0",
+        "locator": "第 3 页 / 表 3 第 4 行／对应课程目标列",
+        "digest": "sha256:a58a7b9c37d387665e68efbaea4159d47cbc5f21d385c567d8c4a1a545f38642"
+      }
+    }
+  ],
+  "targets": [
+    {
+      "target_id": "TGT-CO1",
+      "course_outcome_id": "CO-1",
+      "performance_indicator_id": "PI-4.2",
+      "threshold": "0.70",
+      "note": "评分项跨实验一与实验三聚合，权重挂在评分项→课程目标关系上，不挂在实验上。",
+      "criteria": [
+        {
+          "criterion_id": "RC-0101",
+          "label": "传感器选型与测量电路连接正确性",
+          "max_score": "15",
+          "weight": "0.30",
+          "source": {
+            "material": "《传感器与检测技术》实验报告评分标准表",
+            "material_version": "v1.0",
+            "locator": "第 1 页 / 表 1 第 1 行",
+            "digest": "sha256:ec0528b167db9051097dbb09840891a9535cea9a51608eaef017a10573dcb061"
+          }
+        },
+        {
+          "criterion_id": "RC-0301",
+          "label": "测量方案设计合理性",
+          "max_score": "25",
+          "weight": "0.45",
+          "source": {
+            "material": "《传感器与检测技术》实验报告评分标准表",
+            "material_version": "v1.0",
+            "locator": "第 3 页 / 表 3 第 1 行",
+            "digest": "sha256:77b62506ed70b26934f96d5606bfc15cdd4ac0e94f348a5480fabe1fd9c5e29b"
+          }
+        },
+        {
+          "criterion_id": "RC-0302",
+          "label": "元件参数选择与论证",
+          "max_score": "15",
+          "weight": "0.25",
+          "source": {
+            "material": "《传感器与检测技术》实验报告评分标准表",
+            "material_version": "v1.0",
+            "locator": "第 3 页 / 表 3 第 2 行",
+            "digest": "sha256:480ad824f872f696dd7e10f9270b94ec437fd0b2530b506e7c458f5093b53c51"
+          }
+        }
+      ],
+      "expected": {
+        "ready": true,
+        "blockers": [],
+        "attainment": "0.802",
+        "outcome": "achieved",
+        "weight_total": "1.000",
+        "criteria": [
+          {
+            "criterion_id": "RC-0101",
+            "valid_sample_count": 12,
+            "missing_sample_count": 0,
+            "score_sum": "152",
+            "score_rate": "0.844",
+            "contribution": "0.253"
+          },
+          {
+            "criterion_id": "RC-0301",
+            "valid_sample_count": 12,
+            "missing_sample_count": 0,
+            "score_sum": "236",
+            "score_rate": "0.787",
+            "contribution": "0.354"
+          },
+          {
+            "criterion_id": "RC-0302",
+            "valid_sample_count": 12,
+            "missing_sample_count": 0,
+            "score_sum": "140",
+            "score_rate": "0.778",
+            "contribution": "0.195"
+          }
+        ]
+      }
+    },
+    {
+      "target_id": "TGT-CO2",
+      "course_outcome_id": "CO-2",
+      "performance_indicator_id": "PI-4.3",
+      "threshold": "0.70",
+      "note": "S04 缺席实验二，RC-0201 与 RC-0202 按 exclude 口径剔除，分母减一。",
+      "criteria": [
+        {
+          "criterion_id": "RC-0102",
+          "label": "标定数据采集规范性",
+          "max_score": "15",
+          "weight": "0.25",
+          "source": {
+            "material": "《传感器与检测技术》实验报告评分标准表",
+            "material_version": "v1.0",
+            "locator": "第 1 页 / 表 1 第 2 行",
+            "digest": "sha256:e97d8c617affeb1a88ce22c20d096e6d24be1bfe40bfcafd931bac59cad9858d"
+          }
+        },
+        {
+          "criterion_id": "RC-0201",
+          "label": "测量系统搭建与调试",
+          "max_score": "20",
+          "weight": "0.30",
+          "source": {
+            "material": "《传感器与检测技术》实验报告评分标准表",
+            "material_version": "v1.0",
+            "locator": "第 2 页 / 表 2 第 1 行",
+            "digest": "sha256:e8e2ba325ff937eb32245d3b340f67958cca451229cb9cab1f3da0d42f21d055"
+          }
+        },
+        {
+          "criterion_id": "RC-0202",
+          "label": "温度数据采集与记录完整性",
+          "max_score": "15",
+          "weight": "0.20",
+          "source": {
+            "material": "《传感器与检测技术》实验报告评分标准表",
+            "material_version": "v1.0",
+            "locator": "第 2 页 / 表 2 第 2 行",
+            "digest": "sha256:5cb483f1e797032d70c5bc6ef215f1d4cb8b1837bbac563401bb1dfac983e474"
+          }
+        },
+        {
+          "criterion_id": "RC-0303",
+          "label": "实验数据处理与曲线拟合",
+          "max_score": "20",
+          "weight": "0.25",
+          "source": {
+            "material": "《传感器与检测技术》实验报告评分标准表",
+            "material_version": "v1.0",
+            "locator": "第 3 页 / 表 3 第 3 行",
+            "digest": "sha256:e7d81b67caac62ae62caa542424a010b2e929fc33570e43b9d0adf80ec278172"
+          }
+        }
+      ],
+      "expected": {
+        "ready": true,
+        "blockers": [],
+        "attainment": "0.793",
+        "outcome": "achieved",
+        "weight_total": "1.000",
+        "criteria": [
+          {
+            "criterion_id": "RC-0102",
+            "valid_sample_count": 12,
+            "missing_sample_count": 0,
+            "score_sum": "158",
+            "score_rate": "0.878",
+            "contribution": "0.220"
+          },
+          {
+            "criterion_id": "RC-0201",
+            "valid_sample_count": 11,
+            "missing_sample_count": 1,
+            "score_sum": "172",
+            "score_rate": "0.782",
+            "contribution": "0.235"
+          },
+          {
+            "criterion_id": "RC-0202",
+            "valid_sample_count": 11,
+            "missing_sample_count": 1,
+            "score_sum": "130",
+            "score_rate": "0.788",
+            "contribution": "0.158"
+          },
+          {
+            "criterion_id": "RC-0303",
+            "valid_sample_count": 12,
+            "missing_sample_count": 0,
+            "score_sum": "173",
+            "score_rate": "0.721",
+            "contribution": "0.180"
+          }
+        ]
+      }
+    },
+    {
+      "target_id": "TGT-CO3",
+      "course_outcome_id": "CO-3",
+      "performance_indicator_id": "PI-4.3",
+      "threshold": "0.70",
+      "note": "阻断算例：2024 版大纲新增 CO-3，v1.0 评分表尚未设立对应评分项列，因此无任何评分数据。达成度与结论必须为空，不得投影为未达成；处置方式是评分表升版增列，而不是补算。",
+      "criteria": [
+        {
+          "criterion_id": "RC-0203",
+          "label": "冷端补偿误差分析",
+          "max_score": "15",
+          "weight": "0.40",
+          "source": {
+            "material": "《传感器与检测技术》实验报告评分标准表",
+            "material_version": "v1.0",
+            "locator": "第 2 页 / 表 2 第 3 行（2024 版大纲新增，v1.0 评分表尚未设列）",
+            "digest": "sha256:f2f0135e6da8224e287b60b5512f232fee2ec53e284a351dbe1ed7447e5130de"
+          }
+        },
+        {
+          "criterion_id": "RC-0304",
+          "label": "误差来源分析与改进建议",
+          "max_score": "20",
+          "weight": "0.60",
+          "source": {
+            "material": "《传感器与检测技术》实验报告评分标准表",
+            "material_version": "v1.0",
+            "locator": "第 3 页 / 表 3 第 4 行（2024 版大纲新增，v1.0 评分表尚未设列）",
+            "digest": "sha256:b754958301f1baab39ba6fe83e19a4e0105318176c33c311705e70be7ad066ee"
+          }
+        }
+      ],
+      "expected": {
+        "ready": false,
+        "blockers": [
+          "冷端补偿误差分析缺少评分数据",
+          "误差来源分析与改进建议缺少评分数据"
+        ],
+        "attainment": null,
+        "outcome": null,
+        "weight_total": "1.000",
+        "criteria": [
+          {
+            "criterion_id": "RC-0203",
+            "valid_sample_count": 0,
+            "missing_sample_count": 0,
+            "score_sum": "0",
+            "score_rate": null,
+            "contribution": null
+          },
+          {
+            "criterion_id": "RC-0304",
+            "valid_sample_count": 0,
+            "missing_sample_count": 0,
+            "score_sum": "0",
+            "score_rate": null,
+            "contribution": null
+          }
+        ]
+      }
+    }
+  ]
+}

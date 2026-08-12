@@ -1,0 +1,426 @@
+{
+  "packageVersion": "course-package:v1",
+  "expectedRevision": 0,
+  "effectiveCycle": "2025-2026-2",
+  "owner": "课程负责人（示例）",
+  "course": {
+    "code": "EXP-2031",
+    "name": "传感器与检测技术（实验）",
+    "definition": "面向自动化专业的独立设课实验，覆盖传感器选型、标定与误差分析。",
+    "source": {
+      "sourceRefId": "src-course",
+      "materialId": "material-《传感器与检",
+      "materialVersionId": "material-version-v1.2",
+      "evidenceFragmentId": "fragment-course",
+      "material": "《传感器与检测技术》实验教学大纲",
+      "version": "v1.2",
+      "coordinate": "第 1 页 / 表A 课程基本信息"
+    }
+  },
+  "graduateOutcomes": [
+    {
+      "code": "GO-4",
+      "name": "研究",
+      "definition": "能够基于科学原理并采用科学方法对复杂工程问题进行研究。",
+      "source": {
+        "sourceRefId": "src-GO-4",
+        "materialId": "material-《自动化专业",
+        "materialVersionId": "material-version-2024 版",
+        "evidenceFragmentId": "fragment-GO-4",
+        "material": "《自动化专业本科培养方案》",
+        "version": "2024 版",
+        "coordinate": "第 17 页 / 毕业要求 4"
+      }
+    }
+  ],
+  "abilities": [
+    {
+      "code": "BA-4",
+      "name": "实验研究与数据分析能力",
+      "definition": "能够设计实验方案、采集数据并分析误差，得出有效结论。",
+      "domain": "实验研究",
+      "cognitiveLevel": "analyze",
+      "observableBehaviors": [
+        "选择合理测量方案",
+        "设计可执行实验步骤",
+        "规范采集实验数据",
+        "分析误差来源并提出改进"
+      ],
+      "source": {
+        "sourceRefId": "src-BA-4",
+        "materialId": "material-《自动化专业",
+        "materialVersionId": "material-version-2024 版",
+        "evidenceFragmentId": "fragment-BA-4",
+        "material": "《自动化专业本科培养方案》",
+        "version": "2024 版",
+        "coordinate": "第 18 页 / 能力分解表"
+      }
+    }
+  ],
+  "indicators": [
+    {
+      "code": "PI-4.2",
+      "name": "选择测量方案并设计实验步骤",
+      "definition": "能够针对检测对象特征选择合理的测量方案并设计实验步骤。",
+      "graduateOutcomeCode": "GO-4",
+      "abilityCodes": [
+        "BA-4"
+      ],
+      "source": {
+        "sourceRefId": "src-PI-4.2",
+        "materialId": "material-《自动化专业",
+        "materialVersionId": "material-version-2024 版",
+        "evidenceFragmentId": "fragment-PI-4.2",
+        "material": "《自动化专业本科培养方案》",
+        "version": "2024 版",
+        "coordinate": "第 18 页 / 表 4 指标点分解"
+      }
+    },
+    {
+      "code": "PI-4.3",
+      "name": "采集处理数据并分析误差",
+      "definition": "能够正确采集与处理实验数据，分析误差来源并得出有效结论。",
+      "graduateOutcomeCode": "GO-4",
+      "abilityCodes": [
+        "BA-4"
+      ],
+      "source": {
+        "sourceRefId": "src-PI-4.3",
+        "materialId": "material-《自动化专业",
+        "materialVersionId": "material-version-2024 版",
+        "evidenceFragmentId": "fragment-PI-4.3",
+        "material": "《自动化专业本科培养方案》",
+        "version": "2024 版",
+        "coordinate": "第 18 页 / 表 4 指标点分解"
+      }
+    }
+  ],
+  "courseOutcomes": [
+    {
+      "code": "CO-1",
+      "name": "传感器与测量电路选型及方案设计",
+      "definition": "能够根据被测物理量特性选择合适的传感器与测量电路，并设计可行的实验方案。",
+      "indicatorCode": "PI-4.2",
+      "rationale": "课程通过设计性实验训练学生完成选型论证与方案设计。",
+      "targetBehaviors": [
+        "选择合理测量方案",
+        "设计可执行实验步骤"
+      ],
+      "source": {
+        "sourceRefId": "src-CO-1",
+        "materialId": "material-《传感器与检",
+        "materialVersionId": "material-version-v1.2",
+        "evidenceFragmentId": "fragment-CO-1",
+        "material": "《传感器与检测技术》实验教学大纲",
+        "version": "v1.2",
+        "coordinate": "第 2 页 / 表B 课程目标"
+      }
+    },
+    {
+      "code": "CO-2",
+      "name": "测量系统搭建与数据处理",
+      "definition": "能够正确搭建测量系统、规范采集数据，并完成标定与数据处理。",
+      "indicatorCode": "PI-4.3",
+      "rationale": "课程通过标定与数据处理任务训练规范采集与计算能力。",
+      "targetBehaviors": [
+        "规范采集实验数据"
+      ],
+      "source": {
+        "sourceRefId": "src-CO-2",
+        "materialId": "material-《传感器与检",
+        "materialVersionId": "material-version-v1.2",
+        "evidenceFragmentId": "fragment-CO-2",
+        "material": "《传感器与检测技术》实验教学大纲",
+        "version": "v1.2",
+        "coordinate": "第 2 页 / 表B 课程目标"
+      }
+    },
+    {
+      "code": "CO-3",
+      "name": "误差分析与改进",
+      "definition": "能够分析测量误差来源，评价测量结果有效性并提出改进方案。",
+      "indicatorCode": "PI-4.3",
+      "rationale": "课程通过误差分析环节训练结果评价与改进建议。",
+      "targetBehaviors": [
+        "分析误差来源并提出改进"
+      ],
+      "source": {
+        "sourceRefId": "src-CO-3",
+        "materialId": "material-《传感器与检",
+        "materialVersionId": "material-version-v1.2",
+        "evidenceFragmentId": "fragment-CO-3",
+        "material": "《传感器与检测技术》实验教学大纲",
+        "version": "v1.2",
+        "coordinate": "第 2 页 / 表B 课程目标"
+      }
+    }
+  ],
+  "experiments": [
+    {
+      "code": "EXP-01",
+      "name": "应变式传感器特性与标定",
+      "definition": "验证应变片桥路输出特性并完成静态标定。",
+      "courseOutcomeCodes": [
+        "CO-1",
+        "CO-2"
+      ],
+      "abilityCodes": [
+        "BA-4"
+      ],
+      "source": {
+        "sourceRefId": "src-EXP-01",
+        "materialId": "material-《传感器与检",
+        "materialVersionId": "material-version-v2.0",
+        "evidenceFragmentId": "fragment-EXP-01",
+        "material": "《传感器与检测技术》实验指导书",
+        "version": "v2.0",
+        "coordinate": "第 3 页 / 实验一"
+      }
+    },
+    {
+      "code": "EXP-02",
+      "name": "热电偶温度测量与冷端补偿",
+      "definition": "搭建热电偶测温回路并分析冷端补偿误差。",
+      "courseOutcomeCodes": [
+        "CO-2",
+        "CO-3"
+      ],
+      "abilityCodes": [
+        "BA-4"
+      ],
+      "source": {
+        "sourceRefId": "src-EXP-02",
+        "materialId": "material-《传感器与检",
+        "materialVersionId": "material-version-v2.0",
+        "evidenceFragmentId": "fragment-EXP-02",
+        "material": "《传感器与检测技术》实验指导书",
+        "version": "v2.0",
+        "coordinate": "第 11 页 / 实验二"
+      }
+    },
+    {
+      "code": "EXP-03",
+      "name": "电容式位移传感器设计性实验",
+      "definition": "自主设计电容式位移测量方案并完成数据处理与误差分析。",
+      "courseOutcomeCodes": [
+        "CO-1",
+        "CO-2",
+        "CO-3"
+      ],
+      "abilityCodes": [
+        "BA-4"
+      ],
+      "source": {
+        "sourceRefId": "src-EXP-03",
+        "materialId": "material-《传感器与检",
+        "materialVersionId": "material-version-v2.0",
+        "evidenceFragmentId": "fragment-EXP-03",
+        "material": "《传感器与检测技术》实验指导书",
+        "version": "v2.0",
+        "coordinate": "第 19 页 / 实验三"
+      }
+    }
+  ],
+  "assessmentTasks": [
+    {
+      "code": "AT-01",
+      "name": "实验一实验报告",
+      "definition": "提交实验一标定数据与分析报告。",
+      "experimentCode": "EXP-01",
+      "source": {
+        "sourceRefId": "src-AT-01",
+        "materialId": "material-《传感器与检",
+        "materialVersionId": "material-version-v2.0",
+        "evidenceFragmentId": "fragment-AT-01",
+        "material": "《传感器与检测技术》实验指导书",
+        "version": "v2.0",
+        "coordinate": "第 9 页 / 实验一考核要求"
+      }
+    },
+    {
+      "code": "AT-02",
+      "name": "实验二实验报告",
+      "definition": "提交实验二测温记录与误差分析。",
+      "experimentCode": "EXP-02",
+      "source": {
+        "sourceRefId": "src-AT-02",
+        "materialId": "material-《传感器与检",
+        "materialVersionId": "material-version-v2.0",
+        "evidenceFragmentId": "fragment-AT-02",
+        "material": "《传感器与检测技术》实验指导书",
+        "version": "v2.0",
+        "coordinate": "第 17 页 / 实验二考核要求"
+      }
+    },
+    {
+      "code": "AT-03",
+      "name": "实验三设计报告",
+      "definition": "提交实验三方案设计与数据处理报告。",
+      "experimentCode": "EXP-03",
+      "source": {
+        "sourceRefId": "src-AT-03",
+        "materialId": "material-《传感器与检",
+        "materialVersionId": "material-version-v2.0",
+        "evidenceFragmentId": "fragment-AT-03",
+        "material": "《传感器与检测技术》实验指导书",
+        "version": "v2.0",
+        "coordinate": "第 27 页 / 实验三考核要求"
+      }
+    }
+  ],
+  "criteria": [
+    {
+      "code": "RC-0101",
+      "name": "传感器选型与测量电路连接正确性",
+      "definition": "传感器选型与测量电路连接正确性的评分要求。",
+      "taskCode": "AT-01",
+      "courseOutcomeCode": "CO-1",
+      "abilityCode": "BA-4",
+      "source": {
+        "sourceRefId": "src-RC-0101",
+        "materialId": "material-《传感器与检",
+        "materialVersionId": "material-version-v1.0",
+        "evidenceFragmentId": "fragment-RC-0101",
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "version": "v1.0",
+        "coordinate": "第 1 页 / 表 1 第 1 行"
+      }
+    },
+    {
+      "code": "RC-0102",
+      "name": "标定数据采集规范性",
+      "definition": "标定数据采集规范性的评分要求。",
+      "taskCode": "AT-01",
+      "courseOutcomeCode": "CO-2",
+      "abilityCode": "BA-4",
+      "source": {
+        "sourceRefId": "src-RC-0102",
+        "materialId": "material-《传感器与检",
+        "materialVersionId": "material-version-v1.0",
+        "evidenceFragmentId": "fragment-RC-0102",
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "version": "v1.0",
+        "coordinate": "第 1 页 / 表 1 第 2 行"
+      }
+    },
+    {
+      "code": "RC-0201",
+      "name": "测量系统搭建与调试",
+      "definition": "测量系统搭建与调试的评分要求。",
+      "taskCode": "AT-02",
+      "courseOutcomeCode": "CO-2",
+      "abilityCode": "BA-4",
+      "source": {
+        "sourceRefId": "src-RC-0201",
+        "materialId": "material-《传感器与检",
+        "materialVersionId": "material-version-v1.0",
+        "evidenceFragmentId": "fragment-RC-0201",
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "version": "v1.0",
+        "coordinate": "第 2 页 / 表 2 第 1 行"
+      }
+    },
+    {
+      "code": "RC-0202",
+      "name": "温度数据采集与记录完整性",
+      "definition": "温度数据采集与记录完整性的评分要求。",
+      "taskCode": "AT-02",
+      "courseOutcomeCode": "CO-2",
+      "abilityCode": "BA-4",
+      "source": {
+        "sourceRefId": "src-RC-0202",
+        "materialId": "material-《传感器与检",
+        "materialVersionId": "material-version-v1.0",
+        "evidenceFragmentId": "fragment-RC-0202",
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "version": "v1.0",
+        "coordinate": "第 2 页 / 表 2 第 2 行"
+      }
+    },
+    {
+      "code": "RC-0203",
+      "name": "冷端补偿误差分析",
+      "definition": "冷端补偿误差分析的评分要求。",
+      "taskCode": "AT-02",
+      "courseOutcomeCode": "CO-3",
+      "abilityCode": "BA-4",
+      "source": {
+        "sourceRefId": "src-RC-0203",
+        "materialId": "material-《传感器与检",
+        "materialVersionId": "material-version-v1.0",
+        "evidenceFragmentId": "fragment-RC-0203",
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "version": "v1.0",
+        "coordinate": "第 2 页 / 表 2 第 3 行"
+      }
+    },
+    {
+      "code": "RC-0301",
+      "name": "测量方案设计合理性",
+      "definition": "测量方案设计合理性的评分要求。",
+      "taskCode": "AT-03",
+      "courseOutcomeCode": "CO-1",
+      "abilityCode": "BA-4",
+      "source": {
+        "sourceRefId": "src-RC-0301",
+        "materialId": "material-《传感器与检",
+        "materialVersionId": "material-version-v1.0",
+        "evidenceFragmentId": "fragment-RC-0301",
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "version": "v1.0",
+        "coordinate": "第 3 页 / 表 3 第 1 行"
+      }
+    },
+    {
+      "code": "RC-0302",
+      "name": "元件参数选择与论证",
+      "definition": "元件参数选择与论证的评分要求。",
+      "taskCode": "AT-03",
+      "courseOutcomeCode": "CO-1",
+      "abilityCode": "BA-4",
+      "source": {
+        "sourceRefId": "src-RC-0302",
+        "materialId": "material-《传感器与检",
+        "materialVersionId": "material-version-v1.0",
+        "evidenceFragmentId": "fragment-RC-0302",
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "version": "v1.0",
+        "coordinate": "第 3 页 / 表 3 第 2 行"
+      }
+    },
+    {
+      "code": "RC-0303",
+      "name": "实验数据处理与曲线拟合",
+      "definition": "实验数据处理与曲线拟合的评分要求。",
+      "taskCode": "AT-03",
+      "courseOutcomeCode": "CO-2",
+      "abilityCode": "BA-4",
+      "source": {
+        "sourceRefId": "src-RC-0303",
+        "materialId": "material-《传感器与检",
+        "materialVersionId": "material-version-v1.0",
+        "evidenceFragmentId": "fragment-RC-0303",
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "version": "v1.0",
+        "coordinate": "第 3 页 / 表 3 第 3 行"
+      }
+    },
+    {
+      "code": "RC-0304",
+      "name": "误差来源分析与改进建议",
+      "definition": "误差来源分析与改进建议的评分要求。",
+      "taskCode": "AT-03",
+      "courseOutcomeCode": "CO-3",
+      "abilityCode": "BA-4",
+      "source": {
+        "sourceRefId": "src-RC-0304",
+        "materialId": "material-《传感器与检",
+        "materialVersionId": "material-version-v1.0",
+        "evidenceFragmentId": "fragment-RC-0304",
+        "material": "《传感器与检测技术》实验报告评分标准表",
+        "version": "v1.0",
+        "coordinate": "第 3 页 / 表 3 第 4 行"
+      }
+    }
+  ]
+}

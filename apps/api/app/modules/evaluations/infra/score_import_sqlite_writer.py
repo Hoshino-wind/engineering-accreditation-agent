@@ -17,6 +17,7 @@ def insert_score_import_batch(
     _insert_batch_header(connection, batch)
     _insert_candidate_items(connection, batch)
     _insert_records(connection, batch)
+    _insert_per_student_source(connection, batch)
     _insert_report(connection, batch)
     connection.execute(
         """
@@ -112,6 +113,43 @@ def _insert_records(
                 str(record.score_rate),
             )
             for record in batch.records
+        ],
+    )
+
+
+def _insert_per_student_source(
+    connection: sqlite3.Connection,
+    batch: ScoreImportBatch,
+) -> None:
+    source = batch.per_student_source
+    if source is None:
+        return
+    connection.execute(
+        """
+        INSERT INTO evaluation_score_import_per_student_sources(
+            batch_id, missing_score_policy, score_rate_scale
+        ) VALUES (?, ?, ?)
+        """,
+        (batch.batch_id, source.missing_score_policy, source.score_rate_scale),
+    )
+    connection.executemany(
+        """
+        INSERT INTO evaluation_score_import_student_entries(
+            batch_id, entry_order, input_id, max_score, student_ref, raw_score
+        ) VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        [
+            (
+                batch.batch_id,
+                order,
+                item.input_id,
+                str(item.max_score),
+                entry.student_ref,
+                None if entry.raw_score is None else str(entry.raw_score),
+            )
+            for order, (item, entry) in enumerate(
+                (item, entry) for item in source.items for entry in item.entries
+            )
         ],
     )
 

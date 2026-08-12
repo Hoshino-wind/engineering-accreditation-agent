@@ -105,7 +105,9 @@ M6 前端切片按以下所有权拆分：
 
 后端 `evaluations` 当前提供对象/运行/引用/预检四条权威读端点、一条受限运行写端点，以及试点汇总评分批次的创建与精确读取端点。`POST /api/v1/evaluations/score-import-batches` 与 `GET /api/v1/evaluations/score-import-batches/{batch_id}` 都只在 development/test 且显式开关开启时工作；GET 按不透明 ID 读取不可变批次。预检用例由 application 读取仓储快照、domain 合并来源检查与计算派生阻断、contracts 输出 `scope=pilot_snapshot`、`reportVersion=evaluation-preflight:v1`、稳定 `owner` / `action`、`missingInputs` 和确定性 `reportHash`；route 只处理 HTTP 映射。该查询不写仓储，报告和报告哈希都不是持久化审计快照。
 
-运行创建命令只接收对象 ID、来源运行 ID 和幂等键；评分批次命令另行接收固定 `local-pilot-aggregate:v1` 汇总结构，不与运行来源契约混用。领域层使用 `Decimal` 计算汇总得分率并生成与中文文案无关的内容/报告哈希；独立 SQLite 适配器在一个事务中追加批次、候选项、规范记录、校验报告和幂等命令，并禁止覆盖或删除。阻断运行返回 `result=null`，也不能作为试点重算来源；创建汇总批次同样不会修改它或使其变为 ready。学生明细、文件映射、正式范围、操作者、策略、正式运行生命周期、正式图谱目标定位、审批、RBAC 及不可变业务审计仍待接入，前端复核操作只是按运行隔离的本地草稿。
+`GET /api/v1/evaluations/graph-sources` 是评价与 M2 之间的第一条活链路：评价**结构**（哪些评分项通过 `contributes-to` 汇总到哪个课程目标、课程目标 `supports` 哪个指标点）只从已发布图谱快照派生，评价**权重与阈值**只从 M6 策略版本读取，两者不得互相补写。评价模块不直接依赖 `teaching_graph`：application 只声明 `PublishedGraphRepository` 与 `EvaluationPolicyRepository` 两个端口，跨模块知识集中在 `infra/graph_source_runtime.py` 与 `factory.py`。策略绑定挂在具体 `edgeVersionId` 上——图谱升了关系版本而策略未同步时对应评价对象阻断，不静默沿用旧权重。草稿状态解析到其基线版本，未发布图谱返回 409 并标注 `owner=M2`，不返回空列表。试点策略暂由随代码发布的 `pilot_evaluation_policy.json` 提供；正式化时替换为数据库仓储，端口与领域模型不变。既有对象/运行读端点仍由 `pilot_evaluation_read_model.json` 供给，尚未切换到图谱派生。
+
+运行创建命令只接收对象 ID、来源运行 ID 和幂等键；评分批次命令另行接收 `local-pilot-aggregate:v1` 汇总结构或 `local-pilot-per-student:v1` 逐生结构，不与运行来源契约混用。逐生口径由服务端按声明的 `missingScorePolicy`（`exclude` / `zero` / `block`）从原始分派生汇总值，原始分、满分、口径和 `scoreRateScale` 全部进入内容摘要并可回读，因此汇总值能被复核者重新推导；汇总口径把这些决定留在系统之外，只适用于已无法取得原始分的历史数据。领域层使用 `Decimal` 计算汇总得分率并生成与中文文案无关的内容/报告哈希；独立 SQLite 适配器在一个事务中追加批次、候选项、规范记录、校验报告和幂等命令，并禁止覆盖或删除。阻断运行返回 `result=null`，也不能作为试点重算来源；创建汇总批次同样不会修改它或使其变为 ready。学生明细、文件映射、正式范围、操作者、策略、正式运行生命周期、正式图谱目标定位、审批、RBAC 及不可变业务审计仍待接入，前端复核操作只是按运行隔离的本地草稿。
 
 M7 前端切片按以下所有权拆分：
 
@@ -184,6 +186,10 @@ M2 当前已经建立首条服务端权威链路：
 - 所有写命令携带 `expectedRevision`，由仓储执行乐观锁，过期写入不得覆盖新状态；
 - 前端发布检查只用于即时反馈，服务端在发布命令中重新执行全部阻断规则；
 - 当前操作者仍是本地固定专业负责人，OIDC、组织范围和真实角色授权尚未接入，因此该链路不构成生产安全边界。
+
+`POST /api/v1/teaching-graph/imports/course-package` 是新模板的落地入口：课程大纲、实验指导书与评分标准表本身已是结构化数据，导入不经过 AI 抽取，教师填写模板即人工决定。导入把课程包展开为草稿节点与关系（`status=draft`、`reviewStatus=pending`），随后由 M2 既有的草稿校验、逐项审核与发布门禁把关；ID 与版本号由编码确定性生成，因此重复导入同一份内容是空操作，内容变化则报冲突并拒绝整批写入，不静默改写正式事实。导入不创建正式基线：工作区未初始化时返回 404，因为没有基线的草稿永远无法发布。评分项契约不含权重字段——权重属于 M6 策略版本。
+
+已知约束：`_alignment_flags` 当前要求一个实验支撑某课程目标时，该实验考核任务下所有评价了目标能力的评分项都必须归集到同一课程目标。因此"一份实验报告的不同评分项分别度量不同课程目标"这一常见结构会被发布门禁拒绝。该行为由 `test_publish_gate_currently_rejects_criteria_split_across_outcomes` 固定，是否放宽属于业务规则决策，未在实现层单方面更改。
 
 目标业务模块及产品映射：
 

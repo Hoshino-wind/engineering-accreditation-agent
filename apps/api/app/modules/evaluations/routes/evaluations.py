@@ -9,6 +9,7 @@ from app.modules.evaluations.application import (
     GetEvaluationPreflight,
     GetEvaluationRun,
     GetEvaluationRunReference,
+    GetGraphEvaluationSources,
     GetScoreImportBatch,
     ListEvaluationObjects,
 )
@@ -28,6 +29,9 @@ from app.modules.evaluations.routes.evaluation_route_params import (
 from app.modules.evaluations.routes.evaluation_run_creation import (
     create_evaluation_run_router,
 )
+from app.modules.evaluations.routes.graph_evaluation_sources import (
+    create_graph_evaluation_sources_router,
+)
 from app.modules.evaluations.routes.score_import_batches import (
     create_score_import_batches_router,
 )
@@ -41,6 +45,7 @@ def create_evaluations_router(
     provide_create_run: Callable[[], CreateEvaluationRun],
     provide_create_score_batch: Callable[[], CreateScoreImportBatch] | None = None,
     provide_get_score_batch: Callable[[], GetScoreImportBatch] | None = None,
+    provide_graph_sources: Callable[[], GetGraphEvaluationSources] | None = None,
 ) -> APIRouter:
     if (provide_create_score_batch is None) != (provide_get_score_batch is None):
         raise ValueError("评分批次创建与查询 provider 必须成对提供")
@@ -141,4 +146,6 @@ def create_evaluations_router(
                 provide_get_score_batch,
             )
         )
+    if provide_graph_sources is not None:
+        router.include_router(create_graph_evaluation_sources_router(provide_graph_sources))
     return router

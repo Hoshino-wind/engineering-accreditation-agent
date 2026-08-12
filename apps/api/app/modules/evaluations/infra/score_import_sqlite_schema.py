@@ -6,6 +6,8 @@ SCORE_IMPORT_TABLES = (
     "evaluation_score_records",
     "evaluation_score_validation_reports",
     "evaluation_score_import_commands",
+    "evaluation_score_import_per_student_sources",
+    "evaluation_score_import_student_entries",
 )
 
 SCORE_IMPORT_SCHEMA_STATEMENTS = (
@@ -73,6 +75,30 @@ SCORE_IMPORT_SCHEMA_STATEMENTS = (
         batch_id TEXT NOT NULL UNIQUE,
         created_at TEXT NOT NULL,
         FOREIGN KEY(batch_id) REFERENCES evaluation_score_import_batches(batch_id)
+    )
+    """,
+    # 逐生口径的原始输入独立成表，既避免对既有表做 ALTER，
+    # 也让“汇总批次没有逐生数据”成为结构上的事实而不是约定。
+    """
+    CREATE TABLE IF NOT EXISTS evaluation_score_import_per_student_sources (
+        batch_id TEXT PRIMARY KEY,
+        missing_score_policy TEXT NOT NULL,
+        score_rate_scale INTEGER NOT NULL,
+        FOREIGN KEY(batch_id) REFERENCES evaluation_score_import_batches(batch_id)
+    )
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS evaluation_score_import_student_entries (
+        batch_id TEXT NOT NULL,
+        entry_order INTEGER NOT NULL,
+        input_id TEXT NOT NULL,
+        max_score TEXT NOT NULL,
+        student_ref TEXT NOT NULL,
+        raw_score TEXT,
+        PRIMARY KEY(batch_id, entry_order),
+        UNIQUE(batch_id, input_id, student_ref),
+        FOREIGN KEY(batch_id)
+            REFERENCES evaluation_score_import_per_student_sources(batch_id)
     )
     """,
 )

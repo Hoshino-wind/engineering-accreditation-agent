@@ -5,10 +5,14 @@ from app.modules.evaluations.contracts.score_import_contract_base import (
     ScoreImportContract,
 )
 from app.modules.evaluations.domain import (
+    SCORE_IMPORT_PROFILE_GRANULARITY,
+    PerStudentScoreItem,
+    PerStudentSource,
     ScoreImportBatch,
     ScoreImportCandidateItem,
     ScoreRecord,
     ScoreValidationCheck,
+    StudentScoreEntry,
     canonical_decimal,
 )
 
@@ -39,6 +43,7 @@ class ScoreRecordResponse(ScoreImportContract):
     possible_points_total: str
     observed_student_count: int
     score_rate: str
+    score_rate_scale: int
 
     @classmethod
     def from_record(cls, record: ScoreRecord) -> "ScoreRecordResponse":
@@ -49,6 +54,52 @@ class ScoreRecordResponse(ScoreImportContract):
             possible_points_total=canonical_decimal(record.possible_points_total) or "0",
             observed_student_count=record.observed_student_count,
             score_rate=canonical_decimal(record.score_rate) or "0",
+            score_rate_scale=record.score_rate_scale,
+        )
+
+
+class StudentScoreEntryResponse(ScoreImportContract):
+    student_ref: str
+    raw_score: str | None
+
+    @classmethod
+    def from_entry(cls, entry: StudentScoreEntry) -> "StudentScoreEntryResponse":
+        return cls(
+            student_ref=entry.student_ref,
+            raw_score=canonical_decimal(entry.raw_score),
+        )
+
+
+class PerStudentScoreItemResponse(ScoreImportContract):
+    input_id: str
+    max_score: str
+    entries: list[StudentScoreEntryResponse]
+
+    @classmethod
+    def from_item(cls, item: PerStudentScoreItem) -> "PerStudentScoreItemResponse":
+        return cls(
+            input_id=item.input_id,
+            max_score=canonical_decimal(item.max_score) or "0",
+            entries=[StudentScoreEntryResponse.from_entry(entry) for entry in item.entries],
+        )
+
+
+class PerStudentSourceResponse(ScoreImportContract):
+    """逐生原始输入回读。
+
+    保留原始分和口径声明，使复核者能够独立重算汇总值，而不必信任服务端的推导。
+    """
+
+    missing_score_policy: Literal["exclude", "zero", "block"]
+    score_rate_scale: int
+    items: list[PerStudentScoreItemResponse]
+
+    @classmethod
+    def from_source(cls, source: PerStudentSource) -> "PerStudentSourceResponse":
+        return cls(
+            missing_score_policy=source.missing_score_policy,
+            score_rate_scale=source.score_rate_scale,
+            items=[PerStudentScoreItemResponse.from_item(item) for item in source.items],
         )
 
 
@@ -83,10 +134,10 @@ class ScoreValidationReportResponse(ScoreImportContract):
 
 class ScoreImportBatchResponse(ScoreImportContract):
     batch_id: str
-    scope: Literal["local_pilot_aggregate"]
+    scope: Literal["local_pilot_aggregate", "local_pilot_per_student"]
     schema_version: Literal["score-import-batch:v1"]
-    profile: Literal["local-pilot-aggregate:v1"]
-    record_granularity: Literal["aggregate"] = "aggregate"
+    profile: Literal["local-pilot-aggregate:v1", "local-pilot-per-student:v1"]
+    record_granularity: Literal["aggregate", "per_student"]
     formal_usable: Literal[False] = False
     evaluation_object_id: str
     base_run_id: str
@@ -94,6 +145,7 @@ class ScoreImportBatchResponse(ScoreImportContract):
     source_kind: Literal["structured_json"]
     candidate_items: list[ScoreImportCandidateItemResponse]
     records: list[ScoreRecordResponse]
+    per_student_source: PerStudentSourceResponse | None = None
     content_digest: str
     created_at: str
     validation_report: ScoreValidationReportResponse
@@ -106,6 +158,12 @@ class ScoreImportBatchResponse(ScoreImportContract):
             scope=batch.scope,
             schema_version="score-import-batch:v1",
             profile=batch.profile,
+            record_granularity=SCORE_IMPORT_PROFILE_GRANULARITY[batch.profile],
+            per_student_source=(
+                None
+                if batch.per_student_source is None
+                else PerStudentSourceResponse.from_source(batch.per_student_source)
+            ),
             evaluation_object_id=batch.evaluation_object_id,
             base_run_id=batch.base_run_id,
             base_context_digest=batch.base_context_digest,

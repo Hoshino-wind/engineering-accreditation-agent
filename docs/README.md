@@ -11,7 +11,8 @@
 7. [数据、评价与 AI 架构](architecture/data-and-ai-architecture.md)：核心数据模型、确定性评价、检索增强和模型适配。
 8. [数据安全与合规基线](security/data-security.md)：学生数据、权限、审计、模型调用和文件安全。
 9. [MVP 范围与实施路线](implementation/mvp-roadmap.md)：按垂直切片打通产品模块和退出条件。
-10. [本地开发与验证](implementation/development-setup.md)：基础工程、启动方式、契约生成和质量门槛。
+10. [达成度金标准样例](../golden-sample/README.md)：人工先算出的验收标尺、录入方式和口径冻结。
+11. [本地开发与验证](implementation/development-setup.md)：基础工程、启动方式、契约生成和质量门槛。
 
 ## 已确认的架构决策
 
@@ -34,4 +35,6 @@
 - 业务规则变化时，先更新项目或数据架构文档，再调整实现。
 - API 以服务端 OpenAPI 为唯一机器可读契约，不在前后端重复手写模型。
 - 正式评价公式、阈值和聚合规则必须版本化，并能从输入证据重算。
+- 评价口径（计算方法、缺失值处理、样本口径、舍入时机、阈值边界）以
+  [金标准样例](../golden-sample/README.md)为准；口径变更等同于评价策略版本升级。
 - 文档示例不得包含真实姓名、学号、成绩或可回溯到个人的文件内容。

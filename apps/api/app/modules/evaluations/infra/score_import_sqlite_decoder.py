@@ -4,17 +4,25 @@ from decimal import Decimal
 from typing import Any, cast
 
 from app.modules.evaluations.domain import (
-    SCORE_IMPORT_PROFILE,
+    DEFAULT_SCORE_RATE_SCALE,
+    PER_STUDENT_PROFILE,
+    SCORE_IMPORT_PROFILE_SCOPES,
     SCORE_IMPORT_REPORT_VERSION,
     SCORE_IMPORT_SCHEMA_VERSION,
-    SCORE_IMPORT_SCOPE,
     DataValidationReport,
+    MissingScorePolicy,
+    PerStudentScoreItem,
+    PerStudentSource,
     ScoreImportBatch,
     ScoreImportCandidateItem,
+    ScoreImportProfile,
+    ScoreImportScope,
     ScoreImportValidationStatus,
     ScoreRecord,
     ScoreValidationCheck,
     ScoreValidationCheckStatus,
+    StudentScoreEntry,
+    per_student_payload,
     score_import_content_digest,
     score_import_report_digest,
 )
@@ -88,7 +96,10 @@ def _decode_candidates(item_rows: list[sqlite3.Row]) -> tuple[ScoreImportCandida
     )
 
 
-def _decode_records(record_rows: list[sqlite3.Row]) -> tuple[ScoreRecord, ...]:
+def _decode_records(
+    record_rows: list[sqlite3.Row],
+    score_rate_scale: int,
+) -> tuple[ScoreRecord, ...]:
     return tuple(
         ScoreRecord(
             record_id=str(row["record_id"]),
@@ -97,8 +108,46 @@ def _decode_records(record_rows: list[sqlite3.Row]) -> tuple[ScoreRecord, ...]:
             possible_points_total=Decimal(str(row["possible_points_total"])),
             observed_student_count=int(row["observed_student_count"]),
             score_rate=Decimal(str(row["score_rate"])),
+            score_rate_scale=score_rate_scale,
         )
         for row in record_rows
+    )
+
+
+def _decode_per_student_source(
+    source_row: sqlite3.Row | None,
+    entry_rows: list[sqlite3.Row],
+) -> PerStudentSource | None:
+    if source_row is None:
+        return None
+    grouped: dict[str, list[StudentScoreEntry]] = {}
+    max_scores: dict[str, Decimal] = {}
+    for row in entry_rows:
+        input_id = str(row["input_id"])
+        max_scores.setdefault(input_id, Decimal(str(row["max_score"])))
+        grouped.setdefault(input_id, []).append(
+            StudentScoreEntry(
+                student_ref=str(row["student_ref"]),
+                raw_score=(
+                    None if row["raw_score"] is None else Decimal(str(row["raw_score"]))
+                ),
+            )
+        )
+    if not grouped:
+        raise ScoreImportRepositorySchemaError("逐生评分批次缺少原始评分行")
+    return PerStudentSource(
+        items=tuple(
+            PerStudentScoreItem(
+                input_id=input_id,
+                max_score=max_scores[input_id],
+                entries=tuple(entries),
+            )
+            for input_id, entries in grouped.items()
+        ),
+        missing_score_policy=cast(
+            MissingScorePolicy, source_row["missing_score_policy"]
+        ),
+        score_rate_scale=int(source_row["score_rate_scale"]),
     )
 
 
@@ -108,25 +157,45 @@ def decode_score_import_batch(
     item_rows: list[sqlite3.Row],
     record_rows: list[sqlite3.Row],
     report_row: sqlite3.Row,
+    source_row: sqlite3.Row | None = None,
+    entry_rows: list[sqlite3.Row] | None = None,
 ) -> ScoreImportBatch:
     batch_id = str(batch_row["batch_id"])
     report = _decode_report(report_row, batch_id)
     candidate_items = _decode_candidates(item_rows)
-    records = _decode_records(record_rows)
+    source = _decode_per_student_source(source_row, entry_rows or [])
+    profile = cast(ScoreImportProfile, str(batch_row["profile"]))
+    scope = cast(ScoreImportScope, str(batch_row["scope"]))
+    records = _decode_records(
+        record_rows,
+        DEFAULT_SCORE_RATE_SCALE if source is None else source.score_rate_scale,
+    )
     if (
-        str(batch_row["scope"]) != SCORE_IMPORT_SCOPE
+        profile not in SCORE_IMPORT_PROFILE_SCOPES
+        or scope != SCORE_IMPORT_PROFILE_SCOPES[profile]
         or str(batch_row["schema_version"]) != SCORE_IMPORT_SCHEMA_VERSION
-        or str(batch_row["profile"]) != SCORE_IMPORT_PROFILE
         or str(batch_row["source_kind"]) != "structured_json"
         or report.report_version != SCORE_IMPORT_REPORT_VERSION
+        or (profile == PER_STUDENT_PROFILE) != (source is not None)
     ):
         raise ScoreImportRepositorySchemaError("评分批次契约版本不受支持")
+    # 摘要在读取时重算：逐生原始分同样参与，因此篡改任何一格分数都会被发现。
     content_digest = score_import_content_digest(
         evaluation_object_id=str(batch_row["evaluation_object_id"]),
         base_run_id=str(batch_row["base_run_id"]),
         base_context_digest=str(batch_row["base_context_digest"]),
-        profile=SCORE_IMPORT_PROFILE,
+        profile=profile,
         candidate_items=candidate_items,
+        scope=scope,
+        per_student=(
+            None
+            if source is None
+            else per_student_payload(
+                items=source.items,
+                missing_score_policy=source.missing_score_policy,
+                score_rate_scale=source.score_rate_scale,
+            )
+        ),
     )
     if content_digest != str(batch_row["content_digest"]):
         raise ScoreImportRepositorySchemaError("评分批次内容摘要不一致")
@@ -141,9 +210,9 @@ def decode_score_import_batch(
         raise ScoreImportRepositorySchemaError("评分批次报告摘要不一致")
     return ScoreImportBatch(
         batch_id=batch_id,
-        scope=SCORE_IMPORT_SCOPE,
+        scope=scope,
         schema_version=SCORE_IMPORT_SCHEMA_VERSION,
-        profile=SCORE_IMPORT_PROFILE,
+        profile=profile,
         evaluation_object_id=str(batch_row["evaluation_object_id"]),
         base_run_id=str(batch_row["base_run_id"]),
         base_context_digest=str(batch_row["base_context_digest"]),
@@ -153,6 +222,7 @@ def decode_score_import_batch(
         content_digest=content_digest,
         created_at=str(batch_row["created_at"]),
         validation_report=report,
+        per_student_source=source,
     )
 
 

@@ -4,11 +4,15 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.modules.teaching_graph.application import (
+    CoursePackageConflictError,
+    CoursePackageReferenceError,
     GetGraphWorkspace,
     GraphPublishBlockedError,
     GraphRevisionConflictError,
     GraphSchemaUnsupportedError,
     GraphTransitionError,
+    GraphWorkspaceNotInitializedError,
+    ImportCoursePackage,
     ListGraphAuditEvents,
     PublishGraph,
     SaveGraphDraft,
@@ -19,6 +23,7 @@ from app.modules.teaching_graph.contracts import (
     GraphAuditEventResponse,
     GraphRevisionCommandRequest,
     GraphWorkspaceResponse,
+    ImportCoursePackageRequest,
     SaveGraphDraftRequest,
 )
 
@@ -38,6 +43,7 @@ def create_teaching_graph_router(
     provide_publish: Callable[[], PublishGraph],
     provide_start_revision: Callable[[], StartGraphRevision],
     provide_audit: Callable[[], ListGraphAuditEvents],
+    provide_import_package: Callable[[], ImportCoursePackage],
 ) -> APIRouter:
     router = APIRouter(prefix="/teaching-graph", tags=["teaching-graph"])
 
@@ -80,6 +86,64 @@ def create_teaching_graph_router(
             ) from error
         except GraphSchemaUnsupportedError as error:
             raise _unsupported_schema_http_error(error) from error
+        return GraphWorkspaceResponse.from_workspace(workspace)
+
+    @router.post(
+        "/imports/course-package",
+        response_model=GraphWorkspaceResponse,
+        responses={
+            404: {"description": "图谱工作区尚未初始化"},
+            409: {"description": "修订冲突、引用不完整或与现有对象冲突"},
+        },
+        summary="导入结构化课程包并合入图谱草稿",
+    )
+    async def import_course_package(
+        request: ImportCoursePackageRequest,
+        use_case: Annotated[ImportCoursePackage, Depends(provide_import_package)],
+    ) -> GraphWorkspaceResponse:
+        try:
+            workspace = await use_case.run(
+                package=request.to_domain(),
+                expected_revision=request.expected_revision,
+            )
+        except GraphWorkspaceNotInitializedError as error:
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "code": "graph_workspace_not_initialized",
+                    "message": "图谱工作区尚未初始化，导入不创建正式基线",
+                },
+            ) from error
+        except CoursePackageReferenceError as error:
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "code": "course_package_reference_incomplete",
+                    "problems": list(error.problems),
+                },
+            ) from error
+        except CoursePackageConflictError as error:
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "code": "course_package_conflict",
+                    "conflicts": [
+                        {
+                            "entityKind": item.entity_kind,
+                            "objectId": item.object_id,
+                            "reason": item.reason,
+                        }
+                        for item in error.conflicts
+                    ],
+                },
+            ) from error
+        except GraphRevisionConflictError as error:
+            raise HTTPException(status_code=409, detail=str(error)) from error
+        except GraphTransitionError as error:
+            raise HTTPException(
+                status_code=409,
+                detail={"code": "invalid_graph_transition", "issues": error.issues},
+            ) from error
         return GraphWorkspaceResponse.from_workspace(workspace)
 
     @router.post(

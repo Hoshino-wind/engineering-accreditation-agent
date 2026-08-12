@@ -18,6 +18,11 @@ from .evaluation_run_reference import (
     EvaluationRunReferenceNotFoundResponse,
     EvaluationRunReferenceResponse,
 )
+from .graph_evaluation_source import (
+    BoundCriterionResponse,
+    GraphEvaluationSourceResponse,
+    GraphEvaluationSourcesResponse,
+)
 from .score_import_batch import (
     CreateScoreImportBatchRequest,
     CreateScoreImportBatchResponse,
@@ -26,6 +31,9 @@ from .score_import_batch import (
 )
 
 __all__ = [
+    "BoundCriterionResponse",
+    "GraphEvaluationSourceResponse",
+    "GraphEvaluationSourcesResponse",
     "AttainmentCalculationResponse",
     "CreateEvaluationRunRequest",
     "CreateScoreImportBatchRequest",

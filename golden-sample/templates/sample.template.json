@@ -1,0 +1,113 @@
+{
+  "_说明": [
+    "把本文件复制到 .local-data/golden-sample/<课程代号>/sample.json 后填写。",
+    "真实样例含学生成绩，不得提交到 Git 仓库。",
+    "所有 <> 占位符都必须替换；带 digest 的字段需要填写材料文件的完整 sha256。",
+    "取文件摘要：shasum -a 256 <文件路径>",
+    "填完执行：make verify-golden DIR=.local-data/golden-sample/<课程代号>"
+  ],
+  "sample_id": "<GS-课程代号-001>",
+  "schema_version": 1,
+  "synthetic": false,
+  "context": {
+    "program": "<专业名称>",
+    "program_version": "<培养方案版本，如 2024 版>",
+    "course_code": "<课程编号>",
+    "course_name": "<课程名称>",
+    "evaluation_cycle": "<评价周期，如 2025-2026 学年第二学期>",
+    "graph_version": "<图谱版本标识>",
+    "compiled_by": "<编制人>",
+    "compiled_at": "<编制日期 YYYY-MM-DD>"
+  },
+  "policy": {
+    "_说明": [
+      "method: mean_score_ratio(平均分法) | passing_student_ratio(达标人数比例法)",
+      "missing_score: exclude(剔除缺考) | zero(缺考记零) | block(有缺考就阻断)",
+      "sample_basis: enrolled(选课人数) | submitted(有效提交人数)",
+      "小数位决定逐步舍入的位置，改动会改变最终数值，属于口径变更"
+    ],
+    "policy_version": "<口径版本，如 policy-v1>",
+    "method": "mean_score_ratio",
+    "missing_score": "exclude",
+    "sample_basis": "submitted",
+    "rounding": "half_up",
+    "score_rate_dp": 3,
+    "contribution_dp": 3,
+    "attainment_dp": 3,
+    "weight_tolerance": "0.0001",
+    "passing_score_ratio": null
+  },
+  "nodes": [
+    {
+      "_说明": "节点类型只允许：PerformanceIndicator、Course、CourseOutcome、Experiment、AssessmentTask、RubricCriterion",
+      "node_id": "<PI-x.x>",
+      "node_type": "PerformanceIndicator",
+      "label": "<指标点表述>",
+      "source": {
+        "material": "<培养方案>",
+        "material_version": "<版本>",
+        "locator": "<第 x 页 / 表 x>",
+        "digest": "sha256:<64 位十六进制>"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "_说明": "关系只允许：DEFINES、BELONGS_TO、SUPPORTS、CONTRIBUTES_TO、CONTAINS_TASK、CONTAINS_CRITERION",
+      "relation": "SUPPORTS",
+      "from_node": "<CO-x>",
+      "to_node": "<PI-x.x>",
+      "source": {
+        "material": "<课程大纲>",
+        "material_version": "<版本>",
+        "locator": "<第 x 页 / 表 x>",
+        "digest": "sha256:<64 位十六进制>"
+      }
+    }
+  ],
+  "targets": [
+    {
+      "_说明": "一个评价对象 = 一条“课程目标 → 指标点”的达成度结论",
+      "target_id": "<TGT-COx>",
+      "course_outcome_id": "<CO-x>",
+      "performance_indicator_id": "<PI-x.x>",
+      "threshold": "0.70",
+      "note": "<可选备注>",
+      "criteria": [
+        {
+          "criterion_id": "<RC-x>",
+          "label": "<评分项名称>",
+          "max_score": "<该评分项满分>",
+          "weight": "<在本课程目标中的权重，全部权重合计必须为 1>",
+          "source": {
+            "material": "<评分表>",
+            "material_version": "<版本>",
+            "locator": "<第 x 页 / 表 x 第 x 行>",
+            "digest": "sha256:<64 位十六进制>"
+          }
+        }
+      ],
+      "expected": {
+        "_说明": [
+          "这一段必须由人工先算出来再填，不要从系统结果反抄——那样尺子就失效了。",
+          "阻断时 attainment 与 outcome 填 null，对应评分项的 score_rate/contribution 也填 null。"
+        ],
+        "ready": true,
+        "blockers": [],
+        "attainment": "<人工算出的达成度>",
+        "outcome": "achieved",
+        "weight_total": "<权重合计>",
+        "criteria": [
+          {
+            "criterion_id": "<RC-x>",
+            "valid_sample_count": 0,
+            "missing_sample_count": 0,
+            "score_sum": "<该项原始分合计>",
+            "score_rate": "<该项得分率>",
+            "contribution": "<得分率 × 权重>"
+          }
+        ]
+      }
+    }
+  ]
+}

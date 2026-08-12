@@ -24,6 +24,7 @@
 - [数据、评价与 AI 架构](docs/architecture/data-and-ai-architecture.md)
 - [数据安全与合规基线](docs/security/data-security.md)
 - [MVP 范围与实施路线](docs/implementation/mvp-roadmap.md)
+- [达成度金标准样例（验收标尺）](golden-sample/README.md)
 
 ## 当前状态
 

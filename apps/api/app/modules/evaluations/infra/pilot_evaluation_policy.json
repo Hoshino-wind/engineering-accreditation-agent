@@ -1,0 +1,29 @@
+{
+  "_说明": [
+    "试点评价策略版本：权重、阈值与缺失值口径。",
+    "结构（哪些评分项汇总到哪个课程目标）来自图谱正式关系，本文件不得声明结构。",
+    "bindings 绑定到具体的 edge_version_id：图谱升了关系版本而本策略未同步时，",
+    "对应评价对象会被阻断，而不是静默沿用旧权重。",
+    "口径含义与 golden-sample/README.md 一致；改动权重或阈值必须升 policy_version。"
+  ],
+  "schema_version": 1,
+  "policy_version": "pilot-policy-v1",
+  "method": "mean_score_ratio",
+  "missing_score": "exclude",
+  "score_rate_scale": 3,
+  "threshold": "0.70",
+  "bindings": [
+    {
+      "course_outcome_id": "course-outcome-ds-3",
+      "criterion_id": "criterion-correctness",
+      "edge_version_id": "edge-version:edge-correctness-contributes-co3:v1",
+      "weight": "0.60"
+    },
+    {
+      "course_outcome_id": "course-outcome-ds-3",
+      "criterion_id": "criterion-complexity",
+      "edge_version_id": "edge-version:edge-complexity-contributes-co3:v1",
+      "weight": "0.40"
+    }
+  ]
+}

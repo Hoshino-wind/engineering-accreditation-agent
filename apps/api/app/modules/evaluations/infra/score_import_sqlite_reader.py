@@ -47,11 +47,32 @@ def load_score_import_batch(
     ).fetchone()
     if report_row is None:
         raise ScoreImportRepositorySchemaError("评分批次缺少不可变校验报告")
+    source_row = connection.execute(
+        """
+        SELECT missing_score_policy, score_rate_scale
+        FROM evaluation_score_import_per_student_sources WHERE batch_id = ?
+        """,
+        (batch_id,),
+    ).fetchone()
+    entry_rows = (
+        connection.execute(
+            """
+            SELECT input_id, max_score, student_ref, raw_score
+            FROM evaluation_score_import_student_entries
+            WHERE batch_id = ? ORDER BY entry_order ASC
+            """,
+            (batch_id,),
+        ).fetchall()
+        if source_row is not None
+        else []
+    )
     return decode_score_import_batch(
         batch_row=batch_row,
         item_rows=item_rows,
         record_rows=record_rows,
         report_row=report_row,
+        source_row=source_row,
+        entry_rows=entry_rows,
     )
 
 

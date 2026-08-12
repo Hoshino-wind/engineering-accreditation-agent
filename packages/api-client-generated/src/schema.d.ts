@@ -123,6 +123,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/evaluations/graph-sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 读取由正式图谱与评价策略共同决定的评价来源 */
+        get: operations["get_graph_evaluation_sources_api_v1_evaluations_graph_sources_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/system/status": {
         parameters: {
             query?: never;
@@ -204,6 +221,23 @@ export interface paths {
         /** 初始化或保存能力图谱草稿 */
         put: operations["save_workspace_api_v1_teaching_graph_workspace_put"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teaching-graph/imports/course-package": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 导入结构化课程包并合入图谱草稿 */
+        post: operations["import_course_package_api_v1_teaching_graph_imports_course_package_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -322,6 +356,21 @@ export interface components {
              */
             resource_type: string;
         };
+        /** BoundCriterionResponse */
+        BoundCriterionResponse: {
+            /** Criterionid */
+            criterionId: string;
+            /** Label */
+            label: string;
+            /** Evidencename */
+            evidenceName: string;
+            /** Edgeversionid */
+            edgeVersionId: string;
+            /** Weight */
+            weight: number | null;
+            /** Blockers */
+            blockers: string[];
+        };
         /**
          * ComponentStatus
          * @enum {string}
@@ -334,7 +383,19 @@ export interface components {
             /** Sourcerunid */
             sourceRunId: string;
         };
-        /** CreateScoreImportBatchRequest */
+        /**
+         * CreateScoreImportBatchRequest
+         * @description 创建评分批次。
+         *
+         *     ``profile`` 决定使用哪一组字段：
+         *
+         *     - ``local-pilot-aggregate:v1``：填 ``items``（每个评分项的汇总总分）；
+         *     - ``local-pilot-per-student:v1``：填 ``studentItems``、``missingScorePolicy``
+         *       和 ``scoreRateScale``（逐生原始分，由服务端派生汇总值）。
+         *
+         *     逐生口径把缺失值处理和舍入时机从表格里搬进服务端，并纳入内容摘要，
+         *     因此汇总值可以被复核者从原始分重新推导。
+         */
         CreateScoreImportBatchRequest: {
             /** Evaluationobjectid */
             evaluationObjectId: string;
@@ -342,11 +403,17 @@ export interface components {
             baseRunId: string;
             /**
              * Profile
-             * @constant
+             * @enum {string}
              */
-            profile: "local-pilot-aggregate:v1";
+            profile: "local-pilot-aggregate:v1" | "local-pilot-per-student:v1";
             /** Items */
-            items: components["schemas"]["ScoreImportCandidateItemRequest"][];
+            items?: components["schemas"]["ScoreImportCandidateItemRequest"][] | null;
+            /** Studentitems */
+            studentItems?: components["schemas"]["PerStudentScoreItemRequest"][] | null;
+            /** Missingscorepolicy */
+            missingScorePolicy?: ("exclude" | "zero" | "block") | null;
+            /** Scoreratescale */
+            scoreRateScale?: number | null;
         };
         /** CreateScoreImportBatchResponse */
         CreateScoreImportBatchResponse: {
@@ -761,6 +828,58 @@ export interface components {
             /** Targetnodeversionid */
             targetNodeVersionId: string;
         };
+        /**
+         * GraphEvaluationSourceResponse
+         * @description 一条"课程目标 → 指标点"的评价来源。
+         *
+         *     ``ready`` 为假时 ``blockers`` 说明缺什么。缺正式关系回 M2，
+         *     缺权重绑定回 M6 策略——两者不可互相代写。
+         */
+        GraphEvaluationSourceResponse: {
+            /** Courseoutcomeid */
+            courseOutcomeId: string;
+            /** Objectivecode */
+            objectiveCode: string;
+            /** Objectivename */
+            objectiveName: string;
+            /** Coursename */
+            courseName: string;
+            /** Indicatorcode */
+            indicatorCode: string;
+            /** Indicatorname */
+            indicatorName: string;
+            /** Abilitycode */
+            abilityCode: string;
+            /** Abilityname */
+            abilityName: string;
+            /** Graphversion */
+            graphVersion: string;
+            /** Policyversion */
+            policyVersion: string;
+            /** Threshold */
+            threshold: number;
+            /** Ready */
+            ready: boolean;
+            /** Criteria */
+            criteria: components["schemas"]["BoundCriterionResponse"][];
+            /** Blockers */
+            blockers: string[];
+        };
+        /** GraphEvaluationSourcesResponse */
+        GraphEvaluationSourcesResponse: {
+            /** Graphversion */
+            graphVersion: string;
+            /** Schemaversionid */
+            schemaVersionId: string;
+            /** Publishedat */
+            publishedAt: string;
+            /** Policyversion */
+            policyVersion: string;
+            /** Readycount */
+            readyCount: number;
+            /** Sources */
+            sources: components["schemas"]["GraphEvaluationSourceResponse"][];
+        };
         /** GraphImpactDecisionContract */
         GraphImpactDecisionContract: {
             /**
@@ -881,6 +1000,35 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** ImportCoursePackageRequest */
+        ImportCoursePackageRequest: {
+            /**
+             * Packageversion
+             * @constant
+             */
+            packageVersion: "course-package:v1";
+            /** Expectedrevision */
+            expectedRevision: number;
+            /** Effectivecycle */
+            effectiveCycle: string;
+            /** Owner */
+            owner: string;
+            course: components["schemas"]["PackageEntityContract"];
+            /** Graduateoutcomes */
+            graduateOutcomes: components["schemas"]["PackageEntityContract"][];
+            /** Indicators */
+            indicators: components["schemas"]["PackageIndicatorContract"][];
+            /** Abilities */
+            abilities: components["schemas"]["PackageAbilityContract"][];
+            /** Courseoutcomes */
+            courseOutcomes: components["schemas"]["PackageCourseOutcomeContract"][];
+            /** Experiments */
+            experiments: components["schemas"]["PackageExperimentContract"][];
+            /** Assessmenttasks */
+            assessmentTasks: components["schemas"]["PackageAssessmentTaskContract"][];
+            /** Criteria */
+            criteria: components["schemas"]["PackageCriterionContract"][];
+        };
         /** MaterialListResponse */
         MaterialListResponse: {
             /** Items */
@@ -952,6 +1100,158 @@ export interface components {
          * @enum {string}
          */
         OverallStatus: "operational" | "needs_configuration";
+        /** PackageAbilityContract */
+        PackageAbilityContract: {
+            /** Code */
+            code: string;
+            /** Name */
+            name: string;
+            /** Definition */
+            definition: string;
+            /** Domain */
+            domain: string;
+            /**
+             * Cognitivelevel
+             * @enum {string}
+             */
+            cognitiveLevel: "understand" | "apply" | "analyze" | "evaluate" | "create";
+            /** Observablebehaviors */
+            observableBehaviors: string[];
+            source: components["schemas"]["GraphSourceContract"];
+        };
+        /** PackageAssessmentTaskContract */
+        PackageAssessmentTaskContract: {
+            /** Code */
+            code: string;
+            /** Name */
+            name: string;
+            /** Definition */
+            definition: string;
+            /** Experimentcode */
+            experimentCode: string;
+            source: components["schemas"]["GraphSourceContract"];
+        };
+        /**
+         * PackageCourseOutcomeContract
+         * @description 课程大纲表B + 表C：课程目标及其支撑的指标点。
+         *
+         *     ``rationale`` 与 ``targetBehaviors`` 是支撑关系的能力映射，
+         *     行为必须取自该指标点期望的能力的可观察行为。
+         */
+        PackageCourseOutcomeContract: {
+            /** Code */
+            code: string;
+            /** Name */
+            name: string;
+            /** Definition */
+            definition: string;
+            /** Indicatorcode */
+            indicatorCode: string;
+            /** Rationale */
+            rationale: string;
+            /** Targetbehaviors */
+            targetBehaviors: string[];
+            source: components["schemas"]["GraphSourceContract"];
+        };
+        /**
+         * PackageCriterionContract
+         * @description 评分标准表：评分项、所属考核任务、直接评价的能力与汇总的课程目标。
+         *
+         *     ``abilityCode`` 产生 ``assesses``（评价效度），``courseOutcomeCode``
+         *     产生 ``contributes-to``（聚合路径）。两者独立，不可互相替代。
+         *     权重不在此声明——权重属于 M6 评价策略版本。
+         */
+        PackageCriterionContract: {
+            /** Code */
+            code: string;
+            /** Name */
+            name: string;
+            /** Definition */
+            definition: string;
+            /** Taskcode */
+            taskCode: string;
+            /** Courseoutcomecode */
+            courseOutcomeCode: string;
+            /** Abilitycode */
+            abilityCode: string;
+            source: components["schemas"]["GraphSourceContract"];
+        };
+        /** PackageEntityContract */
+        PackageEntityContract: {
+            /** Code */
+            code: string;
+            /** Name */
+            name: string;
+            /** Definition */
+            definition: string;
+            source: components["schemas"]["GraphSourceContract"];
+        };
+        /**
+         * PackageExperimentContract
+         * @description 实验指导书 §1 §2：实验项目及其对应课程目标与培养能力。
+         */
+        PackageExperimentContract: {
+            /** Code */
+            code: string;
+            /** Name */
+            name: string;
+            /** Definition */
+            definition: string;
+            /** Courseoutcomecodes */
+            courseOutcomeCodes: string[];
+            /** Abilitycodes */
+            abilityCodes: string[];
+            source: components["schemas"]["GraphSourceContract"];
+        };
+        /** PackageIndicatorContract */
+        PackageIndicatorContract: {
+            /** Code */
+            code: string;
+            /** Name */
+            name: string;
+            /** Definition */
+            definition: string;
+            /** Graduateoutcomecode */
+            graduateOutcomeCode: string;
+            /** Abilitycodes */
+            abilityCodes: string[];
+            source: components["schemas"]["GraphSourceContract"];
+        };
+        /** PerStudentScoreItemRequest */
+        PerStudentScoreItemRequest: {
+            /** Inputid */
+            inputId: string;
+            /** Maxscore */
+            maxScore: string;
+            /** Entries */
+            entries: components["schemas"]["StudentScoreEntryRequest"][];
+        };
+        /** PerStudentScoreItemResponse */
+        PerStudentScoreItemResponse: {
+            /** Inputid */
+            inputId: string;
+            /** Maxscore */
+            maxScore: string;
+            /** Entries */
+            entries: components["schemas"]["StudentScoreEntryResponse"][];
+        };
+        /**
+         * PerStudentSourceResponse
+         * @description 逐生原始输入回读。
+         *
+         *     保留原始分和口径声明，使复核者能够独立重算汇总值，而不必信任服务端的推导。
+         */
+        PerStudentSourceResponse: {
+            /**
+             * Missingscorepolicy
+             * @enum {string}
+             */
+            missingScorePolicy: "exclude" | "zero" | "block";
+            /** Scoreratescale */
+            scoreRateScale: number;
+            /** Items */
+            items: components["schemas"]["PerStudentScoreItemResponse"][];
+        };
         /** ProcessingStageResponse */
         ProcessingStageResponse: {
             /** Label */
@@ -976,9 +1276,9 @@ export interface components {
             batchId: string;
             /**
              * Scope
-             * @constant
+             * @enum {string}
              */
-            scope: "local_pilot_aggregate";
+            scope: "local_pilot_aggregate" | "local_pilot_per_student";
             /**
              * Schemaversion
              * @constant
@@ -986,15 +1286,14 @@ export interface components {
             schemaVersion: "score-import-batch:v1";
             /**
              * Profile
-             * @constant
+             * @enum {string}
              */
-            profile: "local-pilot-aggregate:v1";
+            profile: "local-pilot-aggregate:v1" | "local-pilot-per-student:v1";
             /**
              * Recordgranularity
-             * @default aggregate
-             * @constant
+             * @enum {string}
              */
-            recordGranularity: "aggregate";
+            recordGranularity: "aggregate" | "per_student";
             /**
              * Formalusable
              * @default false
@@ -1016,6 +1315,7 @@ export interface components {
             candidateItems: components["schemas"]["ScoreImportCandidateItemResponse"][];
             /** Records */
             records: components["schemas"]["ScoreRecordResponse"][];
+            perStudentSource?: components["schemas"]["PerStudentSourceResponse"] | null;
             /** Contentdigest */
             contentDigest: string;
             /** Createdat */
@@ -1078,6 +1378,8 @@ export interface components {
             observedStudentCount: number;
             /** Scorerate */
             scoreRate: string;
+            /** Scoreratescale */
+            scoreRateScale: number;
         };
         /** ScoreValidationCheckResponse */
         ScoreValidationCheckResponse: {
@@ -1116,6 +1418,23 @@ export interface components {
             reportDigest: string;
             /** Createdat */
             createdAt: string;
+        };
+        /**
+         * StudentScoreEntryRequest
+         * @description 一名学生在一个评分项上的原始分。``rawScore`` 为 null 表示缺考。
+         */
+        StudentScoreEntryRequest: {
+            /** Studentref */
+            studentRef: string;
+            /** Rawscore */
+            rawScore?: string | null;
+        };
+        /** StudentScoreEntryResponse */
+        StudentScoreEntryResponse: {
+            /** Studentref */
+            studentRef: string;
+            /** Rawscore */
+            rawScore: string | null;
         };
         /** SystemComponentResponse */
         SystemComponentResponse: {
@@ -1474,6 +1793,33 @@ export interface operations {
             };
         };
     };
+    get_graph_evaluation_sources_api_v1_evaluations_graph_sources_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GraphEvaluationSourcesResponse"];
+                };
+            };
+            /** @description 尚无已发布图谱版本或生效评价策略 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     get_system_status_api_v1_system_status_get: {
         parameters: {
             query?: never;
@@ -1650,6 +1996,53 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["GraphWorkspaceResponse"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    import_course_package_api_v1_teaching_graph_imports_course_package_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportCoursePackageRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GraphWorkspaceResponse"];
+                };
+            };
+            /** @description 图谱工作区尚未初始化 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 修订冲突、引用不完整或与现有对象冲突 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

@@ -3,6 +3,8 @@ from typing import Protocol
 
 from app.modules.evaluations.domain import (
     EvaluationRunReadModel,
+    MissingScorePolicy,
+    PerStudentScoreItem,
     ScoreImportBatch,
     ScoreImportCandidateItem,
 )
@@ -60,6 +62,18 @@ class ScoreImportBatchValidator(Protocol):
         created_at: str,
         base_run: EvaluationRunReadModel,
         candidate_items: tuple[ScoreImportCandidateItem, ...],
+    ) -> ScoreImportBatch: ...
+
+    def create_per_student(
+        self,
+        *,
+        batch_id: str,
+        report_id: str,
+        created_at: str,
+        base_run: EvaluationRunReadModel,
+        items: tuple[PerStudentScoreItem, ...],
+        missing_score_policy: MissingScorePolicy,
+        score_rate_scale: int,
     ) -> ScoreImportBatch: ...
 
 

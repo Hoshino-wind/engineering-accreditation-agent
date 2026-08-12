@@ -435,6 +435,30 @@
         }
       }
     },
+    "/api/v1/evaluations/graph-sources": {
+      "get": {
+        "tags": [
+          "evaluations"
+        ],
+        "summary": "读取由正式图谱与评价策略共同决定的评价来源",
+        "operationId": "get_graph_evaluation_sources_api_v1_evaluations_graph_sources_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GraphEvaluationSourcesResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "尚无已发布图谱版本或生效评价策略"
+          }
+        }
+      }
+    },
     "/api/v1/system/status": {
       "get": {
         "tags": [
@@ -646,6 +670,53 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/teaching-graph/imports/course-package": {
+      "post": {
+        "tags": [
+          "teaching-graph"
+        ],
+        "summary": "导入结构化课程包并合入图谱草稿",
+        "operationId": "import_course_package_api_v1_teaching_graph_imports_course_package_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportCoursePackageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GraphWorkspaceResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "图谱工作区尚未初始化"
+          },
+          "409": {
+            "description": "修订冲突、引用不完整或与现有对象冲突"
           },
           "422": {
             "description": "Validation Error",
@@ -956,6 +1027,55 @@
         ],
         "title": "Body_upload_material_api_v1_materials_post"
       },
+      "BoundCriterionResponse": {
+        "properties": {
+          "criterionId": {
+            "type": "string",
+            "title": "Criterionid"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "evidenceName": {
+            "type": "string",
+            "title": "Evidencename"
+          },
+          "edgeVersionId": {
+            "type": "string",
+            "title": "Edgeversionid"
+          },
+          "weight": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight"
+          },
+          "blockers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Blockers"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "criterionId",
+          "label",
+          "evidenceName",
+          "edgeVersionId",
+          "weight",
+          "blockers"
+        ],
+        "title": "BoundCriterionResponse"
+      },
       "ComponentStatus": {
         "type": "string",
         "enum": [
@@ -1004,17 +1124,72 @@
           },
           "profile": {
             "type": "string",
-            "const": "local-pilot-aggregate:v1",
+            "enum": [
+              "local-pilot-aggregate:v1",
+              "local-pilot-per-student:v1"
+            ],
             "title": "Profile"
           },
           "items": {
-            "items": {
-              "$ref": "#/components/schemas/ScoreImportCandidateItemRequest"
-            },
-            "type": "array",
-            "maxItems": 200,
-            "minItems": 1,
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ScoreImportCandidateItemRequest"
+                },
+                "type": "array",
+                "maxItems": 200,
+                "minItems": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Items"
+          },
+          "studentItems": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/PerStudentScoreItemRequest"
+                },
+                "type": "array",
+                "maxItems": 200,
+                "minItems": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Studentitems"
+          },
+          "missingScorePolicy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "exclude",
+                  "zero",
+                  "block"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Missingscorepolicy"
+          },
+          "scoreRateScale": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 6.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scoreratescale"
           }
         },
         "additionalProperties": false,
@@ -1022,10 +1197,10 @@
         "required": [
           "evaluationObjectId",
           "baseRunId",
-          "profile",
-          "items"
+          "profile"
         ],
-        "title": "CreateScoreImportBatchRequest"
+        "title": "CreateScoreImportBatchRequest",
+        "description": "创建评分批次。\n\n``profile`` 决定使用哪一组字段：\n\n- ``local-pilot-aggregate:v1``：填 ``items``（每个评分项的汇总总分）；\n- ``local-pilot-per-student:v1``：填 ``studentItems``、``missingScorePolicy``\n  和 ``scoreRateScale``（逐生原始分，由服务端派生汇总值）。\n\n逐生口径把缺失值处理和舍入时机从表格里搬进服务端，并纳入内容摘要，\n因此汇总值可以被复核者从原始分重新推导。"
       },
       "CreateScoreImportBatchResponse": {
         "properties": {
@@ -2213,6 +2388,134 @@
         ],
         "title": "GraphEdgeContract"
       },
+      "GraphEvaluationSourceResponse": {
+        "properties": {
+          "courseOutcomeId": {
+            "type": "string",
+            "title": "Courseoutcomeid"
+          },
+          "objectiveCode": {
+            "type": "string",
+            "title": "Objectivecode"
+          },
+          "objectiveName": {
+            "type": "string",
+            "title": "Objectivename"
+          },
+          "courseName": {
+            "type": "string",
+            "title": "Coursename"
+          },
+          "indicatorCode": {
+            "type": "string",
+            "title": "Indicatorcode"
+          },
+          "indicatorName": {
+            "type": "string",
+            "title": "Indicatorname"
+          },
+          "abilityCode": {
+            "type": "string",
+            "title": "Abilitycode"
+          },
+          "abilityName": {
+            "type": "string",
+            "title": "Abilityname"
+          },
+          "graphVersion": {
+            "type": "string",
+            "title": "Graphversion"
+          },
+          "policyVersion": {
+            "type": "string",
+            "title": "Policyversion"
+          },
+          "threshold": {
+            "type": "number",
+            "title": "Threshold"
+          },
+          "ready": {
+            "type": "boolean",
+            "title": "Ready"
+          },
+          "criteria": {
+            "items": {
+              "$ref": "#/components/schemas/BoundCriterionResponse"
+            },
+            "type": "array",
+            "title": "Criteria"
+          },
+          "blockers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Blockers"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "courseOutcomeId",
+          "objectiveCode",
+          "objectiveName",
+          "courseName",
+          "indicatorCode",
+          "indicatorName",
+          "abilityCode",
+          "abilityName",
+          "graphVersion",
+          "policyVersion",
+          "threshold",
+          "ready",
+          "criteria",
+          "blockers"
+        ],
+        "title": "GraphEvaluationSourceResponse",
+        "description": "一条\"课程目标 → 指标点\"的评价来源。\n\n``ready`` 为假时 ``blockers`` 说明缺什么。缺正式关系回 M2，\n缺权重绑定回 M6 策略——两者不可互相代写。"
+      },
+      "GraphEvaluationSourcesResponse": {
+        "properties": {
+          "graphVersion": {
+            "type": "string",
+            "title": "Graphversion"
+          },
+          "schemaVersionId": {
+            "type": "string",
+            "title": "Schemaversionid"
+          },
+          "publishedAt": {
+            "type": "string",
+            "title": "Publishedat"
+          },
+          "policyVersion": {
+            "type": "string",
+            "title": "Policyversion"
+          },
+          "readyCount": {
+            "type": "integer",
+            "title": "Readycount"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/GraphEvaluationSourceResponse"
+            },
+            "type": "array",
+            "title": "Sources"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "graphVersion",
+          "schemaVersionId",
+          "publishedAt",
+          "policyVersion",
+          "readyCount",
+          "sources"
+        ],
+        "title": "GraphEvaluationSourcesResponse"
+      },
       "GraphImpactDecisionContract": {
         "properties": {
           "action": {
@@ -2556,6 +2859,115 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "ImportCoursePackageRequest": {
+        "properties": {
+          "packageVersion": {
+            "type": "string",
+            "const": "course-package:v1",
+            "title": "Packageversion"
+          },
+          "expectedRevision": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expectedrevision"
+          },
+          "effectiveCycle": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Effectivecycle"
+          },
+          "owner": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Owner"
+          },
+          "course": {
+            "$ref": "#/components/schemas/PackageEntityContract"
+          },
+          "graduateOutcomes": {
+            "items": {
+              "$ref": "#/components/schemas/PackageEntityContract"
+            },
+            "type": "array",
+            "maxItems": 64,
+            "minItems": 1,
+            "title": "Graduateoutcomes"
+          },
+          "indicators": {
+            "items": {
+              "$ref": "#/components/schemas/PackageIndicatorContract"
+            },
+            "type": "array",
+            "maxItems": 128,
+            "minItems": 1,
+            "title": "Indicators"
+          },
+          "abilities": {
+            "items": {
+              "$ref": "#/components/schemas/PackageAbilityContract"
+            },
+            "type": "array",
+            "maxItems": 128,
+            "minItems": 1,
+            "title": "Abilities"
+          },
+          "courseOutcomes": {
+            "items": {
+              "$ref": "#/components/schemas/PackageCourseOutcomeContract"
+            },
+            "type": "array",
+            "maxItems": 64,
+            "minItems": 1,
+            "title": "Courseoutcomes"
+          },
+          "experiments": {
+            "items": {
+              "$ref": "#/components/schemas/PackageExperimentContract"
+            },
+            "type": "array",
+            "maxItems": 128,
+            "minItems": 1,
+            "title": "Experiments"
+          },
+          "assessmentTasks": {
+            "items": {
+              "$ref": "#/components/schemas/PackageAssessmentTaskContract"
+            },
+            "type": "array",
+            "maxItems": 256,
+            "minItems": 1,
+            "title": "Assessmenttasks"
+          },
+          "criteria": {
+            "items": {
+              "$ref": "#/components/schemas/PackageCriterionContract"
+            },
+            "type": "array",
+            "maxItems": 512,
+            "minItems": 1,
+            "title": "Criteria"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "packageVersion",
+          "expectedRevision",
+          "effectiveCycle",
+          "owner",
+          "course",
+          "graduateOutcomes",
+          "indicators",
+          "abilities",
+          "courseOutcomes",
+          "experiments",
+          "assessmentTasks",
+          "criteria"
+        ],
+        "title": "ImportCoursePackageRequest"
+      },
       "MaterialListResponse": {
         "properties": {
           "items": {
@@ -2741,6 +3153,459 @@
         ],
         "title": "OverallStatus"
       },
+      "PackageAbilityContract": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "definition": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Definition"
+          },
+          "domain": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Domain"
+          },
+          "cognitiveLevel": {
+            "type": "string",
+            "enum": [
+              "understand",
+              "apply",
+              "analyze",
+              "evaluate",
+              "create"
+            ],
+            "title": "Cognitivelevel"
+          },
+          "observableBehaviors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 8,
+            "minItems": 1,
+            "title": "Observablebehaviors"
+          },
+          "source": {
+            "$ref": "#/components/schemas/GraphSourceContract"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "name",
+          "definition",
+          "domain",
+          "cognitiveLevel",
+          "observableBehaviors",
+          "source"
+        ],
+        "title": "PackageAbilityContract"
+      },
+      "PackageAssessmentTaskContract": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "definition": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Definition"
+          },
+          "experimentCode": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Experimentcode"
+          },
+          "source": {
+            "$ref": "#/components/schemas/GraphSourceContract"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "name",
+          "definition",
+          "experimentCode",
+          "source"
+        ],
+        "title": "PackageAssessmentTaskContract"
+      },
+      "PackageCourseOutcomeContract": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "definition": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Definition"
+          },
+          "indicatorCode": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Indicatorcode"
+          },
+          "rationale": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Rationale"
+          },
+          "targetBehaviors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 8,
+            "minItems": 1,
+            "title": "Targetbehaviors"
+          },
+          "source": {
+            "$ref": "#/components/schemas/GraphSourceContract"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "name",
+          "definition",
+          "indicatorCode",
+          "rationale",
+          "targetBehaviors",
+          "source"
+        ],
+        "title": "PackageCourseOutcomeContract",
+        "description": "课程大纲表B + 表C：课程目标及其支撑的指标点。\n\n``rationale`` 与 ``targetBehaviors`` 是支撑关系的能力映射，\n行为必须取自该指标点期望的能力的可观察行为。"
+      },
+      "PackageCriterionContract": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "definition": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Definition"
+          },
+          "taskCode": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Taskcode"
+          },
+          "courseOutcomeCode": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Courseoutcomecode"
+          },
+          "abilityCode": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Abilitycode"
+          },
+          "source": {
+            "$ref": "#/components/schemas/GraphSourceContract"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "name",
+          "definition",
+          "taskCode",
+          "courseOutcomeCode",
+          "abilityCode",
+          "source"
+        ],
+        "title": "PackageCriterionContract",
+        "description": "评分标准表：评分项、所属考核任务、直接评价的能力与汇总的课程目标。\n\n``abilityCode`` 产生 ``assesses``（评价效度），``courseOutcomeCode``\n产生 ``contributes-to``（聚合路径）。两者独立，不可互相替代。\n权重不在此声明——权重属于 M6 评价策略版本。"
+      },
+      "PackageEntityContract": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "definition": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Definition"
+          },
+          "source": {
+            "$ref": "#/components/schemas/GraphSourceContract"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "name",
+          "definition",
+          "source"
+        ],
+        "title": "PackageEntityContract"
+      },
+      "PackageExperimentContract": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "definition": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Definition"
+          },
+          "courseOutcomeCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 16,
+            "minItems": 1,
+            "title": "Courseoutcomecodes"
+          },
+          "abilityCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 16,
+            "minItems": 1,
+            "title": "Abilitycodes"
+          },
+          "source": {
+            "$ref": "#/components/schemas/GraphSourceContract"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "name",
+          "definition",
+          "courseOutcomeCodes",
+          "abilityCodes",
+          "source"
+        ],
+        "title": "PackageExperimentContract",
+        "description": "实验指导书 §1 §2：实验项目及其对应课程目标与培养能力。"
+      },
+      "PackageIndicatorContract": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "definition": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Definition"
+          },
+          "graduateOutcomeCode": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Graduateoutcomecode"
+          },
+          "abilityCodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 16,
+            "minItems": 1,
+            "title": "Abilitycodes"
+          },
+          "source": {
+            "$ref": "#/components/schemas/GraphSourceContract"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "name",
+          "definition",
+          "graduateOutcomeCode",
+          "abilityCodes",
+          "source"
+        ],
+        "title": "PackageIndicatorContract"
+      },
+      "PerStudentScoreItemRequest": {
+        "properties": {
+          "inputId": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Inputid"
+          },
+          "maxScore": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 1,
+            "pattern": "^-?(0|[1-9][0-9]{0,17})(\\.[0-9]{1,6})?$",
+            "title": "Maxscore"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/StudentScoreEntryRequest"
+            },
+            "type": "array",
+            "maxItems": 2000,
+            "minItems": 1,
+            "title": "Entries"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "inputId",
+          "maxScore",
+          "entries"
+        ],
+        "title": "PerStudentScoreItemRequest"
+      },
+      "PerStudentScoreItemResponse": {
+        "properties": {
+          "inputId": {
+            "type": "string",
+            "title": "Inputid"
+          },
+          "maxScore": {
+            "type": "string",
+            "title": "Maxscore"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/StudentScoreEntryResponse"
+            },
+            "type": "array",
+            "title": "Entries"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "inputId",
+          "maxScore",
+          "entries"
+        ],
+        "title": "PerStudentScoreItemResponse"
+      },
+      "PerStudentSourceResponse": {
+        "properties": {
+          "missingScorePolicy": {
+            "type": "string",
+            "enum": [
+              "exclude",
+              "zero",
+              "block"
+            ],
+            "title": "Missingscorepolicy"
+          },
+          "scoreRateScale": {
+            "type": "integer",
+            "title": "Scoreratescale"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PerStudentScoreItemResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "missingScorePolicy",
+          "scoreRateScale",
+          "items"
+        ],
+        "title": "PerStudentSourceResponse",
+        "description": "逐生原始输入回读。\n\n保留原始分和口径声明，使复核者能够独立重算汇总值，而不必信任服务端的推导。"
+      },
       "ProcessingStageResponse": {
         "properties": {
           "label": {
@@ -2797,7 +3662,10 @@
           },
           "scope": {
             "type": "string",
-            "const": "local_pilot_aggregate",
+            "enum": [
+              "local_pilot_aggregate",
+              "local_pilot_per_student"
+            ],
             "title": "Scope"
           },
           "schemaVersion": {
@@ -2807,14 +3675,19 @@
           },
           "profile": {
             "type": "string",
-            "const": "local-pilot-aggregate:v1",
+            "enum": [
+              "local-pilot-aggregate:v1",
+              "local-pilot-per-student:v1"
+            ],
             "title": "Profile"
           },
           "recordGranularity": {
             "type": "string",
-            "const": "aggregate",
-            "title": "Recordgranularity",
-            "default": "aggregate"
+            "enum": [
+              "aggregate",
+              "per_student"
+            ],
+            "title": "Recordgranularity"
           },
           "formalUsable": {
             "type": "boolean",
@@ -2853,6 +3726,16 @@
             "type": "array",
             "title": "Records"
           },
+          "perStudentSource": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PerStudentSourceResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "contentDigest": {
             "type": "string",
             "title": "Contentdigest"
@@ -2872,6 +3755,7 @@
           "scope",
           "schemaVersion",
           "profile",
+          "recordGranularity",
           "evaluationObjectId",
           "baseRunId",
           "baseContextDigest",
@@ -3072,6 +3956,10 @@
           "scoreRate": {
             "type": "string",
             "title": "Scorerate"
+          },
+          "scoreRateScale": {
+            "type": "integer",
+            "title": "Scoreratescale"
           }
         },
         "additionalProperties": false,
@@ -3082,7 +3970,8 @@
           "earnedPointsTotal",
           "possiblePointsTotal",
           "observedStudentCount",
-          "scoreRate"
+          "scoreRate",
+          "scoreRateScale"
         ],
         "title": "ScoreRecordResponse"
       },
@@ -3185,6 +4074,63 @@
           "createdAt"
         ],
         "title": "ScoreValidationReportResponse"
+      },
+      "StudentScoreEntryRequest": {
+        "properties": {
+          "studentRef": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Studentref"
+          },
+          "rawScore": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32,
+                "minLength": 1,
+                "pattern": "^-?(0|[1-9][0-9]{0,17})(\\.[0-9]{1,6})?$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rawscore"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "studentRef"
+        ],
+        "title": "StudentScoreEntryRequest",
+        "description": "一名学生在一个评分项上的原始分。``rawScore`` 为 null 表示缺考。"
+      },
+      "StudentScoreEntryResponse": {
+        "properties": {
+          "studentRef": {
+            "type": "string",
+            "title": "Studentref"
+          },
+          "rawScore": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rawscore"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "studentRef",
+          "rawScore"
+        ],
+        "title": "StudentScoreEntryResponse"
       },
       "SystemComponentResponse": {
         "properties": {

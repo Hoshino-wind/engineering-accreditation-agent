@@ -478,6 +478,18 @@ def test_runtime_openapi_exposes_the_fixed_pilot_contract(
     assert set(schema["paths"][detail_path]) == {"get"}
     batch_schema = schema["components"]["schemas"]["ScoreImportBatchResponse"]
     assert batch_schema["properties"]["formalUsable"]["const"] is False
-    assert batch_schema["properties"]["recordGranularity"]["const"] == "aggregate"
+    # 记录粒度随口径变化：汇总口径为 aggregate，逐生口径为 per_student。
+    assert set(batch_schema["properties"]["recordGranularity"]["enum"]) == {
+        "aggregate",
+        "per_student",
+    }
+    assert set(batch_schema["properties"]["profile"]["enum"]) == {
+        "local-pilot-aggregate:v1",
+        "local-pilot-per-student:v1",
+    }
     request_schema = schema["components"]["schemas"]["CreateScoreImportBatchRequest"]
     assert request_schema["additionalProperties"] is False
+    assert set(request_schema["properties"]["profile"]["enum"]) == {
+        "local-pilot-aggregate:v1",
+        "local-pilot-per-student:v1",
+    }

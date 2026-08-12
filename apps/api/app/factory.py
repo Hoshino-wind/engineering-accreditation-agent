@@ -8,6 +8,7 @@ from app.modules.evaluations.application import (
     GetEvaluationPreflight,
     GetEvaluationRun,
     GetEvaluationRunReference,
+    GetGraphEvaluationSources,
     GetScoreImportBatch,
     ListEvaluationObjects,
 )
@@ -20,6 +21,10 @@ from app.modules.evaluations.infra import (
     UuidEvaluationRunIdGenerator,
     UuidScoreImportIdGenerator,
     build_local_evaluation_read_repository_at,
+)
+from app.modules.evaluations.infra.graph_source_runtime import (
+    PilotFileEvaluationPolicyRepository,
+    TeachingGraphPublishedSnapshotRepository,
 )
 from app.modules.evaluations.routes import (
     create_evaluations_router,
@@ -52,6 +57,7 @@ from app.modules.system.infra import (
 from app.modules.system.routes import create_system_router
 from app.modules.teaching_graph.application import (
     GetGraphWorkspace,
+    ImportCoursePackage,
     ListGraphAuditEvents,
     PublishGraph,
     SaveGraphDraft,
@@ -159,6 +165,10 @@ def create_app() -> FastAPI:
         score_import_repository,
         enabled=score_batch_capture_enabled,
     )
+    get_graph_evaluation_sources = GetGraphEvaluationSources(
+        TeachingGraphPublishedSnapshotRepository(graph_repository),
+        PilotFileEvaluationPolicyRepository(),
+    )
     system_status_use_case = GetSystemStatus(
         configuration=build_system_runtime_configuration(settings),
         clock=UtcClock(),
@@ -182,6 +192,11 @@ def create_app() -> FastAPI:
         graph_actor,
     )
     list_graph_audit_events = ListGraphAuditEvents(graph_repository)
+    import_course_package = ImportCoursePackage(
+        graph_repository,
+        graph_clock,
+        graph_actor,
+    )
 
     def provide_system_status_use_case() -> GetSystemStatus:
         return system_status_use_case
@@ -209,6 +224,7 @@ def create_app() -> FastAPI:
             provide_create_run=lambda: create_evaluation_run,
             provide_create_score_batch=lambda: create_score_import_batch,
             provide_get_score_batch=lambda: get_score_import_batch,
+            provide_graph_sources=lambda: get_graph_evaluation_sources,
         ),
         prefix=settings.api_v1_prefix,
     )
@@ -234,6 +250,7 @@ def create_app() -> FastAPI:
             provide_publish=lambda: publish_graph,
             provide_start_revision=lambda: start_graph_revision,
             provide_audit=lambda: list_graph_audit_events,
+            provide_import_package=lambda: import_course_package,
         ),
         prefix=settings.api_v1_prefix,
     )

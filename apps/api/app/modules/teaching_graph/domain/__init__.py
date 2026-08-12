@@ -1,3 +1,20 @@
+from app.modules.teaching_graph.domain.course_package import (
+    COURSE_PACKAGE_VERSION,
+    CoursePackage,
+    CoursePackageConflict,
+    CoursePackageMerge,
+    CoursePackageReferenceError,
+    PackageAbility,
+    PackageAssessmentTask,
+    PackageCourseOutcome,
+    PackageCriterion,
+    PackageEntity,
+    PackageExperiment,
+    PackageIndicator,
+    PackageSource,
+    build_course_package_objects,
+    merge_course_package,
+)
 from app.modules.teaching_graph.domain.graph import (
     CURRENT_GRAPH_SCHEMA_VERSION_ID,
     GraphAuditEvent,
@@ -16,7 +33,22 @@ from app.modules.teaching_graph.domain.migrations import (
 )
 
 __all__ = [
+    "COURSE_PACKAGE_VERSION",
     "CURRENT_GRAPH_SCHEMA_VERSION_ID",
+    "CoursePackage",
+    "CoursePackageConflict",
+    "CoursePackageMerge",
+    "CoursePackageReferenceError",
+    "PackageAbility",
+    "PackageAssessmentTask",
+    "PackageCourseOutcome",
+    "PackageCriterion",
+    "PackageEntity",
+    "PackageExperiment",
+    "PackageIndicator",
+    "PackageSource",
+    "build_course_package_objects",
+    "merge_course_package",
     "LEGACY_GRAPH_SCHEMA_VERSION_IDS",
     "GraphAuditEvent",
     "GraphWorkspace",

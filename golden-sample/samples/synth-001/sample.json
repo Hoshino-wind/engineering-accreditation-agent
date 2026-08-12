@@ -1,0 +1,535 @@
+{
+  "sample_id": "GS-SYNTH-001",
+  "schema_version": 1,
+  "synthetic": true,
+  "context": {
+    "program": "合成示例专业",
+    "program_version": "2024 版培养方案",
+    "course_code": "SYN-101",
+    "course_name": "合成示例课程（实验）",
+    "evaluation_cycle": "2025-2026 学年第二学期",
+    "graph_version": "golden-sample 最小本体 v1",
+    "compiled_by": "示例编制人",
+    "compiled_at": "2026-08-04"
+  },
+  "policy": {
+    "policy_version": "golden-policy v1",
+    "method": "mean_score_ratio",
+    "missing_score": "exclude",
+    "sample_basis": "submitted",
+    "rounding": "half_up",
+    "score_rate_dp": 3,
+    "contribution_dp": 3,
+    "attainment_dp": 3,
+    "weight_tolerance": "0.0001",
+    "passing_score_ratio": null
+  },
+  "nodes": [
+    {
+      "node_id": "PI-3.2",
+      "node_type": "PerformanceIndicator",
+      "label": "能够正确设计实验方案并对数据进行分析与解释",
+      "source": {
+        "material": "合成示例专业培养方案",
+        "material_version": "2024 版",
+        "locator": "第 12 页 / 表 3 指标点分解表",
+        "digest": "sha256:dfa6efbd8c87403718406c98480177e8ead7dbb2a34aa84856c71894b9ec8d4e"
+      }
+    },
+    {
+      "node_id": "COURSE-SYN101",
+      "node_type": "Course",
+      "label": "合成示例课程（实验）",
+      "source": {
+        "material": "合成示例课程教学大纲",
+        "material_version": "v2.1",
+        "locator": "第 1 页 / 课程基本信息",
+        "digest": "sha256:94e52e08be61e5115589049c388f57d7a84c544a099d8ae4f7c58aa78c9cb311"
+      }
+    },
+    {
+      "node_id": "CO-1",
+      "node_type": "CourseOutcome",
+      "label": "能够查阅文献并论证实验方案的可行性",
+      "source": {
+        "material": "合成示例课程教学大纲",
+        "material_version": "v2.1",
+        "locator": "第 2 页 / 表 1 课程目标",
+        "digest": "sha256:bd37669d5d3aea7101d0b9572ffb75980911ce16c54f2d7fd2a64aca8a592644"
+      }
+    },
+    {
+      "node_id": "CO-2",
+      "node_type": "CourseOutcome",
+      "label": "能够正确处理实验数据并分析误差来源",
+      "source": {
+        "material": "合成示例课程教学大纲",
+        "material_version": "v2.1",
+        "locator": "第 2 页 / 表 1 课程目标",
+        "digest": "sha256:55afb844f9b46d7397310b8bfd505ef3741b9a6cc2ceafa1e0dbd44a547b70d0"
+      }
+    },
+    {
+      "node_id": "EXP-1",
+      "node_type": "Experiment",
+      "label": "实验一：文献调研与方案设计",
+      "source": {
+        "material": "合成示例课程实验指导书",
+        "material_version": "v1.3",
+        "locator": "第 3 页 / 实验一",
+        "digest": "sha256:e549f20c3baa1c511bc96f4a27fa1447f96160e51905575e223ebcf28f189cf5"
+      }
+    },
+    {
+      "node_id": "EXP-2",
+      "node_type": "Experiment",
+      "label": "实验二：数据采集与误差分析",
+      "source": {
+        "material": "合成示例课程实验指导书",
+        "material_version": "v1.3",
+        "locator": "第 9 页 / 实验二",
+        "digest": "sha256:fb14c4c0d4a1810a09720a7625e9ae4bc492d470ccd9e17ccf405b03eadb3b3e"
+      }
+    },
+    {
+      "node_id": "AT-1",
+      "node_type": "AssessmentTask",
+      "label": "实验二实验报告",
+      "source": {
+        "material": "合成示例课程实验报告评分表",
+        "material_version": "v1.0",
+        "locator": "第 1 页 / 表头",
+        "digest": "sha256:5b1d63a016ba5350c48615d3072e5ffcf3c5832f443d8099694b5aa84a35d72b"
+      }
+    },
+    {
+      "node_id": "AT-2",
+      "node_type": "AssessmentTask",
+      "label": "实验一方案报告",
+      "source": {
+        "material": "合成示例课程实验指导书",
+        "material_version": "v1.3",
+        "locator": "第 7 页 / 考核要求",
+        "digest": "sha256:408ce76c22e6d029a5a9c4f962abc3c614e832cde485c5058ed816b8e273f5c6"
+      }
+    },
+    {
+      "node_id": "RC-1",
+      "node_type": "RubricCriterion",
+      "label": "实验方案与步骤正确性",
+      "source": {
+        "material": "合成示例课程实验报告评分表",
+        "material_version": "v1.0",
+        "locator": "第 1 页 / 表 1 第 1 行",
+        "digest": "sha256:7b6e141cceb6e064211bc889faf7b59d7fb7402b024860e24bafc625299b5028"
+      }
+    },
+    {
+      "node_id": "RC-2",
+      "node_type": "RubricCriterion",
+      "label": "数据处理与计算准确性",
+      "source": {
+        "material": "合成示例课程实验报告评分表",
+        "material_version": "v1.0",
+        "locator": "第 1 页 / 表 1 第 2 行",
+        "digest": "sha256:1739f958c3fb62de88aca71e2aed8a224a0a333ae772edeb9ddf26d11082ee75"
+      }
+    },
+    {
+      "node_id": "RC-3",
+      "node_type": "RubricCriterion",
+      "label": "误差分析与结论合理性",
+      "source": {
+        "material": "合成示例课程实验报告评分表",
+        "material_version": "v1.0",
+        "locator": "第 1 页 / 表 1 第 3 行",
+        "digest": "sha256:bdd75f8a08488474735c27526cc10e05255653372aacab237c33c48e304da272"
+      }
+    },
+    {
+      "node_id": "RC-4",
+      "node_type": "RubricCriterion",
+      "label": "文献调研与方案论证",
+      "source": {
+        "material": "合成示例课程实验指导书",
+        "material_version": "v1.3",
+        "locator": "第 7 页 / 考核要求第 1 条",
+        "digest": "sha256:7535b7975b5f0eb4fb8119fe8d540237b6d86a295ca97c13d9f2af10a4e2e1f2"
+      }
+    },
+    {
+      "node_id": "RC-5",
+      "node_type": "RubricCriterion",
+      "label": "实验记录规范性",
+      "source": {
+        "material": "合成示例课程实验指导书",
+        "material_version": "v1.3",
+        "locator": "第 7 页 / 考核要求第 2 条",
+        "digest": "sha256:b212b52f89adea7920b9b80fa246f8db932125392b271f105174bf9253b5105f"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "relation": "DEFINES",
+      "from_node": "COURSE-SYN101",
+      "to_node": "CO-1",
+      "source": {
+        "material": "合成示例课程教学大纲",
+        "material_version": "v2.1",
+        "locator": "第 2 页 / 表 1",
+        "digest": "sha256:169dec9c2809bc24f7dee4d8db00f95d22ac7c4ceffd258619596ca01e9b96e0"
+      }
+    },
+    {
+      "relation": "DEFINES",
+      "from_node": "COURSE-SYN101",
+      "to_node": "CO-2",
+      "source": {
+        "material": "合成示例课程教学大纲",
+        "material_version": "v2.1",
+        "locator": "第 2 页 / 表 1",
+        "digest": "sha256:40a1d507c510c94c5e0c537e5db8ebb9c406b3ec86edf3d995151e8ee4be1206"
+      }
+    },
+    {
+      "relation": "BELONGS_TO",
+      "from_node": "EXP-1",
+      "to_node": "COURSE-SYN101",
+      "source": {
+        "material": "合成示例课程实验指导书",
+        "material_version": "v1.3",
+        "locator": "第 1 页 / 实验项目清单",
+        "digest": "sha256:1864dbd6dcde040bbd6599e0f3a100e1bcbea3393b16eee44ca808e994a7ed90"
+      }
+    },
+    {
+      "relation": "BELONGS_TO",
+      "from_node": "EXP-2",
+      "to_node": "COURSE-SYN101",
+      "source": {
+        "material": "合成示例课程实验指导书",
+        "material_version": "v1.3",
+        "locator": "第 1 页 / 实验项目清单",
+        "digest": "sha256:16587d3db2477a5e670e9234393a36de989f78710042035757c81434420647fe"
+      }
+    },
+    {
+      "relation": "SUPPORTS",
+      "from_node": "CO-1",
+      "to_node": "PI-3.2",
+      "source": {
+        "material": "合成示例课程教学大纲",
+        "material_version": "v2.1",
+        "locator": "第 3 页 / 表 2 课程目标与指标点对应",
+        "digest": "sha256:e6112047f096cd93b54673f7aed000b39b3a31213609cf49593b79af1066d032"
+      }
+    },
+    {
+      "relation": "SUPPORTS",
+      "from_node": "CO-2",
+      "to_node": "PI-3.2",
+      "source": {
+        "material": "合成示例课程教学大纲",
+        "material_version": "v2.1",
+        "locator": "第 3 页 / 表 2 课程目标与指标点对应",
+        "digest": "sha256:a14ee6745c789042c5caa6ef0f1221314bf5a80c2df7878d3289e62f94aeca88"
+      }
+    },
+    {
+      "relation": "CONTRIBUTES_TO",
+      "from_node": "EXP-1",
+      "to_node": "CO-1",
+      "source": {
+        "material": "合成示例课程实验指导书",
+        "material_version": "v1.3",
+        "locator": "第 3 页 / 实验一教学目标",
+        "digest": "sha256:3c641134684a3249e27d3835ac1d007c23d4b5411c57aecccd98ccc0cccb45bb"
+      }
+    },
+    {
+      "relation": "CONTRIBUTES_TO",
+      "from_node": "EXP-2",
+      "to_node": "CO-2",
+      "source": {
+        "material": "合成示例课程实验指导书",
+        "material_version": "v1.3",
+        "locator": "第 9 页 / 实验二教学目标",
+        "digest": "sha256:e43b017380880dba13da82ed397e12085a3b70b49a54e5ce3f20f2391315c344"
+      }
+    },
+    {
+      "relation": "CONTAINS_TASK",
+      "from_node": "EXP-2",
+      "to_node": "AT-1",
+      "source": {
+        "material": "合成示例课程实验指导书",
+        "material_version": "v1.3",
+        "locator": "第 12 页 / 实验二考核要求",
+        "digest": "sha256:f4c0b76fe84264d78d1ff44fe9e88bd44f536bffda8d884e78e96c2f8813cacc"
+      }
+    },
+    {
+      "relation": "CONTAINS_TASK",
+      "from_node": "EXP-1",
+      "to_node": "AT-2",
+      "source": {
+        "material": "合成示例课程实验指导书",
+        "material_version": "v1.3",
+        "locator": "第 7 页 / 实验一考核要求",
+        "digest": "sha256:52580f3d280c9268aa318187505a046b3766a19cd65d9a6210e3e4cff24cc929"
+      }
+    },
+    {
+      "relation": "CONTAINS_CRITERION",
+      "from_node": "AT-1",
+      "to_node": "RC-1",
+      "source": {
+        "material": "合成示例课程实验报告评分表",
+        "material_version": "v1.0",
+        "locator": "第 1 页 / 表 1 第 1 行",
+        "digest": "sha256:1a043546696cfb2a0aa28537dec0a35f65cf87a5a1b65d13c10c44520481936c"
+      }
+    },
+    {
+      "relation": "CONTAINS_CRITERION",
+      "from_node": "AT-1",
+      "to_node": "RC-2",
+      "source": {
+        "material": "合成示例课程实验报告评分表",
+        "material_version": "v1.0",
+        "locator": "第 1 页 / 表 1 第 2 行",
+        "digest": "sha256:e946736d1899d8d7b539a6534a81d1b6d29a9d004c81cb411148932f351e31d2"
+      }
+    },
+    {
+      "relation": "CONTAINS_CRITERION",
+      "from_node": "AT-1",
+      "to_node": "RC-3",
+      "source": {
+        "material": "合成示例课程实验报告评分表",
+        "material_version": "v1.0",
+        "locator": "第 1 页 / 表 1 第 3 行",
+        "digest": "sha256:cf289a2cffab585fc80b58854ea89ebb5233830774a1167a3f13f428d2a2d7d7"
+      }
+    },
+    {
+      "relation": "CONTAINS_CRITERION",
+      "from_node": "AT-2",
+      "to_node": "RC-4",
+      "source": {
+        "material": "合成示例课程实验指导书",
+        "material_version": "v1.3",
+        "locator": "第 7 页 / 考核要求第 1 条",
+        "digest": "sha256:ad209b6183d664c8ebaf50591cc2f8e0f7f569733086a2364308b17e3b5eb2b1"
+      }
+    },
+    {
+      "relation": "CONTAINS_CRITERION",
+      "from_node": "AT-2",
+      "to_node": "RC-5",
+      "source": {
+        "material": "合成示例课程实验指导书",
+        "material_version": "v1.3",
+        "locator": "第 7 页 / 考核要求第 2 条",
+        "digest": "sha256:5f2d7bf96d071a0c283c5596c7d1f33d85227c79f18695cb3489462d7c65b9aa"
+      }
+    },
+    {
+      "relation": "CONTRIBUTES_TO",
+      "from_node": "RC-1",
+      "to_node": "CO-2",
+      "source": {
+        "material": "合成示例课程实验报告评分表",
+        "material_version": "v1.0",
+        "locator": "第 2 页 / 表 2 评分项与课程目标对应",
+        "digest": "sha256:258c15fa09d645d7ac5f3a2e6be3484b5047cc0c7ca59ecedf61d4ac69f413ac"
+      }
+    },
+    {
+      "relation": "CONTRIBUTES_TO",
+      "from_node": "RC-2",
+      "to_node": "CO-2",
+      "source": {
+        "material": "合成示例课程实验报告评分表",
+        "material_version": "v1.0",
+        "locator": "第 2 页 / 表 2 评分项与课程目标对应",
+        "digest": "sha256:e4e1cb29510721882d99dd2a30129cb5cf6be77ad6abd5de36f4421ec5a20499"
+      }
+    },
+    {
+      "relation": "CONTRIBUTES_TO",
+      "from_node": "RC-3",
+      "to_node": "CO-2",
+      "source": {
+        "material": "合成示例课程实验报告评分表",
+        "material_version": "v1.0",
+        "locator": "第 2 页 / 表 2 评分项与课程目标对应",
+        "digest": "sha256:ad1654cd6d71c1cad50e608571fd846409e2e6206cd59cad9e9c281ee8ad00af"
+      }
+    },
+    {
+      "relation": "CONTRIBUTES_TO",
+      "from_node": "RC-4",
+      "to_node": "CO-1",
+      "source": {
+        "material": "合成示例课程实验指导书",
+        "material_version": "v1.3",
+        "locator": "第 7 页 / 考核要求第 1 条",
+        "digest": "sha256:296540cfc0dacc0bbf8b18e28ae7bbfa8ce90a9585d3a2077ba0e4945abef54a"
+      }
+    },
+    {
+      "relation": "CONTRIBUTES_TO",
+      "from_node": "RC-5",
+      "to_node": "CO-1",
+      "source": {
+        "material": "合成示例课程实验指导书",
+        "material_version": "v1.3",
+        "locator": "第 7 页 / 考核要求第 2 条",
+        "digest": "sha256:f3cde9d3c03c21608db8923cb7819616db9b536772dcb2edd68e77d153f49638"
+      }
+    }
+  ],
+  "targets": [
+    {
+      "target_id": "TGT-CO2",
+      "course_outcome_id": "CO-2",
+      "performance_indicator_id": "PI-3.2",
+      "threshold": "0.70",
+      "note": "完整算例：含 1 名学生在 RC-2 缺考，按 exclude 口径剔除。",
+      "criteria": [
+        {
+          "criterion_id": "RC-1",
+          "label": "实验方案与步骤正确性",
+          "max_score": "20",
+          "weight": "0.40",
+          "source": {
+            "material": "合成示例课程实验报告评分表",
+            "material_version": "v1.0",
+            "locator": "第 1 页 / 表 1 第 1 行",
+            "digest": "sha256:7b6e141cceb6e064211bc889faf7b59d7fb7402b024860e24bafc625299b5028"
+          }
+        },
+        {
+          "criterion_id": "RC-2",
+          "label": "数据处理与计算准确性",
+          "max_score": "30",
+          "weight": "0.35",
+          "source": {
+            "material": "合成示例课程实验报告评分表",
+            "material_version": "v1.0",
+            "locator": "第 1 页 / 表 1 第 2 行",
+            "digest": "sha256:1739f958c3fb62de88aca71e2aed8a224a0a333ae772edeb9ddf26d11082ee75"
+          }
+        },
+        {
+          "criterion_id": "RC-3",
+          "label": "误差分析与结论合理性",
+          "max_score": "20",
+          "weight": "0.25",
+          "source": {
+            "material": "合成示例课程实验报告评分表",
+            "material_version": "v1.0",
+            "locator": "第 1 页 / 表 1 第 3 行",
+            "digest": "sha256:bdd75f8a08488474735c27526cc10e05255653372aacab237c33c48e304da272"
+          }
+        }
+      ],
+      "expected": {
+        "ready": true,
+        "blockers": [],
+        "attainment": "0.749",
+        "outcome": "achieved",
+        "weight_total": "1.000",
+        "criteria": [
+          {
+            "criterion_id": "RC-1",
+            "valid_sample_count": 8,
+            "missing_sample_count": 0,
+            "score_sum": "127",
+            "score_rate": "0.794",
+            "contribution": "0.318"
+          },
+          {
+            "criterion_id": "RC-2",
+            "valid_sample_count": 7,
+            "missing_sample_count": 1,
+            "score_sum": "161",
+            "score_rate": "0.767",
+            "contribution": "0.268"
+          },
+          {
+            "criterion_id": "RC-3",
+            "valid_sample_count": 8,
+            "missing_sample_count": 0,
+            "score_sum": "104",
+            "score_rate": "0.650",
+            "contribution": "0.163"
+          }
+        ]
+      }
+    },
+    {
+      "target_id": "TGT-CO1",
+      "course_outcome_id": "CO-1",
+      "performance_indicator_id": "PI-3.2",
+      "threshold": "0.70",
+      "note": "阻断算例：图谱路径完整，但没有任何评分数据。真实资料盘点中 9 门课仅有 3 份评分表，因此阻断是常态而非异常。此时达成度与达成结论都必须为空，不得投影为未达成。",
+      "criteria": [
+        {
+          "criterion_id": "RC-4",
+          "label": "文献调研与方案论证",
+          "max_score": "20",
+          "weight": "0.50",
+          "source": {
+            "material": "合成示例课程实验指导书",
+            "material_version": "v1.3",
+            "locator": "第 7 页 / 考核要求第 1 条",
+            "digest": "sha256:7535b7975b5f0eb4fb8119fe8d540237b6d86a295ca97c13d9f2af10a4e2e1f2"
+          }
+        },
+        {
+          "criterion_id": "RC-5",
+          "label": "实验记录规范性",
+          "max_score": "20",
+          "weight": "0.50",
+          "source": {
+            "material": "合成示例课程实验指导书",
+            "material_version": "v1.3",
+            "locator": "第 7 页 / 考核要求第 2 条",
+            "digest": "sha256:b212b52f89adea7920b9b80fa246f8db932125392b271f105174bf9253b5105f"
+          }
+        }
+      ],
+      "expected": {
+        "ready": false,
+        "blockers": [
+          "文献调研与方案论证缺少评分数据",
+          "实验记录规范性缺少评分数据"
+        ],
+        "attainment": null,
+        "outcome": null,
+        "weight_total": "1.000",
+        "criteria": [
+          {
+            "criterion_id": "RC-4",
+            "valid_sample_count": 0,
+            "missing_sample_count": 0,
+            "score_sum": "0",
+            "score_rate": null,
+            "contribution": null
+          },
+          {
+            "criterion_id": "RC-5",
+            "valid_sample_count": 0,
+            "missing_sample_count": 0,
+            "score_sum": "0",
+            "score_rate": null,
+            "contribution": null
+          }
+        ]
+      }
+    }
+  ]
+}

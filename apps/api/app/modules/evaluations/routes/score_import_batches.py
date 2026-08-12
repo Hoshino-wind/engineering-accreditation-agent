@@ -7,6 +7,7 @@ from app.modules.evaluations.application import (
     CreateScoreImportBatch,
     CreateScoreImportBatchCommand,
     GetScoreImportBatch,
+    PerStudentScoreCommandPayload,
     PilotScoreBatchCaptureDisabledError,
 )
 from app.modules.evaluations.contracts import (
@@ -66,8 +67,22 @@ def create_score_import_batches_router(
                     evaluation_object_id=payload.evaluation_object_id,
                     base_run_id=payload.base_run_id,
                     profile=payload.profile,
-                    candidate_items=tuple(item.to_domain() for item in payload.items),
+                    candidate_items=tuple(
+                        item.to_domain() for item in payload.items or ()
+                    ),
                     idempotency_key=idempotency_key,
+                    per_student=(
+                        None
+                        if payload.student_items is None
+                        or payload.missing_score_policy is None
+                        else PerStudentScoreCommandPayload(
+                            items=tuple(
+                                item.to_domain() for item in payload.student_items
+                            ),
+                            missing_score_policy=payload.missing_score_policy,
+                            score_rate_scale=payload.resolved_score_rate_scale,
+                        )
+                    ),
                 )
             )
         except SCORE_IMPORT_CREATION_ERRORS as error:

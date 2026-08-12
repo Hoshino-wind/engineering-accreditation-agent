@@ -1,14 +1,30 @@
 from dataclasses import dataclass
 from decimal import ROUND_HALF_UP, Decimal
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
-ScoreImportScope = Literal["local_pilot_aggregate"]
-ScoreImportProfile = Literal["local-pilot-aggregate:v1"]
+if TYPE_CHECKING:
+    from .score_import_per_student import PerStudentSource
+
+ScoreImportScope = Literal["local_pilot_aggregate", "local_pilot_per_student"]
+ScoreImportProfile = Literal["local-pilot-aggregate:v1", "local-pilot-per-student:v1"]
+ScoreImportRecordGranularity = Literal["aggregate", "per_student"]
 ScoreImportValidationStatus = Literal["blocked", "pilot_ready"]
 ScoreValidationCheckStatus = Literal["pass", "blocked"]
 
 SCORE_IMPORT_SCOPE: ScoreImportScope = "local_pilot_aggregate"
 SCORE_IMPORT_PROFILE: ScoreImportProfile = "local-pilot-aggregate:v1"
+PER_STUDENT_SCOPE: ScoreImportScope = "local_pilot_per_student"
+PER_STUDENT_PROFILE: ScoreImportProfile = "local-pilot-per-student:v1"
+
+# profile → (scope, 记录粒度)。新增口径必须在此登记，批次校验以本表为准。
+SCORE_IMPORT_PROFILE_SCOPES: dict[ScoreImportProfile, ScoreImportScope] = {
+    SCORE_IMPORT_PROFILE: SCORE_IMPORT_SCOPE,
+    PER_STUDENT_PROFILE: PER_STUDENT_SCOPE,
+}
+SCORE_IMPORT_PROFILE_GRANULARITY: dict[ScoreImportProfile, ScoreImportRecordGranularity] = {
+    SCORE_IMPORT_PROFILE: "aggregate",
+    PER_STUDENT_PROFILE: "per_student",
+}
 SCORE_IMPORT_SCHEMA_VERSION = "score-import-batch:v1"
 SCORE_IMPORT_REPORT_VERSION = "score-import-validation:v1"
 SCORE_IMPORT_LIMITATIONS = (
@@ -57,6 +73,9 @@ class ScoreRecord:
     possible_points_total: Decimal
     observed_student_count: int
     score_rate: Decimal
+    # 得分率定标位数。汇总口径固定 6 位；逐生口径由调用方声明，
+    # 因为舍入时机会改变最终达成度，必须是可审计的显式决定而不是实现细节。
+    score_rate_scale: int = 6
 
     def __post_init__(self) -> None:
         require_opaque_id(self.record_id, "评分记录 ID")
@@ -74,6 +93,8 @@ class ScoreRecord:
             raise ValueError("规范评分得分率必须位于 0 到 1 之间")
         if self.observed_student_count < 1:
             raise ValueError("规范评分样本量必须为正整数")
+        if not 1 <= self.score_rate_scale <= 6:
+            raise ValueError("规范评分得分率定标位数必须位于 1 到 6 之间")
 
 
 @dataclass(frozen=True, slots=True)
@@ -126,17 +147,21 @@ class ScoreImportBatch:
     content_digest: str
     created_at: str
     validation_report: DataValidationReport
+    # 仅逐生口径填充：保留原始分、满分与口径声明，供复核者重新推导汇总值。
+    per_student_source: "PerStudentSource | None" = None
 
     def __post_init__(self) -> None:
         require_opaque_id(self.batch_id, "评分批次 ID")
         require_opaque_id(self.evaluation_object_id, "评价对象 ID")
         require_opaque_id(self.base_run_id, "基准运行 ID")
-        if self.scope != SCORE_IMPORT_SCOPE:
-            raise ValueError("评分批次范围不受支持")
+        if (self.profile == PER_STUDENT_PROFILE) != (self.per_student_source is not None):
+            raise ValueError("逐生评分批次必须且只能由逐生口径保留原始输入")
         if self.schema_version != SCORE_IMPORT_SCHEMA_VERSION:
             raise ValueError("评分批次版本不受支持")
-        if self.profile != SCORE_IMPORT_PROFILE:
+        if self.profile not in SCORE_IMPORT_PROFILE_SCOPES:
             raise ValueError("评分批次配置不受支持")
+        if self.scope != SCORE_IMPORT_PROFILE_SCOPES[self.profile]:
+            raise ValueError("评分批次范围与配置不一致")
         if self.validation_report.batch_id != self.batch_id:
             raise ValueError("评分批次与校验报告归属不一致")
         if self.validation_report.validation_status == "pilot_ready":
@@ -157,7 +182,10 @@ class ScoreImportBatch:
                     raise ValueError("规范评分记录与候选评分输入不一致")
                 expected_rate = (
                     record.earned_points_total / record.possible_points_total
-                ).quantize(Decimal("0.000001"), rounding=ROUND_HALF_UP)
+                ).quantize(
+                    Decimal(1).scaleb(-record.score_rate_scale),
+                    rounding=ROUND_HALF_UP,
+                )
                 if record.score_rate != expected_rate:
                     raise ValueError("规范评分记录得分率不是由总分确定性计算得出")
         elif self.records:
@@ -166,14 +194,19 @@ class ScoreImportBatch:
 
 __all__ = [
     "DataValidationReport",
+    "PER_STUDENT_PROFILE",
+    "PER_STUDENT_SCOPE",
     "SCORE_IMPORT_LIMITATIONS",
     "SCORE_IMPORT_PROFILE",
+    "SCORE_IMPORT_PROFILE_GRANULARITY",
+    "SCORE_IMPORT_PROFILE_SCOPES",
     "SCORE_IMPORT_REPORT_VERSION",
     "SCORE_IMPORT_SCHEMA_VERSION",
     "SCORE_IMPORT_SCOPE",
     "ScoreImportBatch",
     "ScoreImportCandidateItem",
     "ScoreImportProfile",
+    "ScoreImportRecordGranularity",
     "ScoreImportScope",
     "ScoreImportValidationStatus",
     "ScoreRecord",
