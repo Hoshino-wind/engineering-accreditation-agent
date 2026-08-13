@@ -85,7 +85,7 @@ def _add_source_node(nodes: list[dict], node_id: str, name: str) -> None:
     })
 
 
-def test_accepted_candidate_projects_approved_edge_and_covers() -> None:
+def test_accepted_candidate_projects_edge_but_single_evidence_is_partial() -> None:
     nodes, edges = _graph_dicts()
     _add_source_node(nodes, "exp-list", "链表实现")
     accepted = _make_candidate(review_status=CandidateReviewStatus.ACCEPTED)
@@ -102,8 +102,8 @@ def test_accepted_candidate_projects_approved_edge_and_covers() -> None:
     assert new_edges[0]["sourceType"] == "manual"
 
     comps = _coverage_of(merged)
-    assert comps["C-01-01"].status == "covered"
-    assert comps["C-01-01"].attainment == 1.0
+    assert comps["C-01-01"].status == "partial"
+    assert comps["C-01-01"].attainment == 0.75
     # 其他指标点不受影响
     assert comps["C-03-01"].status == "gap"
 
@@ -220,8 +220,12 @@ class _CandidateRepo:
         risk: str | None = None,
         candidate_type: str | None = None,
         review_status: str | None = None,
+        major_id: str | None = None,
     ) -> list[RecognitionCandidate]:
-        return list(self.candidates)
+        candidates = list(self.candidates)
+        if major_id is not None:
+            candidates = [c for c in candidates if c.major_id == major_id]
+        return candidates
 
     async def get_by_id(self, candidate_id: str) -> RecognitionCandidate | None:
         return next((c for c in self.candidates if c.id == candidate_id), None)
@@ -294,5 +298,66 @@ def test_orphan_pending_graph_edge_creates_review_candidate() -> None:
         assert candidate.course == "单片机基础"
         assert candidate.confidence == 82
         assert candidate.review_status == CandidateReviewStatus.PENDING
+
+    asyncio.run(_run())
+
+
+def test_experiment_candidate_inherits_course_from_belongs_to_edge() -> None:
+    async def _run() -> None:
+        nodes = [
+            {
+                "id": "course-es",
+                "code": "CO-ES",
+                "name": "嵌入式系统原理",
+                "kind": "Course",
+                "origin": "school",
+                "properties": {},
+            },
+            {
+                "id": "exp-a",
+                "code": "EXP-A",
+                "name": "定时器实验",
+                "kind": "Experiment",
+                "origin": "school",
+                "properties": {},
+            },
+            {
+                "id": "std-c-01-01",
+                "code": "C-01-01",
+                "name": "工程知识应用",
+                "kind": "Competency",
+                "origin": "standard",
+            },
+        ]
+        edges = [
+            {
+                "id": "belongs-exp-a-course-es",
+                "source": "exp-a",
+                "target": "course-es",
+                "kind": "BELONGS_TO",
+                "sourceType": "rule",
+                "reviewStatus": "approved",
+            },
+            {
+                "id": "ai-rel-exp-a-std-c-01-01",
+                "source": "exp-a",
+                "target": "std-c-01-01",
+                "kind": "SUPPORTS",
+                "sourceType": "ai",
+                "reviewStatus": "pending",
+                "strength": "strong",
+                "confidence": 0.92,
+                "materialResourceId": "resource-v1",
+                "materialVersion": "v1",
+                "materialName": "实验任务",
+            },
+        ]
+        repo = _CandidateRepo()
+
+        candidates = await reconcile_orphan_pending_edges(nodes, edges, repo)
+
+        assert len(candidates) == 1
+        assert candidates[0].course == "嵌入式系统原理"
+        assert candidates[0].evidence[0].resource_id == "resource-v1"
 
     asyncio.run(_run())

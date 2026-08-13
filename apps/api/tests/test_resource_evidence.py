@@ -1,7 +1,7 @@
 import asyncio
 
 from app.modules.resources.application.upload_resource import UploadResource
-from app.modules.resources.domain.resource import TeachingResource
+from app.modules.resources.domain.resource import TeachingResource, TeachingResourceType
 
 
 class CapturingResourceRepository:
@@ -11,6 +11,9 @@ class CapturingResourceRepository:
     async def add(self, resource: TeachingResource) -> TeachingResource:
         self.resource = resource
         return resource
+
+    async def list_all(self, **_kwargs) -> list[TeachingResource]:
+        return []
 
 
 class CapturingObjectStorage:
@@ -57,3 +60,16 @@ def test_upload_stores_original_bytes_in_tenant_scoped_object_key() -> None:
     assert resource.object_key is not None
     assert resource.object_key.startswith("tenants/user-42/resources/")
     assert storage.calls == [(resource.object_key, b"pdf", "application/pdf")]
+
+
+def test_upload_preserves_evaluation_result_category() -> None:
+    resource = asyncio.run(
+        UploadResource(CapturingResourceRepository()).execute(
+            file_name="05_attainment_rubric_and_scores.csv",
+            file_size_bytes=512,
+            category="评价结果",
+        )
+    )
+
+    assert resource.resource_type == TeachingResourceType.EVALUATION_RESULT
+    assert resource.format == "CSV"

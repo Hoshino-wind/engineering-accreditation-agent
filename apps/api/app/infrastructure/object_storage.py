@@ -35,6 +35,13 @@ class S3ObjectStorage:
             kwargs["ContentType"] = content_type
         await asyncio.to_thread(self._client.put_object, **kwargs)
 
+    async def delete(self, *, key: str) -> None:
+        await asyncio.to_thread(
+            self._client.delete_object,
+            Bucket=self._bucket,
+            Key=key,
+        )
+
 
 def build_object_storage(settings: Settings) -> ObjectStoragePort | None:
     required = (

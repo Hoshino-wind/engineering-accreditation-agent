@@ -30,6 +30,9 @@ from app.modules.support.application import GetSupportReadiness
 
 
 class ResourceRepository:
+    async def list_all(self, **_kwargs) -> list[TeachingResource]:
+        return []
+
     async def add(self, resource: TeachingResource) -> TeachingResource:
         return resource
 
@@ -82,7 +85,7 @@ def test_electronic_information_engineering_pilot_closed_loop() -> None:
     )
     coverage = analyze_coverage(graph)
     competency = next(item for item in coverage.competencies if item.code == "C-01-01")
-    assert competency.status == "covered"
+    assert competency.status == "partial"
 
     finding = DiagnosticFinding(
         id="pilot-finding-1",

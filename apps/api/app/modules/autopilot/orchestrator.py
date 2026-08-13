@@ -2,8 +2,8 @@
 
 委托 LangGraph pipeline 完成全链路：
 start_run（plan→extract→infer→停在审核网关）
-→ 自动审核（置信度 ≥ 阈值批准，其余驳回，保留真实缺口供诊断）
-→ resume_review（coverage→diagnose→improve→report）。
+→ 识别候选落库，等待教师在审核网关确认
+→ 教师审核后由 orchestration.resume_review 继续 coverage→diagnose→improve→report。
 
 提取的节点真实并入能力图谱，审核后的关系、诊断发现真实落库，
 "AI 自动分析"按钮的每一步产物都可在图谱 / 识别 / 诊断页面看到。
@@ -129,6 +129,10 @@ class AutopilotOrchestrator:
                 material_category=str(resource.resource_type.value),
                 material_name=resource.name,
                 material_text=material_text,
+                material_resource_id=resource.id,
+                material_version_group_id=resource.version_group_id or resource.id,
+                material_version=resource.version,
+                material_file_name=resource.file_name,
             )
             if run.status == RunStatus.FAILED:
                 raise RuntimeError(f"多智能体 pipeline 运行失败: {run.error}")
@@ -154,21 +158,14 @@ class AutopilotOrchestrator:
             except Exception as e:  # noqa: BLE001
                 logger.warning("Autopilot RAG ingest 失败: %s", e)
 
-        # ── Step 2: 自动审核并恢复（coverage→diagnose→improve→report）──
+        # ── Step 2: 严格人在回路：不自动采纳，候选关系等待教师审核 ──
         review_total = len(run.pending_review)
         decided: dict[str, tuple[str, str]] = {}  # rel_id -> (decision, reason)
         if run.status == RunStatus.AWAITING_REVIEW:
-            if run.pending_review:
-                decided = self._auto_review(run.pending_review)
-            decisions = [
-                {"relation_id": rel_id, "decision": decision}
-                for rel_id, (decision, _) in decided.items()
-            ]
-            resumed = await self._pipeline.resume_review(run.run_id, decisions)
-            if resumed is not None:
-                run = resumed
-            if run.status == RunStatus.FAILED:
-                raise RuntimeError(f"多智能体 pipeline 审核后恢复失败: {run.error}")
+            logger.info(
+                "Autopilot 已生成 %s 条候选关系，等待教师审核后再写入覆盖度",
+                review_total,
+            )
 
         # ── Step 3: 汇总产物并落库 ──
         result = run.result or {}
@@ -401,10 +398,17 @@ class AutopilotOrchestrator:
         candidates: list[RecognitionCandidate] = []
         for i, rel in enumerate(relations):
             rel_id = rel.get("id", f"rel-{i}")
-            decision, verdict = decided.get(rel_id, ("rejected", "未参与本轮自动审核"))
+            decision, verdict = decided.get(rel_id, ("pending", "等待教师在 M4 审核后再写入能力图谱"))
             approved = decision == "approved"
+            rejected = decision == "rejected"
             confidence = float(rel.get("confidence") or 0.0)
             reasoning = rel.get("reasoning") or ""
+            if approved:
+                review_status = CandidateReviewStatus.ACCEPTED
+            elif rejected:
+                review_status = CandidateReviewStatus.REJECTED
+            else:
+                review_status = CandidateReviewStatus.PENDING
             candidates.append(RecognitionCandidate(
                 id=f"candidate-auto-{seq % 100000}-{i}",
                 title=f"{rel.get('source', '')} 支撑 {rel.get('target', '')}",
@@ -415,14 +419,11 @@ class AutopilotOrchestrator:
                 source_node=rel.get("source", ""),
                 relation="支撑",
                 target_node=rel.get("target", ""),
-                explanation=f"{reasoning}\n【自动审核】{verdict}".strip(),
+                explanation=f"{reasoning}\n【审核状态】{verdict}".strip(),
                 processor_version="autopilot-v2.0",
                 generated_at=now,
-                review_status=(
-                    CandidateReviewStatus.ACCEPTED
-                    if approved
-                    else CandidateReviewStatus.REJECTED
-                ),
+                major_id=resource.major_id,
+                review_status=review_status,
                 evidence=(
                     CandidateEvidence(
                         id=f"ev-auto-{seq}-{i}",
@@ -431,6 +432,7 @@ class AutopilotOrchestrator:
                         coordinate="autopilot",
                         excerpt=(reasoning or verdict)[:200],
                         hash="auto",
+                        resource_id=resource.id,
                     ),
                 ),
             ))
@@ -474,6 +476,7 @@ class AutopilotOrchestrator:
                         coordinate="autopilot",
                         excerpt=narrative[:200],
                         hash="auto",
+                        resource_id=resource.id,
                     ),
                 ),
             ))

@@ -71,6 +71,7 @@ export function mapRecognitionCandidate(
     explanation: raw.explanation,
     generatedAt: raw.generatedAt,
     id: raw.id,
+    majorId: raw.majorId,
     impact: {
       abilityNodes: raw.impact?.abilityNodes ?? 0,
       courseObjectives: raw.impact?.courseObjectives ?? 0,

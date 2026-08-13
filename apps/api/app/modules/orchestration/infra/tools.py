@@ -89,7 +89,14 @@ def state_to_graph(
 
 def school_node_dicts(nodes: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [
-        {"id": n["id"], "name": n["name"], "kind": n["kind"], "code": n["code"]}
+        {
+            "id": n["id"],
+            "name": n["name"],
+            "kind": n["kind"],
+            "code": n["code"],
+            "description": n.get("description"),
+            "properties": n.get("properties") or {},
+        }
         for n in nodes
         if n.get("origin") == "school"
     ]
@@ -163,6 +170,104 @@ def relations_to_pending_edges(
     return edges
 
 
+def without_superseded_material_version(
+    nodes: list[dict[str, Any]],
+    edges: list[dict[str, Any]],
+    *,
+    version_group_id: str,
+    current_resource_id: str,
+    material_names: set[str] | None = None,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """移除同版本组旧引用；旧格式图谱回退按材料名识别。"""
+    normalized_names = {
+        name.strip().casefold()
+        for name in material_names or set()
+        if name and name.strip()
+    }
+    removed_node_ids: set[str] = set()
+    next_nodes: list[dict[str, Any]] = []
+    for node in nodes:
+        if node.get("origin") != "school":
+            next_nodes.append(node)
+            continue
+        properties = dict(node.get("properties") or {})
+        refs = [
+            dict(ref)
+            for ref in properties.get("materialRefs", [])
+            if isinstance(ref, dict)
+        ]
+        stale_refs = [
+            ref
+            for ref in refs
+            if ref.get("versionGroupId") == version_group_id
+            and ref.get("resourceId") != current_resource_id
+        ]
+        if stale_refs:
+            active_refs = [ref for ref in refs if ref not in stale_refs]
+            if not active_refs:
+                removed_node_ids.add(str(node.get("id") or ""))
+                continue
+            active = active_refs[-1]
+            properties.update(
+                {
+                    "materialRefs": active_refs,
+                    "materialId": active.get("resourceId", ""),
+                    "materialVersionGroupId": active.get("versionGroupId", ""),
+                    "materialVersion": active.get("version", ""),
+                    "materialName": active.get("name", ""),
+                    "materialFileName": active.get("fileName", ""),
+                }
+            )
+            next_nodes.append({**node, "properties": properties})
+            continue
+
+        direct_group = str(properties.get("materialVersionGroupId") or "")
+        direct_id = str(properties.get("materialId") or "")
+        legacy_names = {
+            str(properties.get(key) or "").strip().casefold()
+            for key in ("materialName", "materialFileName", "resourceName")
+            if str(properties.get(key) or "").strip()
+        }
+        legacy_match = not refs and not direct_id and bool(legacy_names & normalized_names)
+        if (
+            direct_group == version_group_id
+            and direct_id != current_resource_id
+        ) or legacy_match:
+            removed_node_ids.add(str(node.get("id") or ""))
+            continue
+        next_nodes.append(node)
+
+    next_edges: list[dict[str, Any]] = []
+    for edge in edges:
+        if edge.get("source") in removed_node_ids or edge.get("target") in removed_node_ids:
+            continue
+        refs = [
+            dict(ref)
+            for ref in edge.get("materialRefs", [])
+            if isinstance(ref, dict)
+        ]
+        active_refs = [
+            ref
+            for ref in refs
+            if not (
+                ref.get("versionGroupId") == version_group_id
+                and ref.get("resourceId") != current_resource_id
+            )
+        ]
+        if refs:
+            if not active_refs:
+                continue
+            next_edges.append({**edge, "materialRefs": active_refs})
+            continue
+        if (
+            edge.get("materialVersionGroupId") == version_group_id
+            and edge.get("materialResourceId") != current_resource_id
+        ):
+            continue
+        next_edges.append(edge)
+    return next_nodes, next_edges
+
+
 # ── 覆盖度下游输入构造 ──────────────────────────────────
 
 
@@ -171,7 +276,12 @@ def build_gap_facts(coverage: CoverageReport) -> list[dict[str, Any]]:
     for comp in coverage.competencies:
         if comp.status == "covered":
             continue
-        reason = "无任何已审核支撑关系" if comp.supporter_count == 0 else "支撑强度不足（弱支撑/仅待审核）"
+        if comp.supporter_count == 0:
+            reason = "无任何已审核支撑关系"
+        elif comp.evidence_source_count < 2:
+            reason = "独立材料证据不足 2 份"
+        else:
+            reason = "累计支撑强度不足 4 分"
         facts.append(
             {
                 "code": comp.code,

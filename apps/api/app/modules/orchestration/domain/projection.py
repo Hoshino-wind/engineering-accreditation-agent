@@ -121,11 +121,21 @@ def apply_review_decisions(
         if status == CandidateReviewStatus.ACCEPTED:
             confidence = int(getattr(candidate, "confidence", 0) or 0)
             strength = strength_from_confidence(confidence)
+            evidence_items = tuple(getattr(candidate, "evidence", ()) or ())
+            primary_evidence = evidence_items[0] if evidence_items else None
+            material_metadata = {
+                "materialResourceId": getattr(primary_evidence, "resource_id", "") or "",
+                "materialVersion": getattr(primary_evidence, "resource_version", "") or "",
+                "materialName": getattr(primary_evidence, "resource_name", "") or "",
+            }
             if existing_edges:
                 for existing in existing_edges:
                     existing["reviewStatus"] = "approved"
                     existing["strength"] = strength
                     existing["confidence"] = confidence / 100
+                    for key, value in material_metadata.items():
+                        if value and not existing.get(key):
+                            existing[key] = value
             else:
                 projected.append(
                     {
@@ -140,6 +150,7 @@ def apply_review_decisions(
                         "reasoning": (
                             f"教师在识别中心采纳候选「{getattr(candidate, 'title', '')}」"
                         ),
+                        **material_metadata,
                     }
                 )
         else:  # REJECTED

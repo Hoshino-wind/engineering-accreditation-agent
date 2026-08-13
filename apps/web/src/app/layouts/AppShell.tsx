@@ -108,7 +108,7 @@ const navigationItems: MenuProps['items'] = [
       {
         key: '/evaluations',
         icon: <BarChartOutlined />,
-        label: '④ 达成度评价',
+        label: '④ 材料支撑评价',
       },
       {
         key: '/improvements',
@@ -184,7 +184,7 @@ const routeBreadcrumbs: Record<string, RouteBreadcrumb> = {
   },
   '/evaluations': {
     areaName: '分析动线 · 第 4 步',
-    pageName: '达成度评价',
+    pageName: '材料支撑评价',
   },
   '/improvements': {
     areaName: '分析动线 · 第 5 步',

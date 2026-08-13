@@ -38,8 +38,8 @@ def test_evaluation_run_freezes_rules_and_input_snapshot() -> None:
     assert len(run.input_snapshot_hash) == 64
     assert len(run.items) == 1
     assert run.items[0].competency_code == "C-01-01"
-    assert run.items[0].attainment == 1.0
-    assert run.items[0].status == "covered"
+    assert run.items[0].attainment == 0.75
+    assert run.items[0].status == "partial"
 
 
 def test_rule_version_changes_evaluation_snapshot() -> None:

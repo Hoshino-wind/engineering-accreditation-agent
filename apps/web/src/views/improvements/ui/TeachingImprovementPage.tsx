@@ -1,6 +1,7 @@
 import {
   CheckCircleOutlined,
   ClockCircleOutlined,
+  DeleteOutlined,
   FileDoneOutlined,
   LinkOutlined,
   LoadingOutlined,
@@ -32,6 +33,7 @@ import {
   type ImprovementData,
   completeImprovement,
   createImprovement,
+  deleteImprovement,
   fetchImprovements,
   updateImprovement,
   updateImprovementStatus,
@@ -82,6 +84,26 @@ interface ImprovementFormValues {
   completionSummary?: string;
 }
 
+function getValidationMessage(error: unknown): string | null {
+  if (!error || typeof error !== 'object' || !('errorFields' in error)) return null;
+  const fields = (error as { errorFields?: Array<{ name?: Array<string | number> }> })
+    .errorFields;
+  if (!fields?.length) return '请补全必填信息后再创建';
+  const fieldLabel: Record<string, string> = {
+    action: '改进措施',
+    course: '课程',
+    owner: '负责人',
+    title: '标题',
+  };
+  const names = fields
+    .map((field) => String(field.name?.[0] ?? ''))
+    .map((name) => fieldLabel[name] ?? name)
+    .filter(Boolean);
+  return names.length > 0
+    ? `请补全必填信息：${Array.from(new Set(names)).join('、')}`
+    : '请补全必填信息后再创建';
+}
+
 export function TeachingImprovementPage() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -93,6 +115,7 @@ export function TeachingImprovementPage() {
   const [createStep, setCreateStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [savingDetail, setSavingDetail] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [form] = Form.useForm<ImprovementFormValues>();
   const [detailForm] = Form.useForm<ImprovementFormValues>();
   const requestedImprovementId = useMemo(
@@ -119,14 +142,20 @@ export function TeachingImprovementPage() {
       targetName: payload.targetName,
       findingId: payload.findingId ?? null,
       title: `补充 ${payload.targetCode} ${payload.targetName ?? ''} 的教学支撑`,
+      course: currentCourseName || '嵌入式系统原理',
+      owner: '当前课程负责人',
+      priority: 'high',
+      description: payload.summary ?? '',
       rootCause: payload.summary,
+      action: '补充该指标点对应的课程大纲、实验材料或评分依据，并重新运行图谱诊断。',
+      expectedEffect: `${payload.targetCode} 支撑关系补全，覆盖度达到诊断阈值。`,
       sourceModule: payload.findingId ? 'M5' : 'manual',
       sourceLabel: payload.findingId ? '图谱诊断' : '',
       verificationMethod: '补充材料或修正关系后，重新运行图谱诊断和达成度评价。',
     });
     setModalOpen(true);
     setCreateStep(0);
-  }, [location.state, form]);
+  }, [location.state, form, currentCourseName]);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -153,14 +182,19 @@ export function TeachingImprovementPage() {
 
   const handleCreate = async () => {
     try {
-      const values = await form.validateFields();
+      await form.validateFields(['action']);
+      const values = form.getFieldsValue(true) as ImprovementFormValues;
+      const fallbackTarget = [values.targetCode, values.targetName].filter(Boolean).join(' ');
+      const fallbackTitle = fallbackTarget
+        ? `补充 ${fallbackTarget} 的教学支撑`
+        : '补充教学支撑材料';
       setSubmitting(true);
       const payload: CreateImprovementPayload = {
-        title: values.title,
+        title: values.title || fallbackTitle,
         description: values.description || '',
         course: values.course || currentCourseName || '数据结构',
         action: values.action || '',
-        owner: values.owner || '',
+        owner: values.owner || '当前课程负责人',
         findingId: values.findingId ?? null,
         priority: values.priority || 'medium',
         targetCode: values.targetCode || null,
@@ -171,6 +205,11 @@ export function TeachingImprovementPage() {
         sourceModule: values.sourceModule || 'manual',
         sourceLabel: values.sourceLabel || '',
         verificationMethod: values.verificationMethod || '',
+        completionSummary: values.completionSummary || '',
+        evidenceUri: values.evidenceUri || '',
+        reevaluationResult: null,
+        baseline: null,
+        targetValue: null,
       };
       const created = await createImprovement(payload);
       if (created) {
@@ -179,9 +218,17 @@ export function TeachingImprovementPage() {
         setCreateStep(0);
         await loadData();
         setSelectedId(created.id);
+        message.success('已创建改进措施');
+      } else {
+        message.error('创建改进措施失败，请确认后端服务已启动');
       }
-    } catch {
-      // validation error
+    } catch (error) {
+      const validationMessage = getValidationMessage(error);
+      if (validationMessage) {
+        message.warning(validationMessage);
+      } else {
+        message.error(error instanceof Error ? error.message : '创建改进措施失败，请重试');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -208,6 +255,35 @@ export function TeachingImprovementPage() {
     } else {
       message.warning('复核未通过：请按提示补充材料或证据');
     }
+  };
+
+  const confirmDeleteImprovement = (item: ImprovementData) => {
+    Modal.confirm({
+      title: '确认删除这条改进措施？',
+      content: `删除后列表中不再显示「${item.title}」。已经完成但需要留痕的事项，建议改为“已关闭”而不是删除。`,
+      okText: '删除',
+      okType: 'danger',
+      cancelText: '取消',
+      centered: true,
+      onOk: async () => {
+        setDeletingId(item.id);
+        try {
+          const deleted = await deleteImprovement(item.id);
+          if (!deleted) {
+            message.error('删除失败，请确认后端服务已启动');
+            throw new Error('delete failed');
+          }
+          const nextSelection = improvements.find((i) => i.id !== item.id)?.id;
+          setImprovements((prev) => prev.filter((i) => i.id !== item.id));
+          if (selectedId === item.id) {
+            setSelectedId(nextSelection);
+          }
+          message.success('改进措施已删除');
+        } finally {
+          setDeletingId(null);
+        }
+      },
+    });
   };
 
   const selected = improvements.find((i) => i.id === selectedId);
@@ -452,6 +528,19 @@ export function TeachingImprovementPage() {
                           </Tag>
                         )}
                       </Space>
+                      <Button
+                        aria-label="删除改进措施"
+                        className="imp-list-item-delete"
+                        danger
+                        icon={<DeleteOutlined />}
+                        loading={deletingId === imp.id}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          confirmDeleteImprovement(imp);
+                        }}
+                        size="small"
+                        type="text"
+                      />
                     </div>
                     <span className="imp-list-item-title">{imp.title}</span>
                     <div className="imp-list-item-meta">
@@ -550,6 +639,63 @@ export function TeachingImprovementPage() {
                   </Button>
                 </div>
 
+                <div className="imp-execution-card">
+                  <div className="imp-execution-head">
+                    <span className="imp-detail-section-label">
+                      <RocketOutlined /> 执行改进
+                    </span>
+                    <span className="imp-execution-note">
+                      先补材料或补关系，再保存证据并提交复查。
+                    </span>
+                  </div>
+                  <div className="imp-execution-actions">
+                    <Button
+                      type="primary"
+                      icon={<PlusOutlined />}
+                      onClick={() => {
+                        void handleStatusChange(selected.id, 'in-progress');
+                        void navigate('/resources', {
+                          state: {
+                            fromImprovementId: selected.id,
+                            targetCode: selected.targetCode,
+                            targetName: selected.targetName,
+                            course: selected.course,
+                          },
+                        });
+                      }}
+                    >
+                      去上传补充材料
+                    </Button>
+                    <Button
+                      icon={<LinkOutlined />}
+                      onClick={() => {
+                        void handleStatusChange(selected.id, 'in-progress');
+                        void navigate('/graph', {
+                          state: {
+                            fromImprovementId: selected.id,
+                            targetCode: selected.targetCode,
+                            targetName: selected.targetName,
+                          },
+                        });
+                      }}
+                    >
+                      去审核支撑关系
+                    </Button>
+                    <Button
+                      icon={<CheckCircleOutlined />}
+                      onClick={() =>
+                        navigate(
+                          selected.findingId
+                            ? `/diagnostics?finding=${selected.findingId}`
+                            : '/diagnostics',
+                        )
+                      }
+                    >
+                      回到诊断复查
+                    </Button>
+                  </div>
+                </div>
+
                 <Form.Item label="问题描述" name="description">
                   <Input.TextArea rows={2} />
                 </Form.Item>
@@ -621,6 +767,14 @@ export function TeachingImprovementPage() {
                   onClick={() => void handleSaveDetail()}
                 >
                   保存详情
+                </Button>
+                <Button
+                  danger
+                  icon={<DeleteOutlined />}
+                  loading={deletingId === selected.id}
+                  onClick={() => confirmDeleteImprovement(selected)}
+                >
+                  删除
                 </Button>
                 {selected.status !== 'closed' && (
                   <Button

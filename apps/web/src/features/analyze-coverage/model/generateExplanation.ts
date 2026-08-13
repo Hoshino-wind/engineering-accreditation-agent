@@ -49,9 +49,10 @@ export interface GapExplanation {
   recommendations: string[];
 }
 
-// === 阈值 ===
+// === 材料支撑充分性规则（与 analyzeCoverage / 后端一致） ===
 const STRENGTH_WEIGHT: Record<string, number> = { strong: 3, medium: 2, weak: 1 };
-const ATTAINMENT_THRESHOLD = 0.7;
+const COVERED_STRENGTH_THRESHOLD = 4;
+const MIN_DISTINCT_EVIDENCE_SOURCES = 2;
 
 // === 辅助函数 ===
 
@@ -125,13 +126,31 @@ export function explainCompetencyGap(
     };
   });
 
-  // 达成度计算
+  // 材料支撑指数与独立证据来源数
   const totalStrength = approvedEdges.reduce(
     (sum, e) => sum + (STRENGTH_WEIGHT[e.strength ?? 'weak'] ?? 1),
     0,
   );
-  const attainment = Math.min(totalStrength / STRENGTH_WEIGHT.strong!, 1);
-  const isBelowThreshold = attainment < ATTAINMENT_THRESHOLD;
+  const evidenceSourceCount = new Set(
+    approvedEdges
+      .map((edge) => {
+        const node = findNode(graph, edge.source);
+        return [
+          edge.materialVersionGroupId,
+          node?.properties?.materialVersionGroupId,
+          edge.materialResourceId,
+          node?.properties?.materialId,
+        ]
+          .map((value) => String(value ?? '').trim())
+          .find(Boolean) ?? '';
+      })
+      .filter(Boolean),
+  ).size;
+  let attainment = Math.min(totalStrength / COVERED_STRENGTH_THRESHOLD, 1);
+  if (evidenceSourceCount < MIN_DISTINCT_EVIDENCE_SOURCES) {
+    attainment = Math.min(attainment, 0.75);
+  }
+  const isBelowThreshold = cc.status !== 'covered';
 
   // 缺口原因
   const gapReasons: GapReason[] = [];
@@ -157,23 +176,29 @@ export function explainCompetencyGap(
     }).join('、');
     gapReasons.push({
       type: 'pending-only',
-      description: `仅有 ${pendingEdges.length} 条 AI 推荐关系待审核（${pendingDescs}），尚未经教师确认，不纳入达成度计算。`,
+      description: `仅有 ${pendingEdges.length} 条 AI 推荐关系待审核（${pendingDescs}），尚未经教师确认，不纳入材料支撑评价。`,
     });
     brokenPaths.push({
       from: 'AI 推荐关系',
-      to: '达成度计算',
+      to: '材料支撑评价',
       description: `${pendingEdges.length} 条 AI 推荐关系处于 pending 状态，审核通过前不参与覆盖度计算`,
       missingType: '教师审核',
     });
   } else {
     // 有支撑但强度不足
-    if (totalStrength < STRENGTH_WEIGHT.strong!) {
+    if (totalStrength < COVERED_STRENGTH_THRESHOLD) {
       const supporterNames = supportFacts
         .map((sf) => `${sf.node.name}(${strengthLabel(sf.strength)})`)
         .join('、');
       gapReasons.push({
         type: 'weak-support',
-        description: `支撑强度不足：当前支撑方为 ${supporterNames}，加权强度 ${totalStrength}，低于达标线 ${STRENGTH_WEIGHT.strong}（需 strong=3 或 medium×2=4）。`,
+        description: `累计支撑强度不足：当前支撑方为 ${supporterNames}，加权强度 ${totalStrength}，低于充分性门槛 ${COVERED_STRENGTH_THRESHOLD} 分。`,
+      });
+    }
+    if (evidenceSourceCount < MIN_DISTINCT_EVIDENCE_SOURCES) {
+      gapReasons.push({
+        type: 'weak-support',
+        description: `独立材料来源不足：当前只有 ${evidenceSourceCount} 份材料证据，至少需要 ${MIN_DISTINCT_EVIDENCE_SOURCES} 份不同材料。材料的新旧版本只计作同一来源。`,
       });
     }
 
@@ -236,8 +261,8 @@ export function explainCompetencyGap(
 
   const attainmentPct = Math.round(attainment * 100);
   const summary = cc.status === 'gap'
-    ? `能力指标「${comp.code} ${comp.name}」存在覆盖缺口。${supporterSummary}达成度 0%，远低于阈值 ${ATTAINMENT_THRESHOLD * 100}%。`
-    : `能力指标「${comp.code} ${comp.name}」支撑不足。${supporterSummary}达成度 ${attainmentPct}%，低于阈值 ${ATTAINMENT_THRESHOLD * 100}%。`;
+    ? `能力指标「${comp.code} ${comp.name}」没有已审核材料支撑。${supporterSummary}材料支撑指数为 0%。`
+    : `能力指标「${comp.code} ${comp.name}」证据不足。${supporterSummary}材料支撑指数 ${attainmentPct}%，独立材料 ${evidenceSourceCount}/${MIN_DISTINCT_EVIDENCE_SOURCES} 份。`;
 
   // 建议方向（基于数据，非套话）
   const recommendations: string[] = [];
@@ -245,14 +270,13 @@ export function explainCompetencyGap(
     if (pendingEdges.length > 0) {
       recommendations.push(`优先审核 ${pendingEdges.length} 条 AI 推荐关系，通过后可直接补上覆盖缺口。`);
     } else {
-      recommendations.push(`在 M3 上传该能力指标对应的课程大纲或实验材料，触发 M4 提取节点后建立支撑关系。`);
+      recommendations.push('上传该能力指标对应的课程大纲、实验材料或评分依据，提取后再审核支撑关系。');
     }
   } else {
-    if (cc.weakCount > 0 && cc.strongCount === 0) {
-      recommendations.push(`当前仅有弱支撑，建议将支撑强度提升至 medium 或 strong（如增加实验学时或综合设计环节）。`);
-    }
-    if (cc.mediumCount > 0 && cc.strongCount === 0) {
-      recommendations.push(`建议至少将 1 条支撑关系升级为 strong（如增加综合性实验或课程设计）。`);
+    if (evidenceSourceCount < MIN_DISTINCT_EVIDENCE_SOURCES) {
+      recommendations.push('补充另一类独立证据，例如评分表、学生作品或实验报告；不要仅上传同一材料的新版本。');
+    } else if (totalStrength < COVERED_STRENGTH_THRESHOLD) {
+      recommendations.push('补充能直接证明该指标的综合实验或评价依据，审核后累计支撑强度需达到 4 分。');
     }
     const noKp = gapReasons.some((r) => r.type === 'no-knowledge');
     if (noKp) {
@@ -275,7 +299,7 @@ export function explainCompetencyGap(
   return {
     summary,
     attainment,
-    threshold: ATTAINMENT_THRESHOLD,
+    threshold: 1,
     isBelowThreshold,
     supportFacts,
     gapReasons,
@@ -297,9 +321,9 @@ export function explainRequirementGap(
   const partialComps = rc.competencies.filter((cc) => cc.status === 'partial');
   const coveredComps = rc.competencies.filter((cc) => cc.status === 'covered');
 
-  // 达成度：用覆盖率作为近似
+  // 毕业要求材料支撑充分率
   const attainment = rc.coverageRate;
-  const isBelowThreshold = attainment < ATTAINMENT_THRESHOLD;
+  const isBelowThreshold = rc.status !== 'covered';
 
   // 支撑事实（从子指标汇总）
   const supportFacts: SupportFact[] = [];
@@ -334,7 +358,7 @@ export function explainRequirementGap(
     const partialNames = partialComps.map((cc) => `${cc.competency.code}`).join('、');
     gapReasons.push({
       type: 'weak-support',
-      description: `${partialComps.length} 个能力指标支撑不足（${partialNames}），加权强度未达达标线。`,
+      description: `${partialComps.length} 个能力指标证据不足（${partialNames}），未同时满足累计 4 分和至少 2 份独立材料。`,
     });
   }
 
@@ -366,7 +390,7 @@ export function explainRequirementGap(
   const totalCount = rc.competencies.length;
   const summary = rc.status === 'gap'
     ? `毕业要求「${req.code} ${req.name}」存在完全覆盖缺口。${totalCount} 个能力指标中 ${gapComps.length} 个无任何支撑，覆盖率 0%。`
-    : `毕业要求「${req.code} ${req.name}」覆盖不足。${totalCount} 个能力指标中仅 ${coveredCount} 个达标，${gapComps.length} 个缺口 + ${partialComps.length} 个部分覆盖，覆盖率 ${Math.round(rc.coverageRate * 100)}%。`;
+    : `毕业要求「${req.code} ${req.name}」材料支撑不足。${totalCount} 个能力指标中 ${coveredCount} 个支撑充分，${gapComps.length} 个无支撑，${partialComps.length} 个证据不足，支撑充分率 ${Math.round(rc.coverageRate * 100)}%。`;
 
   // 建议方向
   const recommendations: string[] = [];
@@ -379,7 +403,7 @@ export function explainRequirementGap(
     }
   }
   if (partialComps.length > 0) {
-    recommendations.push(`对 ${partialComps.length} 个支撑不足的指标，建议提升支撑强度（增设综合实验或课程设计）。`);
+    recommendations.push(`对 ${partialComps.length} 个证据不足的指标，优先补充独立材料来源，再核对支撑强度。`);
   }
   if (rc.supportingCourses.length === 0) {
     recommendations.push(`当前无课程通过 SUPPORTS_REQ 边直接对标该毕业要求，建议在图谱中建立课程→毕业要求的直接映射。`);
@@ -391,7 +415,7 @@ export function explainRequirementGap(
   return {
     summary,
     attainment,
-    threshold: ATTAINMENT_THRESHOLD,
+    threshold: 0.8,
     isBelowThreshold,
     supportFacts,
     gapReasons,

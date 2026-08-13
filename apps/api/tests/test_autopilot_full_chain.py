@@ -1,8 +1,8 @@
 """Autopilot 全链路端到端测试（真实组件，mock LLM，离线可重复）。
 
 复刻生产装配（main.py 中 AutopilotOrchestrator 的构造方式）：
-上传资源 → autopilot.run（真实 LangGraph pipeline + 自动审核 + 落库）→
-识别中心候选 / 诊断发现真实生成 → 教师复核改判 → 投影进图谱 →
+上传资源 → autopilot.run（真实 LangGraph pipeline + 人工审核网关 + 候选落库）→
+识别中心候选真实生成 → 教师复核改判 → 投影进图谱 →
 覆盖度联动 → 重启后一致。
 
 验证「一键分析」按钮背后的每一条真实数据流，而不是各层单独行为的简单拼接。
@@ -85,7 +85,7 @@ def _resource(extracted_text: str):
 
 
 async def test_autopilot_full_chain(mock_llm):
-    """上传 → 自动分析 → 候选/发现落库 → 图谱批准 → 教师复核改判 → 覆盖度联动。"""
+    """上传 → 自动分析 → 候选落库 → 教师采纳 → 图谱批准 → 覆盖度联动。"""
     from app.modules.autopilot.orchestrator import AutopilotOrchestrator
     from app.modules.diagnostics.infra.memory_store import InMemoryFindingRepository
     from app.modules.recognition.application.review_candidate import ReviewCandidate
@@ -114,25 +114,25 @@ async def test_autopilot_full_chain(mock_llm):
 
     result = await autopilot.run(resource.id, course="数据结构")
 
-    # ── ① 自动审核后：候选与诊断发现真实落库 ────────────────
+    # ── ① 自动分析后：候选真实落库，但仍等待教师审核 ────────
     assert result["candidates_created"] >= 1
-    assert result["findings_created"] >= 1
+    assert result["findings_created"] == 0
     all_candidates = await candidates.list_all()
     assert len(all_candidates) == result["candidates_created"]
-    accepted = [c for c in all_candidates if c.review_status == CandidateReviewStatus.ACCEPTED]
-    rejected = [c for c in all_candidates if c.review_status == CandidateReviewStatus.REJECTED]
-    assert accepted, "置信度达标的推断应被自动采纳"
-    # 自动审核是保守策略：全部达标时也会至少保留一个真实缺口给诊断
-    # （此时不产生 rejected 候选，缺口由 findings 承担）
+    pending = [c for c in all_candidates if c.review_status == CandidateReviewStatus.PENDING]
+    assert pending, "一键分析只能生成待审核候选，不能直接采纳入图"
 
-    # ── ② 提取节点真实并入能力图谱 ─────────────────────────
+    # ── ② 提取节点真实并入能力图谱，支撑边仍为 pending ─────
     graph = await orch.get_current_graph()
     school_kinds = {n.get("kind") for n in graph["nodes"] if n.get("origin") == "school"}
     assert "Course" in school_kinds or "Experiment" in school_kinds
-    approved = [e for e in graph["edges"] if e.get("reviewStatus") == "approved"]
-    assert approved, "自动批准的关系应已并入图谱"
+    pending_supports = [
+        e for e in graph["edges"]
+        if e.get("kind") == "SUPPORTS" and e.get("reviewStatus") == "pending"
+    ]
+    assert pending_supports, "AI 推断的支撑关系应先停留在待审核状态"
 
-    # ── ③ 教师复核：被自动驳回的候选可被人工采纳补图 ────────
+    # ── ③ 教师复核：采纳候选后才投影为 approved 支撑边 ─────
     from app.modules.orchestration.domain.projection import _resolve_node
 
     def _edge_id(cand) -> tuple[str, str] | None:
@@ -143,33 +143,34 @@ async def test_autopilot_full_chain(mock_llm):
             return None
         return src["id"], tgt["id"]
 
-    if rejected:
-        target = next((c for c in rejected if _edge_id(c) is not None), None)
-        if target is not None:
-            reviewed = await ReviewCandidate(candidates).execute(target.id, "accept")
-            assert reviewed is not None
-            assert reviewed.review_status == CandidateReviewStatus.ACCEPTED
-            await orch.review_project_candidates([reviewed])
+    target = next((c for c in pending if _edge_id(c) is not None), None)
+    assert target is not None, "应存在端点可解析的待审核候选"
+    reviewed = await ReviewCandidate(candidates).execute(target.id, "accept")
+    assert reviewed is not None
+    assert reviewed.review_status == CandidateReviewStatus.ACCEPTED
+    await orch.review_project_candidates([reviewed])
 
-            graph2 = await orch.get_current_graph()
-            src2, tgt2 = _edge_id(reviewed)
-            edge = next(
-                (e for e in graph2["edges"] if e["source"] == src2 and e["target"] == tgt2),
-                None,
-            )
-            assert edge is not None, "教师采纳的候选应投影出图谱边"
-            assert edge["reviewStatus"] == "approved"
+    graph2 = await orch.get_current_graph()
+    src2, tgt2 = _edge_id(reviewed)
+    edge = next(
+        (e for e in graph2["edges"] if e["source"] == src2 and e["target"] == tgt2),
+        None,
+    )
+    assert edge is not None, "教师采纳的候选应投影出图谱边"
+    assert edge["reviewStatus"] == "approved"
 
     coverage = await orch.get_current_coverage()
-    covered_codes = [c["code"] for c in coverage["competencies"] if c["status"] == "covered"]
-    assert covered_codes, "自动批准 + 教师采纳后应存在已覆盖的指标点"
+    supported_codes = [
+        c["code"]
+        for c in coverage["competencies"]
+        if c["status"] in ("partial", "covered")
+    ]
+    assert supported_codes, "教师采纳后应存在已产生有效支撑的指标点"
 
-    # ── ④ 改判驳回自动采纳的候选 → 图谱降级、覆盖度联动 ──
+    # ── ④ 改判驳回已采纳候选 → 图谱降级、覆盖度联动 ────────
     # 注意：候选是 frozen dataclass，repository 以 replace 方式更新；
     # 必须使用 execute 的返回值（与生产路径 main.py 一致），否则旧引用仍是 ACCEPTED
-    victim = next((c for c in accepted if _edge_id(c) is not None), None)
-    assert victim is not None, "应存在端点可解析的自动采纳候选"
-    rejected_candidate = await ReviewCandidate(candidates).execute(victim.id, "reject")
+    rejected_candidate = await ReviewCandidate(candidates).execute(reviewed.id, "reject")
     assert rejected_candidate is not None
     assert rejected_candidate.review_status == CandidateReviewStatus.REJECTED
     await orch.review_project_candidates([rejected_candidate])

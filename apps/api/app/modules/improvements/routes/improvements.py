@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from app.modules.improvements.application import (
     CompleteMaterialHealthImprovement,
     CreateImprovement,
+    DeleteImprovement,
     ListImprovements,
     UpdateImprovement,
 )
@@ -43,6 +44,7 @@ def create_improvements_router(
     create_improvement_use_case: Callable[[], CreateImprovement],
     update_improvement_use_case: Callable[[], UpdateImprovement],
     complete_improvement_use_case: Callable[[], CompleteMaterialHealthImprovement],
+    delete_improvement_use_case: Callable[[], DeleteImprovement],
 ) -> APIRouter:
     router = APIRouter(prefix="/improvements", tags=["improvements"])
 
@@ -135,5 +137,18 @@ def create_improvements_router(
         if result is None:
             raise HTTPException(status_code=404, detail="Improvement not found")
         return ImprovementCompletionResponse.from_domain(result)
+
+    @router.delete(
+        "/{improvement_id}",
+        status_code=204,
+        summary="删除改进措施",
+    )
+    async def delete_improvement(
+        improvement_id: str,
+        use_case: Annotated[DeleteImprovement, Depends(delete_improvement_use_case)],
+    ) -> None:
+        deleted = await use_case.execute(improvement_id)
+        if not deleted:
+            raise HTTPException(status_code=404, detail="改进措施不存在")
 
     return router

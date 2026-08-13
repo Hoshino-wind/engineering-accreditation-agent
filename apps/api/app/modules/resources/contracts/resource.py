@@ -100,6 +100,9 @@ class TeachingResourceResponse(BaseModel):
     nextAction: str
     sourceCoverage: int
     majorId: str
+    versionGroupId: str
+    supersedesId: str | None = None
+    isCurrentVersion: bool
     evidenceFragments: list[EvidenceFragmentResponse]
     processingStages: list[ProcessingStageResponse]
     pageCount: int | None = None
@@ -125,6 +128,9 @@ class TeachingResourceResponse(BaseModel):
             nextAction=resource.next_action,
             sourceCoverage=resource.source_coverage,
             majorId=resource.major_id,
+            versionGroupId=resource.version_group_id or resource.id,
+            supersedesId=resource.supersedes_id,
+            isCurrentVersion=resource.is_current_version,
             evidenceFragments=[
                 EvidenceFragmentResponse(
                     id=f.id,

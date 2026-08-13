@@ -13,6 +13,9 @@ class Repository:
 
 
 class ResourceRepository:
+    async def list_all(self, **_kwargs):
+        return []
+
     async def add(self, resource):
         return resource
 

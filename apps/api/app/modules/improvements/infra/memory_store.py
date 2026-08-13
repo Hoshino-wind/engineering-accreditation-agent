@@ -153,6 +153,20 @@ class InMemoryImprovementRepository(JsonPersistenceMixin):
         await self._record(updated, "improvement.updated")
         return updated
 
+    async def delete(self, improvement_id: str) -> bool:
+        existing = self._store.pop(improvement_id, None)
+        if existing is None:
+            return False
+        self._schedule_save()
+        if self._persistence is not None:
+            await self._persistence.delete_snapshot(
+                tenant_id=self._user_id,
+                entity_type="improvement",
+                entity_id=improvement_id,
+                actor_id=self._user_id,
+            )
+        return True
+
     async def _record(self, improvement: Improvement, action: str) -> None:
         if self._persistence is None:
             return

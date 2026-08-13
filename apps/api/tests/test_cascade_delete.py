@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+from dataclasses import replace
 
 from app.modules.courses.application.delete_course import DeleteCourse
 from app.modules.courses.domain.course import Course
@@ -39,6 +40,32 @@ class _FakeGraphProjection:
         self._removed = removed
 
     async def remove_course(self, course: Course) -> set[str]:
+        return self._removed
+
+
+class _FakeMaterialGraphProjection:
+    """模拟材料图谱清理：按材料名返回被删节点集合。"""
+
+    def __init__(self, removed: set[str]) -> None:
+        self._removed = removed
+        self.seen_names: set[str] = set()
+        self.seen_course: str | None = None
+        self.seen_valid_resource_ids: set[str] | None = None
+
+    async def remove_material(
+        self,
+        material_names: set[str],
+        resource_ids: set[str] | None = None,
+    ) -> set[str]:
+        self.seen_names = set(material_names)
+        return self._removed
+
+    async def retain_materials(self, valid_resource_ids: set[str]) -> set[str]:
+        self.seen_valid_resource_ids = set(valid_resource_ids)
+        return set()
+
+    async def clear_school_graph(self, course_name: str | None = None) -> set[str]:
+        self.seen_course = course_name
         return self._removed
 
 
@@ -110,6 +137,15 @@ def _candidate() -> RecognitionCandidate:
                 coordinate="file", excerpt="x", hash="h",
             ),
         ),
+    )
+
+
+def _candidate_by_node() -> RecognitionCandidate:
+    return replace(
+        _candidate(),
+        id="cand-node",
+        source_node="EXP-MCU-01",
+        evidence=(),
     )
 
 
@@ -191,24 +227,131 @@ def test_delete_resource_cascades_candidates_and_findings() -> None:
     resources = InMemoryResourceRepository(with_seed=False, user_id="t")
     resources._store = {"res-1": _resource()}
     candidates = InMemoryCandidateRepository(with_seed=False, user_id="t")
-    candidates._store = {"cand-1": _candidate()}
+    candidates._store = {"cand-1": _candidate(), "cand-node": _candidate_by_node()}
     findings = InMemoryFindingRepository(with_seed=False, user_id="t")
     findings._store = {"finding-1": _finding()}
+    graph = _FakeMaterialGraphProjection({"EXP-MCU-01"})
 
     use_case = DeleteResource(
         repository=resources,
         candidates_repo=candidates,
         findings_repo=findings,
+        graph_projection=graph,
     )
     deleted = asyncio.run(use_case.execute("res-1"))
 
     assert deleted is True
     assert resources._store == {}
-    assert candidates._store == {}  # evidence.resource_name 命中
-    assert findings._store == {}    # evidence.object_name 命中
+    assert "单片机实验指导书" in graph.seen_names
+    assert "单片机实验指导书.pdf" in graph.seen_names
+    assert graph.seen_valid_resource_ids == set()
+    assert candidates._store == {}  # evidence.resource_name + removed source node 命中
+    assert findings._store == {}    # evidence.object_name + removed node 命中
 
 
 def test_delete_missing_resource_is_noop() -> None:
     resources = InMemoryResourceRepository(with_seed=False, user_id="t")
     use_case = DeleteResource(repository=resources)
     assert asyncio.run(use_case.execute("res-missing")) is False
+
+
+def test_delete_current_resource_removes_entire_version_family() -> None:
+    resources = InMemoryResourceRepository(with_seed=False, user_id="versions-delete")
+    first = replace(
+        _resource(),
+        id="res-v1",
+        version="v1",
+        version_group_id="group-1",
+        is_current_version=False,
+    )
+    second = replace(
+        _resource(),
+        id="res-v2",
+        version="v2",
+        version_group_id="group-1",
+        supersedes_id="res-v1",
+        is_current_version=True,
+    )
+    resources._store = {first.id: first, second.id: second}
+    graph = _FakeMaterialGraphProjection({"EXP-MCU-01"})
+
+    deleted = asyncio.run(
+        DeleteResource(repository=resources, graph_projection=graph).execute(second.id)
+    )
+
+    assert deleted is True
+    assert resources._store == {}
+
+
+def test_delete_resource_reconciles_graph_with_remaining_materials() -> None:
+    resources = InMemoryResourceRepository(with_seed=False, user_id="retain-delete")
+    deleted_resource = _resource()
+    remaining_resource = replace(
+        _resource(),
+        id="res-2",
+        name="另一份实验材料",
+        file_name="another-guide.pdf",
+        hash="h2",
+    )
+    resources._store = {
+        deleted_resource.id: deleted_resource,
+        remaining_resource.id: remaining_resource,
+    }
+    graph = _FakeMaterialGraphProjection(set())
+
+    deleted = asyncio.run(
+        DeleteResource(repository=resources, graph_projection=graph).execute(
+            deleted_resource.id
+        )
+    )
+
+    assert deleted is True
+    assert graph.seen_valid_resource_ids == {"res-2"}
+
+
+def test_clear_resource_scope_cleans_stale_graph_data() -> None:
+    resources = InMemoryResourceRepository(with_seed=False, user_id="t")
+    candidates = InMemoryCandidateRepository(with_seed=False, user_id="t")
+    candidates._store = {"cand-node": _candidate_by_node()}
+    findings = InMemoryFindingRepository(with_seed=False, user_id="t")
+    findings._store = {"finding-1": _finding()}
+    graph = _FakeMaterialGraphProjection({"EXP-MCU-01"})
+
+    use_case = DeleteResource(
+        repository=resources,
+        candidates_repo=candidates,
+        findings_repo=findings,
+        graph_projection=graph,
+        active_major_id="major-eie",
+    )
+    deleted = asyncio.run(
+        use_case.execute_scope(course="单片机基础", clear_graph=True)
+    )
+
+    assert deleted == 0
+    assert graph.seen_course == "单片机基础"
+    assert candidates._store == {}
+    assert findings._store == {}
+
+
+def test_clear_empty_major_removes_orphan_candidates_and_findings() -> None:
+    resources = InMemoryResourceRepository(with_seed=False, user_id="empty-major")
+    candidates = InMemoryCandidateRepository(with_seed=False, user_id="empty-major")
+    candidates._store = {"cand-node": _candidate_by_node()}
+    findings = InMemoryFindingRepository(with_seed=False, user_id="empty-major")
+    findings._store = {"finding-1": _finding()}
+    graph = _FakeMaterialGraphProjection(set())
+
+    deleted = asyncio.run(
+        DeleteResource(
+            repository=resources,
+            candidates_repo=candidates,
+            findings_repo=findings,
+            graph_projection=graph,
+            active_major_id="major-eie",
+        ).execute_scope(clear_graph=True)
+    )
+
+    assert deleted == 0
+    assert candidates._store == {}
+    assert findings._store == {}

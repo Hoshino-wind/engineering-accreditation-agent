@@ -45,7 +45,11 @@ import { GraphSidePanel } from '../../../widgets/graph-side-panel';
 import { EmptyStateGuide } from '../../../widgets/empty-state-guide';
 import { NextStepBanner } from '../../../widgets/next-step-banner/ui/NextStepBanner';
 import { useCourseState } from '../../../shared/course/useCourseState';
-import { subscribeCourseListChanged } from '../../../shared/course/courseStore';
+import {
+  ALL_COURSES,
+  setSelectedCourseId,
+  subscribeCourseListChanged,
+} from '../../../shared/course/courseStore';
 import { fetchPipelineStatus } from '../../../shared/api/pipelineClient';
 import './graphViewPage.css';
 
@@ -79,6 +83,7 @@ export function GraphViewPage() {
     [graph, currentCourseName],
   );
   const { nodes: initialNodes, edges: initialEdges } = courseGraph;
+  const hasSchoolGraph = initialNodes.some((node) => node.origin === 'school');
 
   // 本地边状态：就地审核后即时更新，避免整图刷新
   const [localEdges, setLocalEdges] = useState<AbilityGraphEdge[]>(initialEdges);
@@ -392,8 +397,12 @@ export function GraphViewPage() {
   };
 
   const pendingCount = localEdges.filter(
-    (e) => e.reviewStatus === 'pending',
+    (e) => e.kind === 'SUPPORTS' && e.reviewStatus === 'pending',
   ).length;
+  const allPendingCount = graph.edges.filter(
+    (e) => e.kind === 'SUPPORTS' && e.reviewStatus === 'pending',
+  ).length;
+  const hiddenPendingCount = Math.max(0, allPendingCount - pendingCount);
 
   // 覆盖度指标（后端确定性计算：仅 approved 边计入，strong=3/medium=2/weak=1 加权）
   const coverageRate = coverage
@@ -445,10 +454,10 @@ export function GraphViewPage() {
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 300 }}>
           <Spin size="large" />
         </div>
-      ) : initialNodes.length === 0 ? (
+      ) : !hasSchoolGraph ? (
         <EmptyStateGuide
-          title="还没有图谱数据"
-          description="先上传一份培养方案或实验指导书，AI 会自动提取节点构建能力图谱"
+          title="还没有材料生成的图谱"
+          description="系统已加载认证标准模板；上传教学材料并完成关系审核后，课程、实验项目和支撑关系才会显示在这里。"
           ctaText="去上传材料"
           ctaPath="/resources"
         />
@@ -469,7 +478,7 @@ export function GraphViewPage() {
               </Col>
               <Col>
                 <Statistic
-                  title="待审核"
+                  title="需审核"
                   value={pendingCount}
                   styles={{ value: { color: pendingCount > 0 ? '#e8930c' : undefined } }}
                   prefix={<ThunderboltOutlined />}
@@ -830,6 +839,21 @@ export function GraphViewPage() {
           showIcon
           title={`仍有 ${pendingCount} 条 AI 推荐关系待审核`}
           description="在右侧「待审候选」面板点击卡片展开详情：画布会同步预览这条关系将连接的两个节点，可对照周边支撑再决定采纳或驳回；采纳的关系即刻投影回图谱并计入覆盖度。"
+        />
+      )}
+
+      {currentCourseName && hiddenPendingCount > 0 && (
+        <Alert
+          className="graph-view-pending-notice"
+          type="info"
+          showIcon
+          title={`另有 ${hiddenPendingCount} 条待审核关系被当前课程筛选隐藏`}
+          description={`你正在查看「${currentCourseName}」。这些关系属于当前专业的其他课程，不会显示在本课程图谱中。`}
+          action={
+            <Button onClick={() => setSelectedCourseId(ALL_COURSES)}>
+              查看全部课程
+            </Button>
+          }
         />
       )}
 

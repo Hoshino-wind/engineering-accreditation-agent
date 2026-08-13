@@ -32,6 +32,7 @@ export interface RecognitionCandidateDTO {
   explanation: string;
   generatedAt: string;
   id: string;
+  majorId?: string;
   impact?: {
     abilityNodes?: number;
     courseObjectives?: number;

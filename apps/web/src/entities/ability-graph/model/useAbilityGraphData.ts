@@ -33,6 +33,10 @@ function toAbilityGraphData(raw: GraphData): AbilityGraphData {
       strength: (e.strength as 'strong' | 'medium' | 'weak') ?? undefined,
       confidence: e.confidence ?? undefined,
       aiReasoning: e.reasoning ?? undefined,
+      materialResourceId: e.materialResourceId ?? undefined,
+      materialVersionGroupId: e.materialVersionGroupId ?? undefined,
+      materialVersion: e.materialVersion ?? undefined,
+      materialName: e.materialName ?? undefined,
     })),
   };
 }

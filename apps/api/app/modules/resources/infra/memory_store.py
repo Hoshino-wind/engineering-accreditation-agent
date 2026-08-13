@@ -73,6 +73,9 @@ class InMemoryResourceRepository(JsonPersistenceMixin):
                 kwargs["suggested_course"] = SuggestedCourse(**sc)
             else:
                 kwargs["suggested_course"] = None
+            kwargs.setdefault("version_group_id", kwargs.get("id", ""))
+            kwargs.setdefault("supersedes_id", None)
+            kwargs.setdefault("is_current_version", True)
             return TeachingResource(**kwargs)
         except (TypeError, KeyError, ValueError):
             return None

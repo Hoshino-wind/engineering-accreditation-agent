@@ -172,6 +172,13 @@
   stroke-width: 1.6px !important;
 }
 
+.ability-graph-edge-approved-support path {
+  stroke: #4ade80 !important;
+  stroke-width: 2.4px !important;
+  stroke-dasharray: none !important;
+  filter: drop-shadow(0 0 4px rgba(74, 222, 128, 0.38));
+}
+
 .ability-graph-edge-selected path {
   stroke: #7aa2f7 !important;
   stroke-width: 2.4px !important;

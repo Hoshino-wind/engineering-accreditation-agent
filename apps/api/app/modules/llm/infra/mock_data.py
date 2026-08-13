@@ -13,9 +13,90 @@ from app.modules.llm.domain.models import (
 )
 
 
+STAGED_DEMO_TARGETS = [
+    (
+        "C-01-01",
+        "EXP-DEMO-C01-01",
+        "GPIO 与定时器基础验证实验",
+        "通过 GPIO 控制、定时器中断和基础调试说明工程基础知识的应用，支撑 C-01-01 工程知识应用。",
+    ),
+    (
+        "C-02-01",
+        "EXP-DEMO-C02-01",
+        "串口通信故障定位实验",
+        "通过协议抓包、串口波形观察和故障复现训练问题识别与表达，支撑 C-02-01 问题识别与表达。",
+    ),
+    (
+        "C-03-01",
+        "EXP-DEMO-C03-01",
+        "RTOS 任务调度系统设计实验",
+        "通过任务划分、优先级设置和同步机制完成系统设计方法训练，支撑 C-03-01 系统设计方法。",
+    ),
+    (
+        "C-03-02",
+        "EXP-DEMO-C03-02",
+        "嵌入式方案可行性与影响分析任务",
+        "要求学生比较功耗、成本、可靠性、安全与环境影响，支撑 C-03-02 可行性与影响考量。",
+    ),
+    (
+        "C-04-01",
+        "EXP-DEMO-C04-01",
+        "研究型实验方案设计",
+        "要求学生提出实验假设、变量控制、实验路线和验证方案，支撑 C-04-01 实验方案设计。",
+    ),
+    (
+        "C-04-02",
+        "EXP-DEMO-C04-02",
+        "实验数据采集、分析与解释任务",
+        "要求学生采集传感器数据，完成统计分析、误差解释和结论复核，支撑 C-04-02 数据分析与解释。",
+    ),
+    (
+        "C-05-01",
+        "EXP-DEMO-C05-01",
+        "调试工具链与仿真验证实验",
+        "通过 Keil、串口调试助手、逻辑分析仪和仿真器完成工具链训练，支撑 C-05-01 现代工具选择与使用。",
+    ),
+]
+
+
+def _get_staged_demo_extraction_items(content: str) -> list[ExtractionItem]:
+    """为 staged demo 材料提供可复现的兜底提取结果。"""
+    if "staged_coverage_demo" not in content and "阶段覆盖演示" not in content:
+        return []
+
+    items = [
+        ExtractionItem(
+            code="CO-ES",
+            name="嵌入式系统原理",
+            kind="course",
+            credit_hours=2.0,
+            description="围绕嵌入式系统设计、实验验证、数据分析和工程影响评价组织教学。",
+            confidence=0.96,
+            source_excerpt="DEMO_TAG: STAGED_COVERAGE_DEMO；课程名称：嵌入式系统原理",
+        )
+    ]
+    for target_code, exp_code, name, description in STAGED_DEMO_TARGETS:
+        compact_code = target_code.lower().replace("-", "")
+        if target_code.lower() not in content and compact_code not in content:
+            continue
+        items.append(
+            ExtractionItem(
+                code=exp_code,
+                name=name,
+                kind="experiment",
+                credit_hours=1.0,
+                description=description,
+                confidence=0.95,
+                source_excerpt=f"对应指标：{target_code}；支撑强度：strong；演示材料可追溯。",
+            )
+        )
+    return items if len(items) > 1 else []
+
+
 def get_mock_extraction_items(
     material_category: str,
     material_name: str,
+    material_text: str = "",
 ) -> list[ExtractionItem]:
     """按材料类别返回 mock 提取节点。
 
@@ -24,6 +105,41 @@ def get_mock_extraction_items(
     - kind=knowledge (知识点) 仅是课程/实验的组成部分，不直接支撑毕业要求
     - 禁止将教材章节名（如"链表"、"排序"）作为独立节点
     """
+    content = f"{material_name}\n{material_category}\n{material_text}".lower()
+    staged_demo_items = _get_staged_demo_extraction_items(content)
+    if staged_demo_items:
+        return staged_demo_items
+
+    if (
+        "c-04-01" in content
+        or "c04-01" in content
+        or "实验方案设计" in content
+        or ("gr-04" in content and "研究" in content and "实验" in content)
+    ):
+        return [
+            ExtractionItem(
+                code="CO-ES",
+                name="嵌入式系统原理",
+                kind="course",
+                credit_hours=2.0,
+                description="围绕嵌入式系统方案设计、实验验证与数据分析组织教学。",
+                confidence=0.95,
+                source_excerpt="课程名称：嵌入式系统原理",
+            ),
+            ExtractionItem(
+                code="EXP-C04-01",
+                name="研究型实验：嵌入式环境监测节点的低功耗采集方案设计",
+                kind="experiment",
+                credit_hours=2.0,
+                description=(
+                    "要求学生完成文献调研、研究路线比较、实验目的设定、硬件与软件方案设计、"
+                    "数据采集方法设计和误差控制，直接支撑 C-04-01 4-1 实验方案设计。"
+                ),
+                confidence=0.96,
+                source_excerpt="对应指标：C-04-01 4-1 实验方案设计；评分项 R2：实验方案完整性；支撑强度：强支撑。",
+            ),
+        ]
+
     if "培养方案" in material_name or "培养方案" in material_category:
         return [
             ExtractionItem(
@@ -172,6 +288,10 @@ def get_mock_relation_items(
     sources = [
         n for n in school_nodes if str(n.get("kind", "")).lower() in ("course", "experiment")
     ]
+    if any(str(n.get("kind", "")).lower() == "experiment" for n in sources):
+        # 实验指导书中课程节点只是归属上下文；真正参与审核的是实验项目。
+        # 否则同一材料会同时产生“课程→指标”和“实验→指标”两批候选。
+        sources = [n for n in sources if str(n.get("kind", "")).lower() == "experiment"]
     target_codes = [
         n.get("code", "") for n in standard_nodes
         if str(n.get("kind", "")).lower() == "competency"
@@ -188,20 +308,139 @@ def get_mock_relation_items(
 
     items: list[RelationItem] = []
     for i, node in enumerate(sources):
-        target_code = target_codes[i % len(target_codes)]
+        node_text = " ".join(
+            str(part or "")
+            for part in (
+                node.get("id"),
+                node.get("code"),
+                node.get("name"),
+                node.get("description"),
+                (node.get("properties") or {}).get("sourceExcerpt")
+                if isinstance(node.get("properties"), dict)
+                else "",
+            )
+        ).lower()
+        target_code = ""
+        for candidate_code in target_codes:
+            lower_code = candidate_code.lower()
+            aliases = {
+                lower_code,
+                lower_code.replace("-", ""),
+                lower_code.replace("c-", "c", 1),
+            }
+            if any(alias in node_text for alias in aliases):
+                target_code = candidate_code
+                break
+        if not target_code and "实验方案设计" in node_text:
+            target_code = "C-04-01"
+        elif not target_code and ("数据分析与解释" in node_text or "数据记录与分析" in node_text):
+            target_code = "C-04-02"
+        elif not target_code and "可行性与影响考量" in node_text:
+            target_code = "C-03-02"
+        elif not target_code:
+            target_code = target_codes[i % len(target_codes)]
         is_course = str(node.get("kind", "")).lower() == "course"
         name = node.get("name") or node.get("code") or "节点"
+        targeted = (
+            target_code.lower() in node_text
+            or target_code.lower().replace("-", "") in node_text
+            or target_code.lower().replace("c-", "c", 1) in node_text
+        )
         items.append(
             RelationItem(
                 source_id=str(node.get("id") or node.get("code") or ""),
                 target_id=target_code,
                 relation_type="SUPPORTS",
-                strength="strong" if is_course else "medium",
-                confidence=0.90 if is_course else 0.78,
+                strength="strong" if is_course or targeted else "medium",
+                confidence=0.92 if targeted else (0.90 if is_course else 0.78),
                 reasoning=(
+                    f"材料明确写明「{name}」支撑指标 {target_code}，可作为该指标的强支撑证据"
+                    if targeted
+                    else (
                     f"核心课程「{name}」直接覆盖指标 {target_code} 的教学与考核要求"
                     if is_course
                     else f"实验「{name}」训练了指标 {target_code} 对应的实践能力（间接支撑）"
+                    )
+                ),
+            )
+        )
+    return items
+
+
+def get_evidence_relation_items(
+    school_nodes: list[dict],
+    standard_nodes: list[dict],
+) -> list[RelationItem]:
+    """Infer only relationships backed by an explicit indicator reference."""
+    sources = [
+        node
+        for node in school_nodes
+        if str(node.get("kind", "")).lower() in ("course", "experiment")
+    ]
+    if any(str(node.get("kind", "")).lower() == "experiment" for node in sources):
+        sources = [
+            node
+            for node in sources
+            if str(node.get("kind", "")).lower() == "experiment"
+        ]
+
+    target_codes = [
+        str(node.get("code") or "")
+        for node in standard_nodes
+        if str(node.get("kind", "")).lower() == "competency" and node.get("code")
+    ]
+    phrase_targets = {
+        "实验方案设计": "C-04-01",
+        "数据分析与解释": "C-04-02",
+        "数据记录与分析": "C-04-02",
+        "可行性与影响考量": "C-03-02",
+    }
+
+    items: list[RelationItem] = []
+    for node in sources:
+        properties = node.get("properties") or {}
+        node_text = " ".join(
+            str(part or "")
+            for part in (
+                node.get("id"),
+                node.get("code"),
+                node.get("name"),
+                node.get("description"),
+                properties.get("sourceExcerpt")
+                if isinstance(properties, dict)
+                else "",
+            )
+        ).lower()
+        target_code = ""
+        for candidate_code in target_codes:
+            lower_code = candidate_code.lower()
+            aliases = {
+                lower_code,
+                lower_code.replace("-", ""),
+                lower_code.replace("c-", "c", 1),
+            }
+            if any(alias in node_text for alias in aliases):
+                target_code = candidate_code
+                break
+        if not target_code:
+            for phrase, candidate_code in phrase_targets.items():
+                if phrase.lower() in node_text and candidate_code in target_codes:
+                    target_code = candidate_code
+                    break
+        if not target_code:
+            continue
+
+        name = str(node.get("name") or node.get("code") or "教学节点")
+        items.append(
+            RelationItem(
+                source_id=str(node.get("id") or node.get("code") or ""),
+                target_id=target_code,
+                relation_type="SUPPORTS",
+                strength="strong",
+                confidence=0.92,
+                reasoning=(
+                    f"材料节点“{name}”明确包含指标 {target_code} 或对应能力表述，"
+                    "由证据规则生成待审核关系；教师确认后才计入覆盖度。"
                 ),
             )
         )

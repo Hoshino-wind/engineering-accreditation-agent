@@ -1,7 +1,9 @@
 """上传教学资源用例。"""
 
 import hashlib
+import re
 import uuid
+from dataclasses import replace
 from datetime import UTC, datetime
 
 from app.modules.resources.application.ports import (
@@ -44,10 +46,12 @@ class UploadResource:
         repository: ResourceRepository,
         object_storage: ObjectStoragePort | None = None,
         owner: str = "current-user",
+        major_id: str = "major-eie",
     ) -> None:
         self._repository = repository
         self._object_storage = object_storage
         self._owner = owner
+        self._major_id = major_id
 
     async def execute(
         self,
@@ -90,13 +94,36 @@ class UploadResource:
                 content_type=content_type,
             )
 
+        existing = await self._repository.list_all(
+            course=course,
+            major_id=self._major_id,
+        )
+        same_material = [
+            item
+            for item in existing
+            if item.file_name.strip().casefold() == file_name.strip().casefold()
+        ]
+
+        def _version_number(value: str) -> int:
+            match = re.fullmatch(r"v(\d+)", (value or "").strip(), re.IGNORECASE)
+            return int(match.group(1)) if match else 1
+
+        previous = max(same_material, key=lambda item: _version_number(item.version), default=None)
+        version_number = _version_number(previous.version) + 1 if previous else 1
+        version_group_id = (
+            previous.version_group_id or previous.id if previous else resource_id
+        )
+
+        if previous is not None and previous.is_current_version:
+            await self._repository.update(replace(previous, is_current_version=False))
+
         resource = TeachingResource(
             id=resource_id,
             name=file_name.rsplit(".", 1)[0] if "." in file_name else file_name,
             file_name=file_name,
             course=course,
             resource_type=resource_type,
-            version="v1",
+            version=f"v{version_number}",
             format=fmt,
             status=TeachingResourceStatus.PROCESSING,
             size=size_str,
@@ -106,6 +133,10 @@ class UploadResource:
             hash=f"SHA256 {fake_hash}",
             next_action="等待内容解析",
             source_coverage=0,
+            major_id=self._major_id,
+            version_group_id=version_group_id,
+            supersedes_id=previous.id if previous else None,
+            is_current_version=True,
             object_key=object_key,
             evidence_fragments=(
                 EvidenceFragment(

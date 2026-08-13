@@ -32,6 +32,7 @@ const nodeTypes = {
 // 关系箭头配色：与 CSS 中的线色保持一致，保证箭头与线同色
 const EDGE_COLOR_PENDING = '#f5a524';
 const EDGE_COLOR_APPROVED = 'rgba(203,213,225,0.55)';
+const EDGE_COLOR_APPROVED_SUPPORT = '#4ade80';
 const EDGE_COLOR_SELECTED = '#7aa2f7';
 const EDGE_COLOR_PREVIEW = '#f5a524';
 
@@ -46,7 +47,13 @@ export interface AbilityGraphPreviewEdge {
 // - 待审核边橙色虚线 + 橙色箭头；已通过边浅灰实线；选中时蓝色高亮
 function toFlowEdge(edge: AbilityGraphData['edges'][number]): Edge {
   const isPending = edge.reviewStatus === 'pending';
-  const color = isPending ? EDGE_COLOR_PENDING : EDGE_COLOR_APPROVED;
+  const isApprovedSupport =
+    !isPending && edge.kind === 'SUPPORTS' && edge.reviewStatus === 'approved';
+  const color = isPending
+    ? EDGE_COLOR_PENDING
+    : isApprovedSupport
+      ? EDGE_COLOR_APPROVED_SUPPORT
+      : EDGE_COLOR_APPROVED;
   return {
     id: edge.id,
     source: edge.source,
@@ -54,6 +61,8 @@ function toFlowEdge(edge: AbilityGraphData['edges'][number]): Edge {
     type: 'default',
     className: isPending
       ? 'ability-graph-edge-pending'
+      : isApprovedSupport
+        ? 'ability-graph-edge-approved-support'
       : 'ability-graph-edge-approved',
     markerEnd: {
       type: MarkerType.ArrowClosed,

@@ -260,7 +260,10 @@
   border-top-style: solid;
   vertical-align: middle;
 }
-.graph-view-legend-approved { border-top-color: var(--mi-ink-faint); }
+.graph-view-legend-approved {
+  border-top-color: #4ade80;
+  border-top-width: 3px;
+}
 .graph-view-legend-pending {
   border-top-color: #f5a524;
   border-top-style: dashed;

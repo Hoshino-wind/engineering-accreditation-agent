@@ -3,7 +3,7 @@
  *
  * 三个 Tab：
  *  - 「待审候选」：识别库实时候选，直接在此采纳/驳回，决定实时投影回图谱并刷新覆盖度
- *  - 「覆盖缺口」：后端权威覆盖度诊断的缺口/部分达成清单，点击定位到图谱节点
+ *  - 「覆盖缺口」：后端权威覆盖度诊断的缺口/证据不足清单，点击定位到图谱节点
  *  - 「节点详情」：原 AbilityReviewPanel，查看选中节点的关系与审核状态
  *
  * 所有数据均来自后端真实接口；审核写入失败时提示且不改动本地状态。
@@ -79,18 +79,34 @@ export interface GraphSidePanelProps {
 function useNodeLocator(nodes: AbilityGraphNode[], onJumpToNode: (id: string) => void) {
   return useMemo(() => {
     return (codeOrName: string) => {
-      const hit = nodes.find(
-        (n) => n.code === codeOrName || n.name === codeOrName,
-      );
+      const needle = normalizeGraphRef(codeOrName);
+      const hit = nodes.find((n) => nodeMatchesRef(n, needle));
       if (hit) onJumpToNode(hit.id);
     };
   }, [nodes, onJumpToNode]);
 }
 
+function normalizeGraphRef(value: string | null | undefined): string {
+  return String(value ?? '').trim().toLowerCase();
+}
+
+function nodeMatchesRef(node: AbilityGraphNode, normalizedRef: string): boolean {
+  if (!normalizedRef) return false;
+  return (
+    normalizeGraphRef(node.id) === normalizedRef ||
+    normalizeGraphRef(node.code) === normalizedRef ||
+    normalizeGraphRef(node.name) === normalizedRef ||
+    normalizeGraphRef(node.properties?.code as string | undefined) === normalizedRef ||
+    normalizeGraphRef(node.properties?.name as string | undefined) === normalizedRef ||
+    normalizeGraphRef(node.properties?.title as string | undefined) === normalizedRef ||
+    normalizeGraphRef(node.properties?.label as string | undefined) === normalizedRef
+  );
+}
+
 const GAP_STATUS: Record<CompetencyCoverageData['status'], { color: string; label: string }> = {
   gap: { color: 'red', label: '缺口' },
-  partial: { color: 'orange', label: '部分达成' },
-  covered: { color: 'green', label: '已覆盖' },
+  partial: { color: 'orange', label: '证据不足' },
+  covered: { color: 'green', label: '支撑充分' },
 };
 
 export function GraphSidePanel({
@@ -116,7 +132,8 @@ export function GraphSidePanel({
   // 通过节点名称解析节点 id（候选里存的是名称），找不到返回 null
   const nodeIdByName = useMemo(() => {
     return (name: string): string | null => {
-      const hit = nodes.find((n) => n.name === name);
+      const needle = normalizeGraphRef(name);
+      const hit = nodes.find((n) => nodeMatchesRef(n, needle));
       return hit ? hit.id : null;
     };
   }, [nodes]);
@@ -130,10 +147,30 @@ export function GraphSidePanel({
     updateCandidate,
   } = useRecognitionCandidates();
 
+  const candidateHasVisibleEndpoints = useMemo(() => {
+    return (candidate: RecognitionCandidate): boolean =>
+      nodeIdByName(candidate.sourceNode) !== null &&
+      nodeIdByName(candidate.targetNode) !== null;
+  }, [nodeIdByName]);
+
   const pendingCandidates = useMemo(
     () =>
-      candidates.filter((c) => (c.reviewStatus ?? 'pending') === 'pending'),
-    [candidates],
+      candidates.filter(
+        (c) =>
+          (c.reviewStatus ?? 'pending') === 'pending' &&
+          candidateHasVisibleEndpoints(c),
+      ),
+    [candidateHasVisibleEndpoints, candidates],
+  );
+
+  const hiddenPendingCandidateCount = useMemo(
+    () =>
+      candidates.filter(
+        (c) =>
+          (c.reviewStatus ?? 'pending') === 'pending' &&
+          !candidateHasVisibleEndpoints(c),
+      ).length,
+    [candidateHasVisibleEndpoints, candidates],
   );
 
   const candidatesForEdgeLookup = useMemo(() => {
@@ -157,7 +194,19 @@ export function GraphSidePanel({
     for (const nodeItem of nodes) {
       nodeAliases.set(
         nodeItem.id,
-        new Set([nodeItem.id, nodeItem.code, nodeItem.name].filter(Boolean)),
+        new Set(
+          [
+            nodeItem.id,
+            nodeItem.code,
+            nodeItem.name,
+            nodeItem.properties?.code,
+            nodeItem.properties?.name,
+            nodeItem.properties?.title,
+            nodeItem.properties?.label,
+          ]
+            .map((value) => normalizeGraphRef(value as string | undefined))
+            .filter(Boolean),
+        ),
       );
     }
 
@@ -167,8 +216,8 @@ export function GraphSidePanel({
       const targetAliases = nodeAliases.get(edge.target) ?? new Set([edge.target]);
       const match = candidatesForEdgeLookup.find(
         (candidate) =>
-          sourceAliases.has(candidate.sourceNode) &&
-          targetAliases.has(candidate.targetNode),
+          sourceAliases.has(normalizeGraphRef(candidate.sourceNode)) &&
+          targetAliases.has(normalizeGraphRef(candidate.targetNode)),
       );
       if (match) {
         map[edge.id] = match.id;
@@ -391,6 +440,15 @@ export function GraphSidePanel({
       ),
       children: (
         <div className="gsp-pane">
+          {hiddenPendingCandidateCount > 0 && !candidatesLoading && !loadFailed && (
+            <Alert
+              type="info"
+              showIcon
+              style={{ marginBottom: 10 }}
+              message={`已隐藏 ${hiddenPendingCandidateCount} 条不属于当前图谱范围的候选`}
+              description="这些候选的源节点或目标节点不在当前专业/课程画布中，切换到对应范围后再审核。"
+            />
+          )}
           {candidatesLoading ? (
             <div className="gsp-pane-center">
               <Spin size="small" />

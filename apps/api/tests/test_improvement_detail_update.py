@@ -2,6 +2,7 @@ import asyncio
 from datetime import UTC, datetime
 
 from app.modules.improvements.application.update_improvement import UpdateImprovement
+from app.modules.improvements.application.delete_improvement import DeleteImprovement
 from app.modules.improvements.domain.improvement import (
     Improvement,
     ImprovementPriority,
@@ -62,3 +63,16 @@ def test_update_improvement_detail_fields() -> None:
     assert updated.reevaluation_result == 0.86
     assert updated.status == ImprovementStatus.CLOSED
     assert updated.closed_at is not None
+
+
+def test_delete_improvement_removes_item() -> None:
+    user_id = f"test-improvement-delete-{datetime.now(UTC).strftime('%Y%m%d%H%M%S%f')}"
+    repo = InMemoryImprovementRepository(with_seed=False, user_id=user_id)
+    repo._store = {"imp-detail-1": _improvement()}
+    use_case = DeleteImprovement(repo)
+
+    deleted = asyncio.run(use_case.execute("imp-detail-1"))
+
+    assert deleted is True
+    assert asyncio.run(repo.get_by_id("imp-detail-1")) is None
+    assert asyncio.run(use_case.execute("missing")) is False

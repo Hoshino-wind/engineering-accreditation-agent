@@ -20,6 +20,7 @@ from app.modules.orchestration.domain.models import (
 from app.modules.orchestration.domain.projection import apply_review_decisions
 from app.modules.recognition.application.ports import CandidateRepository
 from app.modules.recognition.domain.candidate import (
+    CandidateEvidence,
     CandidateReviewStatus,
     RecognitionCandidate,
     RecognitionCandidateRisk,
@@ -69,10 +70,22 @@ def _candidate_matches_edge(
 ) -> bool:
     source_aliases = _aliases_for_endpoint(edge.get("source"), aliases_by_id)
     target_aliases = _aliases_for_endpoint(edge.get("target"), aliases_by_id)
-    return (
+    endpoint_match = (
         _clean_alias(candidate.source_node) in source_aliases
         and _clean_alias(candidate.target_node) in target_aliases
     )
+    if not endpoint_match:
+        return False
+
+    edge_resource_id = str(edge.get("materialResourceId") or "")
+    candidate_resource_ids = {
+        str(evidence.resource_id or "")
+        for evidence in candidate.evidence
+        if evidence.resource_id
+    }
+    if edge_resource_id:
+        return edge_resource_id in candidate_resource_ids
+    return True
 
 
 def _edge_is_reviewable_candidate(edge: dict[str, Any]) -> bool:
@@ -105,6 +118,8 @@ def _candidate_id_for_edge(edge_id: str) -> str:
 def _candidate_from_edge(
     edge: dict[str, Any],
     nodes_by_id: dict[str, dict[str, Any]],
+    course_by_source_id: dict[str, str],
+    major_id: str,
 ) -> RecognitionCandidate:
     edge_id = str(edge.get("id") or f"{edge.get('source')}-{edge.get('target')}")
     source_node = nodes_by_id.get(str(edge.get("source") or ""))
@@ -123,6 +138,25 @@ def _candidate_from_edge(
         )
     if not course and source_node and source_node.get("kind") == "Course":
         course = source_label
+    if not course:
+        course = course_by_source_id.get(str(edge.get("source") or ""), "")
+
+    material_name = str(edge.get("materialName") or "")
+    material_resource_id = str(edge.get("materialResourceId") or "")
+    material_version = str(edge.get("materialVersion") or "")
+    evidence = ()
+    if material_name or material_resource_id:
+        evidence = (
+            CandidateEvidence(
+                id=f"evidence-{_candidate_id_for_edge(edge_id)}",
+                resource_name=material_name,
+                resource_version=material_version,
+                coordinate="graph-reconciliation",
+                excerpt=str(edge.get("reasoning") or "")[:200],
+                hash="graph-edge",
+                resource_id=material_resource_id,
+            ),
+        )
 
     return RecognitionCandidate(
         id=_candidate_id_for_edge(edge_id),
@@ -141,7 +175,9 @@ def _candidate_from_edge(
         explanation=str(edge.get("reasoning") or "由图谱待审核关系自动补齐，供教师继续审核。"),
         processor_version="graph-reconcile-v1",
         generated_at=datetime.now(UTC).strftime("%Y-%m-%d %H:%M"),
+        major_id=major_id,
         review_status=CandidateReviewStatus.PENDING,
+        evidence=evidence,
     )
 
 
@@ -151,14 +187,25 @@ async def reconcile_orphan_pending_edges(
     candidates_repo: CandidateRepository,
     *,
     existing_candidates: list[RecognitionCandidate] | None = None,
+    major_id: str = "major-eie",
 ) -> list[RecognitionCandidate]:
     candidates = (
         list(existing_candidates)
         if existing_candidates is not None
-        else await candidates_repo.list_all()
+        else await candidates_repo.list_all(major_id=major_id)
     )
     aliases_by_id = _node_aliases_by_id(nodes)
     nodes_by_id = {str(node.get("id")): node for node in nodes if node.get("id")}
+    course_by_source_id: dict[str, str] = {}
+    for edge in edges:
+        if edge.get("kind") != "BELONGS_TO":
+            continue
+        course_node = nodes_by_id.get(str(edge.get("target") or ""))
+        if course_node is None:
+            continue
+        course_by_source_id[str(edge.get("source") or "")] = _label_for_node(
+            course_node, edge.get("target")
+        )
     existing_ids = {candidate.id for candidate in candidates}
     missing: list[RecognitionCandidate] = []
 
@@ -174,7 +221,9 @@ async def reconcile_orphan_pending_edges(
             for candidate in [*candidates, *missing]
         ):
             continue
-        missing.append(_candidate_from_edge(edge, nodes_by_id))
+        missing.append(
+            _candidate_from_edge(edge, nodes_by_id, course_by_source_id, major_id)
+        )
         existing_ids.add(candidate_id)
 
     if missing:
@@ -190,9 +239,11 @@ class QueryProjectedGraph:
         self,
         orchestrator: AgentOrchestratorPort,
         candidates: CandidateRepository,
+        major_id: str = "major-eie",
     ) -> None:
         self._orchestrator = orchestrator
         self._candidates = candidates
+        self._major_id = major_id
 
     async def _merged_graph(self) -> dict[str, list[dict[str, Any]]]:
         base = await self._orchestrator.get_current_graph()
@@ -202,6 +253,7 @@ class QueryProjectedGraph:
             nodes,
             edges,
             self._candidates,
+            major_id=self._major_id,
         )
         return apply_review_decisions(
             nodes,

@@ -179,3 +179,300 @@ class JsonGraphStateStore:
         ]
         self._write(new_nodes, new_edges)
         return _GraphMutationContext(removed_node_ids=to_remove)
+
+    def remove_material(
+        self,
+        *,
+        material_names: set[str],
+        resource_ids: set[str],
+    ) -> _GraphMutationContext:
+        """移除由指定材料提取出的学校节点与关联边。
+
+        节点提取阶段会在 school 节点 properties.materialName 中记录材料名。
+        删除 M3 材料时，图谱必须同步撤销这些节点，否则会出现"材料清单为空，
+        但图谱仍然显示旧实验/支撑关系"的状态。
+        """
+        normalized = {
+            name.strip().lower()
+            for name in material_names
+            if name and name.strip()
+        }
+        normalized_ids = {
+            value.strip()
+            for value in resource_ids
+            if value and value.strip()
+        }
+        if not normalized and not normalized_ids:
+            return _GraphMutationContext(removed_node_ids=set())
+
+        saved = self._read()
+        if saved is None:
+            return _GraphMutationContext(removed_node_ids=set())
+
+        nodes = saved["nodes"]
+        edges = saved["edges"]
+
+        def _legacy_name_matches(props: dict[str, Any]) -> bool:
+            values = [
+                props.get("materialName"),
+                props.get("materialFileName"),
+                props.get("resourceName"),
+            ]
+            return any(str(value or "").strip().lower() in normalized for value in values)
+
+        to_remove: set[str] = set()
+        new_nodes: list[dict[str, Any]] = []
+        for node in nodes:
+            if node.get("origin") != "school" or not node.get("id"):
+                new_nodes.append(node)
+                continue
+            props = dict(node.get("properties") or {})
+            refs = [
+                dict(ref)
+                for ref in props.get("materialRefs", [])
+                if isinstance(ref, dict)
+            ]
+            matched_refs = [
+                ref
+                for ref in refs
+                if str(ref.get("resourceId") or "").strip() in normalized_ids
+            ]
+            if matched_refs:
+                remaining_refs = [ref for ref in refs if ref not in matched_refs]
+                if remaining_refs:
+                    active = remaining_refs[-1]
+                    props.update(
+                        {
+                            "materialRefs": remaining_refs,
+                            "materialId": active.get("resourceId", ""),
+                            "materialVersionGroupId": active.get("versionGroupId", ""),
+                            "materialVersion": active.get("version", ""),
+                            "materialName": active.get("name", ""),
+                            "materialFileName": active.get("fileName", ""),
+                        }
+                    )
+                    new_nodes.append({**node, "properties": props})
+                else:
+                    to_remove.add(str(node["id"]))
+                continue
+
+            has_stable_identity = bool(
+                refs or str(props.get("materialId") or "").strip()
+            )
+            direct_match = str(props.get("materialId") or "").strip() in normalized_ids
+            legacy_match = not has_stable_identity and _legacy_name_matches(props)
+            if direct_match or legacy_match:
+                to_remove.add(str(node["id"]))
+            else:
+                new_nodes.append(node)
+
+        if not to_remove:
+            # 即使没有节点被删，也可能有只属于该材料的关系需要撤销。
+            pass
+
+        new_edges = []
+        for edge in edges:
+            if edge.get("source") in to_remove or edge.get("target") in to_remove:
+                continue
+            refs = [
+                dict(ref)
+                for ref in edge.get("materialRefs", [])
+                if isinstance(ref, dict)
+            ]
+            remaining_refs = [
+                ref
+                for ref in refs
+                if str(ref.get("resourceId") or "").strip() not in normalized_ids
+            ]
+            if refs and not remaining_refs:
+                continue
+            edge_resource_id = str(edge.get("materialResourceId") or "").strip()
+            if not refs and edge_resource_id and edge_resource_id in normalized_ids:
+                continue
+            new_edges.append(
+                {**edge, "materialRefs": remaining_refs} if refs else edge
+            )
+        self._write(new_nodes, new_edges)
+        return _GraphMutationContext(removed_node_ids=to_remove)
+
+    def remove_material_names(self, material_names: set[str]) -> _GraphMutationContext:
+        """兼容旧调用：旧图谱没有 resource id 时按材料名清理。"""
+        return self.remove_material(material_names=material_names, resource_ids=set())
+
+    def retain_materials(self, valid_resource_ids: set[str]) -> _GraphMutationContext:
+        """让学校侧图谱只保留仍存在于材料仓储中的引用。
+
+        PostgreSQL 是材料真源，图谱 JSON 可能包含迁移前留下的材料 ID。删除材料后
+        用当前专业仍存在的材料 ID 调用本方法，可移除孤立节点和关系；共享节点只会
+        删除失效引用，只要仍有一份有效材料支撑就会保留。
+        """
+        valid_ids = {
+            value.strip()
+            for value in valid_resource_ids
+            if value and value.strip()
+        }
+        saved = self._read()
+        if saved is None:
+            return _GraphMutationContext(removed_node_ids=set())
+
+        nodes = saved["nodes"]
+        edges = saved["edges"]
+        to_remove: set[str] = set()
+        new_nodes: list[dict[str, Any]] = []
+
+        for node in nodes:
+            node_id = str(node.get("id") or "")
+            if node.get("origin") != "school" or not node_id:
+                new_nodes.append(node)
+                continue
+
+            # 没有任何材料时，学校侧图谱不应继续存在。该规则同时负责清理
+            # 早期版本中没有稳定 materialId 的遗留节点。
+            if not valid_ids:
+                to_remove.add(node_id)
+                continue
+
+            raw_props = node.get("properties") or {}
+            props = dict(raw_props) if isinstance(raw_props, dict) else {}
+            refs = [
+                dict(ref)
+                for ref in props.get("materialRefs", [])
+                if isinstance(ref, dict)
+            ]
+            if refs:
+                active_refs = [
+                    ref
+                    for ref in refs
+                    if str(ref.get("resourceId") or "").strip() in valid_ids
+                ]
+                if not active_refs:
+                    to_remove.add(node_id)
+                    continue
+                active = active_refs[-1]
+                props.update(
+                    {
+                        "materialRefs": active_refs,
+                        "materialId": active.get("resourceId", ""),
+                        "materialVersionGroupId": active.get("versionGroupId", ""),
+                        "materialVersion": active.get("version", ""),
+                        "materialName": active.get("name", ""),
+                        "materialFileName": active.get("fileName", ""),
+                    }
+                )
+                new_nodes.append({**node, "properties": props})
+                continue
+
+            material_id = str(props.get("materialId") or "").strip()
+            if material_id and material_id not in valid_ids:
+                to_remove.add(node_id)
+                continue
+
+            # 部分旧图谱没有稳定材料身份。仍有有效材料时无法可靠判断归属，
+            # 因而保留；待这些节点被重新解析后会自动获得 materialRefs。
+            new_nodes.append(node)
+
+        new_edges: list[dict[str, Any]] = []
+        for edge in edges:
+            if edge.get("source") in to_remove or edge.get("target") in to_remove:
+                continue
+
+            refs = [
+                dict(ref)
+                for ref in edge.get("materialRefs", [])
+                if isinstance(ref, dict)
+            ]
+            if refs:
+                active_refs = [
+                    ref
+                    for ref in refs
+                    if str(ref.get("resourceId") or "").strip() in valid_ids
+                ]
+                if not active_refs:
+                    continue
+                new_edges.append({**edge, "materialRefs": active_refs})
+                continue
+
+            material_id = str(edge.get("materialResourceId") or "").strip()
+            if material_id and material_id not in valid_ids:
+                continue
+            new_edges.append(edge)
+
+        self._write(new_nodes, new_edges)
+        return _GraphMutationContext(removed_node_ids=to_remove)
+
+    def clear_school_nodes(self, course_name: str | None = None) -> _GraphMutationContext:
+        """清空当前图谱中的学校侧节点。
+
+        用于 M3 的"清空当前范围"操作：用户可能已经把本地材料文件删掉，
+        但图谱持久化里仍保留旧课程、实验项目和支撑关系。该操作会保留
+        标准库节点和 CONTAINS 结构边，只撤销由材料/课程产生的学校侧数据。
+        传入 course_name 时优先只清该课程；不传则清当前专业下全部学校节点。
+        """
+        saved = self._read()
+        if saved is None:
+            return _GraphMutationContext(removed_node_ids=set())
+
+        nodes = saved["nodes"]
+        edges = saved["edges"]
+        target_course = (course_name or "").strip().lower()
+
+        def _norm(value: Any) -> str:
+            return str(value or "").strip().lower()
+
+        def _props(node: dict[str, Any]) -> dict[str, Any]:
+            props = node.get("properties") or {}
+            return props if isinstance(props, dict) else {}
+
+        def _matches_course(node: dict[str, Any]) -> bool:
+            if node.get("origin") != "school":
+                return False
+            if not target_course:
+                return True
+            props = _props(node)
+            values = [
+                node.get("name"),
+                node.get("code"),
+                props.get("course"),
+                props.get("courseName"),
+                props.get("course_name"),
+                props.get("materialCourse"),
+            ]
+            return any(
+                value_norm == target_course or target_course in value_norm
+                for value_norm in (_norm(value) for value in values)
+                if value_norm
+            )
+
+        school_ids = {
+            str(node["id"])
+            for node in nodes
+            if node.get("id") and node.get("origin") == "school"
+        }
+        to_remove = {
+            str(node["id"])
+            for node in nodes
+            if node.get("id") and _matches_course(node)
+        }
+
+        # 若命中课程节点，则把课程下游的实验/知识点/教学资源一起清理。
+        changed = True
+        while changed:
+            changed = False
+            for edge in edges:
+                source = str(edge.get("source") or "")
+                target = str(edge.get("target") or "")
+                if source in to_remove and target in school_ids and target not in to_remove:
+                    to_remove.add(target)
+                    changed = True
+
+        if not to_remove:
+            return _GraphMutationContext(removed_node_ids=set())
+
+        new_nodes = [n for n in nodes if n.get("id") not in to_remove]
+        new_edges = [
+            e
+            for e in edges
+            if e.get("source") not in to_remove and e.get("target") not in to_remove
+        ]
+        self._write(new_nodes, new_edges)
+        return _GraphMutationContext(removed_node_ids=to_remove)

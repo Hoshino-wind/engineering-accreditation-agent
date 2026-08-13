@@ -33,6 +33,7 @@ from app.modules.evaluations.routes import create_evaluations_router
 from app.modules.improvements.application import (
     CompleteMaterialHealthImprovement,
     CreateImprovement,
+    DeleteImprovement,
     ListImprovements,
     UpdateImprovement,
 )
@@ -211,16 +212,19 @@ def create_app() -> FastAPI:
 
     def provide_upload_resource(
         current_user: Annotated[User, Depends(get_current_user)],
+        active_major_id: Annotated[str | None, Depends(get_active_major_id)] = None,
     ) -> UploadResource:
         repos = per_user_mgr.get(current_user.id)
         return UploadResource(
             repository=repos.resources,
             object_storage=object_storage,
             owner=current_user.id,
+            major_id=active_major_id or "major-eie",
         )
 
     def provide_delete_resource(
         current_user: Annotated[User, Depends(get_current_user)],
+        active_major_id: Annotated[str | None, Depends(get_active_major_id)] = None,
     ) -> DeleteResource:
         repos = per_user_mgr.get(current_user.id)
         return DeleteResource(
@@ -228,6 +232,9 @@ def create_app() -> FastAPI:
             cancellation=task_registry,
             candidates_repo=repos.candidates,
             findings_repo=repos.findings,
+            graph_projection=get_orchestrator(current_user.id, active_major_id),
+            active_major_id=active_major_id,
+            object_storage=object_storage,
         )
 
     def provide_classify_resource(
@@ -339,7 +346,10 @@ def create_app() -> FastAPI:
         active_major_id: Annotated[str | None, Depends(get_active_major_id)] = None,
     ) -> ListCandidates:
         repos = per_user_mgr.get(current_user.id)
-        inner = ListCandidates(repository=repos.candidates)
+        inner = ListCandidates(
+            repository=repos.candidates,
+            active_major_id=active_major_id,
+        )
 
         class _ListAndReconcile:
             async def execute(
@@ -349,6 +359,7 @@ def create_app() -> FastAPI:
                 risk: str | None = None,
                 candidate_type: str | None = None,
                 review_status: str | None = None,
+                major_id: str | None = None,
             ) -> list[RecognitionCandidate]:
                 try:
                     graph = await get_orchestrator(
@@ -359,6 +370,7 @@ def create_app() -> FastAPI:
                         list(graph.get("nodes", [])),
                         list(graph.get("edges", [])),
                         repos.candidates,
+                        major_id=active_major_id or "major-eie",
                     )
                 except Exception:  # noqa: BLE001
                     logging.getLogger(__name__).exception(
@@ -369,6 +381,7 @@ def create_app() -> FastAPI:
                     risk=risk,
                     candidate_type=candidate_type,
                     review_status=review_status,
+                    major_id=major_id,
                 )
 
         return _ListAndReconcile()
@@ -428,9 +441,12 @@ def create_app() -> FastAPI:
 
     def provide_create_improvement(
         current_user: Annotated[User, Depends(get_current_user)],
+        active_major_id: Annotated[str | None, Depends(get_active_major_id)] = None,
     ) -> CreateImprovement:
         repos = per_user_mgr.get(current_user.id)
-        return CreateImprovement(repository=repos.improvements)
+        return CreateImprovement(
+            repository=repos.improvements, active_major_id=active_major_id
+        )
 
     def provide_update_improvement(
         current_user: Annotated[User, Depends(get_current_user)],
@@ -448,6 +464,12 @@ def create_app() -> FastAPI:
             resources=repos.resources,
             active_major_id=active_major_id,
         )
+
+    def provide_delete_improvement(
+        current_user: Annotated[User, Depends(get_current_user)],
+    ) -> DeleteImprovement:
+        repos = per_user_mgr.get(current_user.id)
+        return DeleteImprovement(repository=repos.improvements)
 
     # --- LLM + RAG ---
     # LLM 客户端不再使用全局单例：在请求 / 任务级别按当前用户构造，
@@ -577,6 +599,7 @@ def create_app() -> FastAPI:
         return QueryProjectedGraph(
             orchestrator=get_orchestrator(current_user.id, active_major_id),
             candidates=repos.candidates,
+            major_id=active_major_id or "major-eie",
         )
 
     def provide_run_evaluation(
@@ -588,6 +611,7 @@ def create_app() -> FastAPI:
             graph_query=QueryProjectedGraph(
                 orchestrator=get_orchestrator(current_user.id, active_major_id),
                 candidates=repos.candidates,
+                major_id=active_major_id or "major-eie",
             ),
             tenant_id=current_user.id,
             audit_store=persistence,
@@ -603,54 +627,64 @@ def create_app() -> FastAPI:
 
     # --- Pipeline（全局进度聚合）---
     class _ResourceStatusAdapter:
-        def __init__(self, repo):
+        def __init__(self, repo, major_id: str):
             self._repo = repo
+            self._major_id = major_id
 
         async def get_extracting_count(self) -> int:
-            items = await self._repo.list_all(status="processing")
+            items = await self._repo.list_all(
+                status="processing", major_id=self._major_id
+            )
             return len(items)
 
         async def get_total_count(self) -> int:
-            items = await self._repo.list_all()
+            items = await self._repo.list_all(major_id=self._major_id)
             return len(items)
 
     class _ReviewStatusAdapter:
-        def __init__(self, repo, orch):
-            self._repo = repo
-            self._orch = orch
+        def __init__(self, graph_query):
+            self._graph_query = graph_query
+
+        async def _pending_graph_edges(self) -> list[dict]:
+            try:
+                graph = await self._graph_query.current_graph()
+            except Exception:  # noqa: BLE001
+                return []
+            return [
+                edge
+                for edge in graph.get("edges", [])
+                if edge.get("kind") == "SUPPORTS"
+                and edge.get("reviewStatus") == "pending"
+            ]
 
         async def get_pending_run_review_count(self) -> int:
-            # 停在审核网关的多智能体运行中的待审核推断关系（只取最近一次）
-            try:
-                for run in await self._orch.list_runs():
-                    if run.pending_review:
-                        return len(run.pending_review)
-            except Exception:  # noqa: BLE001
-                pass
+            # 历史运行快照可能仍停在 interrupt 状态，但关系已经在统一审核页
+            # 被处理或随材料删除。快照不是当前业务待办，不能混入数量。
             return 0
 
         async def get_pending_review_count(self) -> int:
-            items = await self._repo.list_all()
-            pending = sum(1 for c in items if c.review_status == "pending")
-            return pending + await self.get_pending_run_review_count()
+            return len(await self._pending_graph_edges())
 
     class _CoverageStatusAdapter:
-        def __init__(self, orch):
-            self._orch = orch
+        def __init__(self, graph_query):
+            self._graph_query = graph_query
 
         async def get_gap_count(self) -> int:
             try:
-                report = await self._orch.get_current_coverage()
+                report = await self._graph_query.current_coverage()
                 return report.get("gapCount", 0)
             except Exception:
                 return 0
 
     class _SuggestionStatusAdapter:
-        def __init__(self, repo):
+        def __init__(self, repo, major_id: str):
             self._repo = repo
+            self._major_id = major_id
 
         async def get_open_suggestion_count(self) -> int:
-            items = await self._repo.list_all(status="open")
+            items = await self._repo.list_all(
+                status="open", major_id=self._major_id
+            )
             return len(items)
 
     def provide_pipeline_status(
@@ -658,15 +692,17 @@ def create_app() -> FastAPI:
         active_major_id: Annotated[str | None, Depends(get_active_major_id)] = None,
     ) -> GetPipelineStatus:
         repos = per_user_mgr.get(current_user.id)
+        major_id = active_major_id or "major-eie"
+        graph_query = QueryProjectedGraph(
+            orchestrator=get_orchestrator(current_user.id, active_major_id),
+            candidates=repos.candidates,
+            major_id=major_id,
+        )
         return GetPipelineStatus(
-            resources=_ResourceStatusAdapter(repos.resources),
-            review=_ReviewStatusAdapter(
-                repos.candidates, get_orchestrator(current_user.id, active_major_id)
-            ),
-            coverage=_CoverageStatusAdapter(
-                get_orchestrator(current_user.id, active_major_id)
-            ),
-            suggestions=_SuggestionStatusAdapter(repos.improvements),
+            resources=_ResourceStatusAdapter(repos.resources, major_id),
+            review=_ReviewStatusAdapter(graph_query),
+            coverage=_CoverageStatusAdapter(graph_query),
+            suggestions=_SuggestionStatusAdapter(repos.improvements, major_id),
         )
 
     def provide_support_readiness(
@@ -683,6 +719,8 @@ def create_app() -> FastAPI:
         )
 
     # --- B1/B2/B4: 上传后异步处理 pipeline ---
+    evaluation_evidence_categories = {"评分表", "学生报告", "评价结果"}
+
     async def _process_resource_background(resource_id: str, category: str, content: bytes) -> None:
         """上传后异步：标记 READY（B1）→ 触发真实多智能体 pipeline（B2）。
 
@@ -759,14 +797,15 @@ def create_app() -> FastAPI:
             # 取消检查点
             token.check()
 
-            # B1: 更新状态为 READY，标记所有阶段完成，并持久化解析文本
+            # 文本解析完成后仍保持 PROCESSING。只有待审核关系成功写入 M4 后，
+            # 才将材料标记为 READY，避免前端提前结束轮询并短暂显示“无待审核关系”。
             updated_resource = dc_replace(
                 resource,
-                status=TeachingResourceStatus.READY,
+                status=TeachingResourceStatus.PROCESSING,
                 next_action=(
                     "AI 已识别候选课程，请确认课程归属后再进入图谱审核"
                     if suggested_course is not None
-                    else "AI 已提取节点，可去图谱查看或进入审核"
+                    else "节点已提取，正在生成待审核支撑关系"
                 ),
                 source_coverage=85,
                 extracted_text=material_text,
@@ -784,17 +823,109 @@ def create_app() -> FastAPI:
             )
             await target_repos.resources.update(updated_resource)
 
+            if category in evaluation_evidence_categories:
+                ready_resource = dc_replace(
+                    updated_resource,
+                    status=TeachingResourceStatus.READY,
+                    next_action=(
+                        "评价证据已入库留档；该类材料用于达成度评价和认证支撑，"
+                        "不进入图谱节点提取"
+                    ),
+                    source_coverage=100,
+                )
+                await target_repos.resources.update(ready_resource)
+                return
+
             # B2: 触发真实多智能体 pipeline（提取节点入图 + 推断待审核关系）
             try:
+                orchestrator = get_orchestrator(resource_owner_id, resource.major_id)
                 goal = f"解析上传材料「{resource.name}」，提取教学节点并推断对毕业要求指标点的支撑关系"
-                await get_orchestrator(resource_owner_id, resource.major_id).start_run(
+                run = await orchestrator.start_run(
                     goal=goal,
                     material_category=category or "其他",
                     material_name=resource.name,
                     material_text=material_text,
+                    material_resource_id=resource.id,
+                    material_version_group_id=resource.version_group_id or resource.id,
+                    material_version=resource.version,
+                    material_file_name=resource.file_name,
                 )
-            except Exception:  # noqa: BLE001
+                if run.status.value == "failed":
+                    raise RuntimeError(run.error or "新版本图谱提取失败")
+                if not (run.result or {}).get("extracted"):
+                    raise RuntimeError("材料未提取出可维护节点，版本暂不生效")
+                relations = list((run.result or {}).get("relations") or [])
+                if not relations or not run.pending_review:
+                    raise RuntimeError(
+                        "材料未生成可审核支撑关系，请检查模型设置、材料指标证据或网络连接"
+                    )
+
+                graph = await orchestrator.get_current_graph()
+                reconciled = await reconcile_orphan_pending_edges(
+                    list(graph.get("nodes", [])),
+                    list(graph.get("edges", [])),
+                    target_repos.candidates,
+                    major_id=resource.major_id,
+                )
+                material_pending_count = sum(
+                    1
+                    for candidate in reconciled
+                    if candidate.review_status.value == "pending"
+                    and any(
+                        evidence.resource_id == resource.id
+                        for evidence in candidate.evidence
+                    )
+                )
+                if material_pending_count == 0:
+                    raise RuntimeError("支撑关系已生成，但写入识别与审核队列失败")
+
+                updated_resource = dc_replace(
+                    updated_resource,
+                    status=TeachingResourceStatus.READY,
+                    next_action=(
+                        f"已生成 {material_pending_count} 条待审核支撑关系，"
+                        "请到识别与审核页面确认；采纳后才计入图谱诊断"
+                    ),
+                )
+                await target_repos.resources.update(updated_resource)
+
+                # 新版本运行快照已在同一事务性图状态中排除旧版本。这里只清理
+                # 旧候选/诊断；图谱不能再从外部删除，否则审核恢复时会被快照写回。
+                if resource.supersedes_id:
+                    version_family = await target_repos.resources.list_all(
+                        course=resource.course,
+                        major_id=resource.major_id,
+                    )
+                    stale_resource_ids = {
+                        item.id
+                        for item in version_family
+                        if item.id != resource.id
+                        and (item.version_group_id or item.id)
+                        == (resource.version_group_id or resource.id)
+                    }
+                    for stale_resource_id in stale_resource_ids:
+                        await target_repos.candidates.delete_by_evidence_resource_id(
+                            stale_resource_id
+                        )
+                        await target_repos.findings.delete_by_evidence_resource_id(
+                            stale_resource_id
+                        )
+            except Exception as exc:  # noqa: BLE001
                 logger.exception("上传后自动 pipeline 运行失败")
+                failed_resource = dc_replace(
+                    updated_resource,
+                    status=TeachingResourceStatus.FAILED,
+                    is_current_version=False,
+                    next_action="新版本解析失败，前一有效版本仍继续生效",
+                    failure_reason=str(exc),
+                )
+                await target_repos.resources.update(failed_resource)
+                if resource.supersedes_id:
+                    previous = await target_repos.resources.get_by_id(resource.supersedes_id)
+                    if previous is not None:
+                        await target_repos.resources.update(
+                            dc_replace(previous, is_current_version=True)
+                        )
 
     application = FastAPI(
         title="工程认证智能体 API",
@@ -879,6 +1010,7 @@ def create_app() -> FastAPI:
             provide_create_improvement,
             provide_update_improvement,
             provide_complete_improvement,
+            provide_delete_improvement,
         ),
         prefix=settings.api_v1_prefix,
     )

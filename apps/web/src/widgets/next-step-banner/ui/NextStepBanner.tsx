@@ -79,20 +79,10 @@ export function NextStepBanner({ currentPath, override }: NextStepBannerProps) {
         config = null;
       }
 
-      // 特殊逻辑：有待审核项时优先提示审核。
-      // 智能体运行推断的关系去智能体控制台审核，识别候选去识别页审核。
-      const runReview = status.pendingRunReviewCount ?? 0;
-      const candidateReview = status.pendingReviewCount - runReview;
-      if (runReview > 0 && currentPath !== '/agent') {
+      // 当前图谱中的待审核 SUPPORTS 边是唯一业务真源，统一在图谱页处理。
+      if (status.pendingReviewCount > 0 && currentPath !== '/graph') {
         config = {
-          message: `${runReview} 条 AI 推断的支撑关系待审核`,
-          cta: '去 AI 观测台审核',
-          path: '/agent',
-          tone: 'warning',
-        };
-      } else if (candidateReview > 0 && currentPath !== '/graph') {
-        config = {
-          message: `${candidateReview} 条识别结果待审核确认`,
+          message: `${status.pendingReviewCount} 条 AI 推断的支撑关系待审核`,
           cta: '去图谱审核',
           path: '/graph',
           tone: 'warning',

@@ -72,6 +72,7 @@ class InMemoryCandidateRepository(JsonPersistenceMixin):
         risk: str | None = None,
         candidate_type: str | None = None,
         review_status: str | None = None,
+        major_id: str | None = None,
     ) -> list[RecognitionCandidate]:
         results = list(self._store.values())
         if course:
@@ -82,6 +83,8 @@ class InMemoryCandidateRepository(JsonPersistenceMixin):
             results = [c for c in results if c.candidate_type == candidate_type]
         if review_status:
             results = [c for c in results if c.review_status == review_status]
+        if major_id is not None:
+            results = [c for c in results if c.major_id == major_id]
         return results
 
     async def get_by_id(self, candidate_id: str) -> RecognitionCandidate | None:
@@ -197,11 +200,44 @@ class InMemoryCandidateRepository(JsonPersistenceMixin):
         to_delete = [
             cid
             for cid, c in self._store.items()
-            if any(ev.resource_name == target for ev in c.evidence)
+            if any(
+                ev.resource_name == target and not ev.resource_id
+                for ev in c.evidence
+            )
         ]
         if not to_delete:
             return 0
         for cid in to_delete:
             self._store.pop(cid, None)
         self._schedule_save()
+        return len(to_delete)
+
+    async def delete_by_major(self, major_id: str) -> int:
+        target = (major_id or "").strip()
+        if not target:
+            return 0
+        to_delete = [
+            cid for cid, candidate in self._store.items()
+            if candidate.major_id == target
+        ]
+        for cid in to_delete:
+            self._store.pop(cid, None)
+        if to_delete:
+            self._schedule_save()
+        return len(to_delete)
+
+    async def delete_by_evidence_resource_id(self, resource_id: str) -> int:
+        """按稳定资源 ID 删除候选，避免同名不同版本互相误删。"""
+        target = (resource_id or "").strip()
+        if not target:
+            return 0
+        to_delete = [
+            cid
+            for cid, candidate in self._store.items()
+            if any(evidence.resource_id == target for evidence in candidate.evidence)
+        ]
+        for cid in to_delete:
+            self._store.pop(cid, None)
+        if to_delete:
+            self._schedule_save()
         return len(to_delete)

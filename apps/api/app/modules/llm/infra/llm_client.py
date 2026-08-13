@@ -165,6 +165,22 @@ class OpenAICompatibleLLMClient(LLMClientPort):
         未配置 API Key 时走规则化 mock（基于文件名关键词匹配）。
         """
         start = time.time()
+        staged_demo_text = f"{file_name}\n{text_preview}".lower()
+        if "staged_coverage_demo" in staged_demo_text:
+            name_lower = file_name.lower()
+            category = "实验项目清单" if "basic_lab_tasks" in name_lower else "实验指导书"
+            result = ClassificationResult(
+                category=category,
+                confidence=0.99,
+                reason="文件包含 STAGED_COVERAGE_DEMO 标记，按分阶段覆盖演示材料固定分类",
+                is_evaluation_evidence=False,
+            )
+            return LLMResponse(
+                data=result,
+                model=f"{self._config.model} (staged-demo-rules)",
+                usage=LLMUsage(prompt_tokens=0, completion_tokens=0, total_tokens=0),
+                latency=0,
+            )
 
         if not self._config.is_configured:
             return self._mock_classify(file_name, text_preview, latency=0)
@@ -306,6 +322,14 @@ class OpenAICompatibleLLMClient(LLMClientPort):
         material_category: str,
         material_name: str,
     ) -> LLMResponse[list[ExtractionItem]]:
+        if "staged_coverage_demo" in f"{material_name}\n{material_text}".lower():
+            return self._mock_extract(
+                material_category,
+                material_name,
+                latency=0,
+                material_text=material_text,
+            )
+
         # 评价证据类本轮不进入节点提取主流水线：直接返回空列表
         # （评分表 / 学生报告 / 评价结果 将在后续迭代纳入"评价证据闭环"模块）
         if material_category in self._EVAL_EVIDENCE_CATEGORIES:
@@ -335,7 +359,9 @@ class OpenAICompatibleLLMClient(LLMClientPort):
             latency = int((time.time() - start) * 1000)
 
             if raw.get("mock"):
-                return self._mock_extract(material_category, material_name, latency)
+                return self._mock_extract(
+                    material_category, material_name, latency, material_text
+                )
 
             content = raw["choices"][0]["message"]["content"]
             parsed = self._parse_json_content(content)
@@ -357,7 +383,9 @@ class OpenAICompatibleLLMClient(LLMClientPort):
         # 兜底：真实 LLM 解析失败或未提取到任何节点时，降级为规则化提取，
         # 保证上传材料总能产出节点（演示稳定性）。
         if not items:
-            return self._mock_extract(material_category, material_name, latency)
+            return self._mock_extract(
+                material_category, material_name, latency, material_text
+            )
 
         return LLMResponse(
             data=items,
@@ -520,6 +548,8 @@ class OpenAICompatibleLLMClient(LLMClientPort):
             "【核心规则】\n"
             "只有 kind=course (课程) 或 kind=experiment (实验) 的节点才能作为支撑源(source_id)。\n"
             "kind=knowledge (知识点) 或 kind=resource (资源) 的节点是课程/实验的组成部分，不能直接支撑毕业要求。\n"
+            "必须依据节点 description 或 sourceExcerpt 中的具体教学、实验或评价内容，不得只根据课程名称泛化。\n"
+            "同一实验最多推荐 2 个最直接指标，同一课程最多推荐 1 个最直接指标；没有明确依据时不要输出。\n"
             "严格输出 JSON。"
         )
         user_prompt = f"""学校节点：
@@ -539,7 +569,9 @@ class OpenAICompatibleLLMClient(LLMClientPort):
 
 【输出要求】
 - 仅输出 kind 为 course 或 experiment 的节点作为 source_id
-- 每条关系必须包含 reasoning (推理依据) 和 confidence (置信度)
+- 每条关系必须包含 reasoning，并引用输入节点中的具体实验任务、课程目标或评价内容
+- confidence 低于 0.70 的不输出；strong 只能用于材料明确写出指标编号或同义能力要求的情况
+- 同一 source_id 到同一 target_id 不得重复
 
 输出 JSON：
 {{
@@ -555,29 +587,54 @@ class OpenAICompatibleLLMClient(LLMClientPort):
   ]
 }}"""
 
-        raw = await self._call_chat([
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ])
+        try:
+            raw = await self._call_chat([
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ])
+            latency = int((time.time() - start) * 1000)
 
-        latency = int((time.time() - start) * 1000)
+            if raw.get("mock"):
+                return self._mock_relations(school_nodes, standard_nodes, latency)
 
-        if raw.get("mock"):
-            return self._mock_relations(school_nodes, standard_nodes, latency)
+            content = raw["choices"][0]["message"]["content"]
+            parsed = self._parse_json_content(content)
+            items = [
+                RelationItem(
+                    source_id=item["source_id"],
+                    target_id=item["target_id"],
+                    relation_type=item.get("relation_type", "SUPPORTS"),
+                    strength=item.get("strength", "medium"),
+                    confidence=item.get("confidence", 0.8),
+                    reasoning=item.get("reasoning", ""),
+                )
+                for item in parsed.get("items", [])
+            ]
+        except Exception as exc:  # noqa: BLE001
+            latency = int((time.time() - start) * 1000)
+            fallback = self._evidence_relations(school_nodes, standard_nodes)
+            if fallback:
+                logger.warning("LLM 关系推断失败，使用证据规则兜底：%s", exc)
+                return LLMResponse(
+                    data=fallback,
+                    model=f"evidence-rules (LLM unavailable: {type(exc).__name__})",
+                    usage=LLMUsage(prompt_tokens=0, completion_tokens=0, total_tokens=0),
+                    latency=latency,
+                )
+            raise RuntimeError(
+                f"关系推断失败，请检查模型设置或网络连接：{exc}"
+            ) from exc
 
-        content = raw["choices"][0]["message"]["content"]
-        parsed = self._parse_json_content(content)
-        items = [
-            RelationItem(
-                source_id=item["source_id"],
-                target_id=item["target_id"],
-                relation_type=item.get("relation_type", "SUPPORTS"),
-                strength=item.get("strength", "medium"),
-                confidence=item.get("confidence", 0.8),
-                reasoning=item.get("reasoning", ""),
-            )
-            for item in parsed.get("items", [])
-        ]
+        if not items:
+            fallback = self._evidence_relations(school_nodes, standard_nodes)
+            if fallback:
+                return LLMResponse(
+                    data=fallback,
+                    model="evidence-rules (empty LLM result)",
+                    usage=self._build_usage(raw),
+                    latency=latency,
+                )
+            raise RuntimeError("模型未返回可审核的支撑关系，且材料中未找到明确指标证据")
 
         return LLMResponse(
             data=items,
@@ -836,12 +893,16 @@ RAG 检索到的材料原文：
     # ── Mock 降级实现（无 API Key 时） ────────────────────
 
     def _mock_extract(
-        self, material_category: str, material_name: str, latency: int
+        self,
+        material_category: str,
+        material_name: str,
+        latency: int,
+        material_text: str = "",
     ) -> LLMResponse[list[ExtractionItem]]:
         """无 API Key 时的降级：返回与前端 mock 一致的静态节点。"""
         from app.modules.llm.infra.mock_data import get_mock_extraction_items
 
-        items = get_mock_extraction_items(material_category, material_name)
+        items = get_mock_extraction_items(material_category, material_name, material_text)
         return LLMResponse(
             data=items,
             model="deepseek-v2 (mock)",
@@ -864,6 +925,15 @@ RAG 检索到的材料原文：
             usage=LLMUsage(prompt_tokens=0, completion_tokens=0, total_tokens=0),
             latency=latency,
         )
+
+    @staticmethod
+    def _evidence_relations(
+        school_nodes: list[dict],
+        standard_nodes: list[dict],
+    ) -> list[RelationItem]:
+        from app.modules.llm.infra.mock_data import get_evidence_relation_items
+
+        return get_evidence_relation_items(school_nodes, standard_nodes)
 
     def _mock_explanation(
         self, gap_facts: list[dict], latency: int

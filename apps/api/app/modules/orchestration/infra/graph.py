@@ -15,6 +15,7 @@ from langgraph.types import interrupt
 
 from app.modules.llm.application.ports import LLMClientPort
 from app.modules.llm.application.rag_port import RAGSearchPort
+from app.modules.llm.domain.models import RelationItem
 from app.modules.orchestration.domain.coverage import analyze_coverage
 from app.modules.orchestration.domain.models import AgentPhase, StepStatus
 from app.modules.orchestration.infra.seed_graph import build_seed_graph
@@ -29,6 +30,7 @@ from app.modules.orchestration.infra.tools import (
     school_node_dicts,
     standard_node_dicts,
     state_to_graph,
+    without_superseded_material_version,
 )
 
 
@@ -37,6 +39,10 @@ class AgentState(TypedDict, total=False):
     material_category: str
     material_name: str
     material_text: str
+    material_resource_id: str
+    material_version_group_id: str
+    material_version: str
+    material_file_name: str
     plan: list[str]
     graph_nodes: list[dict[str, Any]]
     graph_edges: list[dict[str, Any]]
@@ -54,6 +60,65 @@ class AgentState(TypedDict, total=False):
 
 def _prev_steps(state: AgentState) -> list[dict[str, Any]]:
     return list(state.get("steps", []))
+
+
+def _relation_ref(value: Any) -> str:
+    return str(value or "").strip().casefold()
+
+
+def _limit_review_relations(
+    relations: list[RelationItem],
+    source_nodes: list[dict[str, Any]],
+) -> list[RelationItem]:
+    """Keep review queues evidence-oriented and bounded per extracted source."""
+    source_by_ref: dict[str, dict[str, Any]] = {}
+    for node in source_nodes:
+        for value in (node.get("id"), node.get("code"), node.get("name")):
+            if ref := _relation_ref(value):
+                source_by_ref[ref] = node
+
+    deduplicated: dict[tuple[str, str], RelationItem] = {}
+    for relation in relations:
+        if relation.relation_type != "SUPPORTS" or relation.confidence < 0.70:
+            continue
+        key = (_relation_ref(relation.source_id), _relation_ref(relation.target_id))
+        previous = deduplicated.get(key)
+        if previous is None or relation.confidence > previous.confidence:
+            deduplicated[key] = relation
+
+    grouped: dict[str, list[RelationItem]] = {}
+    for relation in deduplicated.values():
+        grouped.setdefault(_relation_ref(relation.source_id), []).append(relation)
+
+    limited: list[RelationItem] = []
+    for source_ref, source_relations in grouped.items():
+        node = source_by_ref.get(source_ref, {})
+        properties = node.get("properties") or {}
+        node_text = " ".join(
+            str(value or "")
+            for value in (
+                node.get("code"),
+                node.get("name"),
+                node.get("description"),
+                properties.get("sourceExcerpt") if isinstance(properties, dict) else "",
+            )
+        ).casefold()
+        explicit: list[RelationItem] = []
+        semantic: list[RelationItem] = []
+        for relation in source_relations:
+            target = _relation_ref(relation.target_id)
+            aliases = {target, target.replace("-", ""), target.replace("c-", "c", 1)}
+            if any(alias and alias in node_text for alias in aliases):
+                explicit.append(relation)
+            else:
+                semantic.append(relation)
+
+        semantic_limit = 1 if _relation_ref(node.get("kind")) == "course" else 2
+        limited.extend(sorted(explicit, key=lambda item: item.confidence, reverse=True))
+        limited.extend(
+            sorted(semantic, key=lambda item: item.confidence, reverse=True)[:semantic_limit]
+        )
+    return limited
 
 
 def build_agent_graph(llm: LLMClientPort, rag: RAGSearchPort | None = None):
@@ -104,6 +169,13 @@ def build_agent_graph(llm: LLMClientPort, rag: RAGSearchPort | None = None):
         category = state.get("material_category") or "培养方案"
         name = state.get("material_name") or "电子信息工程（嵌入式）培养方案"
         text = state.get("material_text") or ""
+        material_ref = {
+            "resourceId": state.get("material_resource_id") or "",
+            "versionGroupId": state.get("material_version_group_id") or "",
+            "version": state.get("material_version") or "",
+            "name": name,
+            "fileName": state.get("material_file_name") or name,
+        }
         try:
             resp = await llm.extract_nodes(text, category, name)
             extracted = [
@@ -132,12 +204,56 @@ def build_agent_graph(llm: LLMClientPort, rag: RAGSearchPort | None = None):
             "knowledge": "KnowledgePoint",
             "resource": "TeachingResource",
         }
-        existing_nodes = list(state.get("graph_nodes", []))
+        existing_nodes = [dict(node) for node in state.get("graph_nodes", [])]
+        existing_edges = [dict(edge) for edge in state.get("graph_edges", [])]
+        if extracted and material_ref["versionGroupId"] and material_ref["resourceId"]:
+            existing_nodes, existing_edges = without_superseded_material_version(
+                existing_nodes,
+                existing_edges,
+                version_group_id=material_ref["versionGroupId"],
+                current_resource_id=material_ref["resourceId"],
+                material_names={name, material_ref["fileName"]},
+            )
+        existing_index = {
+            str(node.get("code") or "").strip().lower(): index
+            for index, node in enumerate(existing_nodes)
+            if node.get("code")
+        }
         seen_codes = {n.get("code") for n in existing_nodes}
         new_nodes: list[dict[str, Any]] = []
         for item in extracted:
             code = item.get("code", "")
-            if not code or code in seen_codes:
+            if not code:
+                continue
+            existing_position = existing_index.get(str(code).strip().lower())
+            if existing_position is not None:
+                existing = dict(existing_nodes[existing_position])
+                if existing.get("origin") == "school" and material_ref["resourceId"]:
+                    properties = dict(existing.get("properties") or {})
+                    refs = [
+                        dict(ref)
+                        for ref in properties.get("materialRefs", [])
+                        if isinstance(ref, dict)
+                    ]
+                    if not any(
+                        ref.get("resourceId") == material_ref["resourceId"]
+                        for ref in refs
+                    ):
+                        refs.append(material_ref)
+                    properties.update(
+                        {
+                            "materialName": name,
+                            "materialFileName": material_ref["fileName"],
+                            "materialId": material_ref["resourceId"],
+                            "materialVersionGroupId": material_ref["versionGroupId"],
+                            "materialVersion": material_ref["version"],
+                            "materialRefs": refs,
+                        }
+                    )
+                    existing["properties"] = properties
+                    existing_nodes[existing_position] = existing
+                continue
+            if code in seen_codes:
                 continue
             seen_codes.add(code)
             new_nodes.append(
@@ -153,27 +269,160 @@ def build_agent_graph(llm: LLMClientPort, rag: RAGSearchPort | None = None):
                         "confidence": item.get("confidence"),
                         "sourceExcerpt": item.get("sourceExcerpt"),
                         "materialName": name,
+                        "materialFileName": material_ref["fileName"],
+                        "materialId": material_ref["resourceId"],
+                        "materialVersionGroupId": material_ref["versionGroupId"],
+                        "materialVersion": material_ref["version"],
+                        "materialRefs": [material_ref],
                     },
                 }
             )
 
+        all_nodes = existing_nodes + new_nodes
+        node_by_code = {
+            str(n.get("code") or "").lower(): n
+            for n in all_nodes
+            if n.get("code")
+        }
+        extracted_courses = [
+            node_by_code.get(str(item.get("code") or "").lower())
+            for item in extracted
+            if item.get("kind") == "course"
+        ]
+        extracted_courses = [n for n in extracted_courses if n is not None]
+        extracted_experiments = [
+            node_by_code.get(str(item.get("code") or "").lower())
+            for item in extracted
+            if item.get("kind") == "experiment"
+        ]
+        extracted_experiments = [n for n in extracted_experiments if n is not None]
+
+        seen_edge_ids = {e.get("id") for e in existing_edges}
+        structural_edges: list[dict[str, Any]] = []
+        if extracted_courses:
+            course_node = extracted_courses[0]
+            course_id = str(course_node.get("id") or "")
+            for experiment_node in extracted_experiments:
+                experiment_id = str(experiment_node.get("id") or "")
+                if not course_id or not experiment_id:
+                    continue
+                edge_id = f"edge-belongs-{experiment_id}-{course_id}"
+                if edge_id in seen_edge_ids:
+                    for index, edge in enumerate(existing_edges):
+                        if edge.get("id") != edge_id or not material_ref["resourceId"]:
+                            continue
+                        refs = [
+                            dict(ref)
+                            for ref in edge.get("materialRefs", [])
+                            if isinstance(ref, dict)
+                        ]
+                        if not any(
+                            ref.get("resourceId") == material_ref["resourceId"]
+                            for ref in refs
+                        ):
+                            refs.append(material_ref)
+                        existing_edges[index] = {**edge, "materialRefs": refs}
+                    continue
+                seen_edge_ids.add(edge_id)
+                structural_edges.append(
+                    {
+                        "id": edge_id,
+                        "source": experiment_id,
+                        "target": course_id,
+                        "kind": "BELONGS_TO",
+                        "sourceType": "rule",
+                        "reviewStatus": "approved",
+                        "reasoning": "同一材料中识别出的实验项目自动归属于该课程，仅用于图谱层级展示，不参与达成度计算。",
+                        "materialResourceId": material_ref["resourceId"],
+                        "materialVersionGroupId": material_ref["versionGroupId"],
+                        "materialVersion": material_ref["version"],
+                        "materialName": name,
+                        "materialRefs": [material_ref],
+                    }
+                )
+
         step = make_step(
             AgentPhase.EXTRACT, "提取智能体", "解析教学材料，提取节点", StepStatus.COMPLETED,
-            summary=f"提取 {len(extracted)} 个候选节点，新增入图 {len(new_nodes)} 个",
+            summary=(
+                f"提取 {len(extracted)} 个候选节点，新增入图 {len(new_nodes)} 个，"
+                f"补充结构关系 {len(structural_edges)} 条"
+            ),
             tool_calls=[tool],
         )
         return {
             "extracted": extracted,
-            "graph_nodes": existing_nodes + new_nodes,
+            "graph_nodes": all_nodes,
+            "graph_edges": existing_edges + structural_edges,
             "phase": AgentPhase.EXTRACT.value,
             "steps": _prev_steps(state) + [step],
         }
 
     async def infer_node(state: AgentState) -> dict[str, Any]:
         nodes_d = state.get("graph_nodes", [])
+        extracted_refs = {
+            str(value or "").strip().lower()
+            for item in state.get("extracted", [])
+            for value in (item.get("code"), item.get("name"))
+            if str(value or "").strip()
+        }
+        all_school_nodes = school_node_dicts(nodes_d)
+        current_school_nodes = [
+            node
+            for node in all_school_nodes
+            if str(node.get("code") or "").strip().lower() in extracted_refs
+            or str(node.get("name") or "").strip().lower() in extracted_refs
+        ]
+        # 只对本次材料提取出的学校节点做关系推理，避免每次上传都把整张图谱
+        # 重新推断一遍，造成同一实验项目反复进入审核队列。
+        relation_sources = current_school_nodes
         try:
-            resp = await llm.infer_relations(school_node_dicts(nodes_d), standard_node_dicts(nodes_d))
-            pending = relations_to_pending_edges(resp.data, nodes_d)
+            resp = await llm.infer_relations(relation_sources, standard_node_dicts(nodes_d))
+            allowed_source_refs = {
+                str(value or "").strip().casefold()
+                for node in relation_sources
+                for value in (node.get("id"), node.get("code"), node.get("name"))
+                if str(value or "").strip()
+            }
+            allowed_target_refs = {
+                str(value or "").strip().casefold()
+                for node in standard_node_dicts(nodes_d)
+                for value in (node.get("id"), node.get("code"), node.get("name"))
+                if str(value or "").strip()
+            }
+            filtered_relations = [
+                relation
+                for relation in resp.data
+                if str(relation.source_id or "").strip().casefold() in allowed_source_refs
+                and str(relation.target_id or "").strip().casefold() in allowed_target_refs
+            ]
+            # 当材料提取出实验项目时，课程节点只承担归属展示；支撑证据必须落到
+            # 具体实验，避免模型额外生成课程级泛化关系而虚高 M5 覆盖率。
+            experiment_refs = {
+                str(value or "").strip().casefold()
+                for node in relation_sources
+                if str(node.get("kind") or "").casefold() == "experiment"
+                for value in (node.get("id"), node.get("code"), node.get("name"))
+                if str(value or "").strip()
+            }
+            if experiment_refs:
+                filtered_relations = [
+                    relation
+                    for relation in filtered_relations
+                    if str(relation.source_id or "").strip().casefold() in experiment_refs
+                ]
+            filtered_relations = _limit_review_relations(
+                filtered_relations, relation_sources
+            )
+            pending = relations_to_pending_edges(filtered_relations, nodes_d)
+            for edge in pending:
+                edge.update(
+                    {
+                        "materialResourceId": state.get("material_resource_id") or "",
+                        "materialVersionGroupId": state.get("material_version_group_id") or "",
+                        "materialVersion": state.get("material_version") or "",
+                        "materialName": state.get("material_name") or "",
+                    }
+                )
             tool = make_tool_call(
                 "llm.infer_relations", "关系推理智能体", StepStatus.COMPLETED,
                 f"model={resp.model}", resp.latency,
@@ -205,6 +454,28 @@ def build_agent_graph(llm: LLMClientPort, rag: RAGSearchPort | None = None):
 
     async def review_node(state: AgentState) -> dict[str, Any]:
         relations = state.get("relations", [])
+        if not relations:
+            step = make_step(
+                AgentPhase.REVIEW,
+                "人工审核网关",
+                "教师审核 AI 推断的关系",
+                StepStatus.SKIPPED,
+                summary="没有生成可审核关系，跳过人工审核网关",
+                tool_calls=[
+                    make_tool_call(
+                        "human.review",
+                        "人工审核网关",
+                        StepStatus.SKIPPED,
+                        "0 pending relations",
+                        0,
+                    )
+                ],
+            )
+            return {
+                "review_decisions": [],
+                "phase": AgentPhase.REVIEW.value,
+                "steps": _prev_steps(state) + [step],
+            }
         # 人在回路：暂停，等待教师对每条推断关系给出 approve/reject
         decisions = interrupt({"pending_review": relations})
         decisions = decisions or []

@@ -156,7 +156,7 @@ export function OverviewMetrics() {
           },
           {
             key: 'avgAttainment',
-            title: '达成度均值',
+            title: '材料支撑指数',
             value: 0,
             suffix: '',
             displayValue: '—',
@@ -208,12 +208,12 @@ export function OverviewMetrics() {
         },
         {
           key: 'avgAttainment',
-          title: '达成度均值',
+          title: '材料支撑指数',
           value: avgAtt / 100,
           suffix: '',
           displayValue: String(avgAtt),
           displaySuffix: '%',
-          detail: `${cov.coveredCount} 项达标，${cov.partialCount} 项部分达成`,
+          detail: `${cov.coveredCount} 项支撑充分，${cov.partialCount} 项证据不足`,
           tone: 'default',
           hero: false,
         },
