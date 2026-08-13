@@ -34,6 +34,17 @@ class FindingRepository(Protocol):
     async def delete_by_evidence_object(self, object_name: str) -> int: ...
 
 
+class ResourceRepository(Protocol):
+    async def list_all(
+        self,
+        *,
+        course: str | None = None,
+        status: str | None = None,
+        resource_type: str | None = None,
+        major_id: str | None = None,
+    ) -> list[object]: ...
+
+
 class ImprovementRepository(Protocol):
     async def list_all(
         self,

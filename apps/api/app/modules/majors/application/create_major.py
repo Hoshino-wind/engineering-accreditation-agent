@@ -10,14 +10,15 @@ class MajorAlreadyExistsError(Exception):
     pass
 
 
-def _slugify(name: str) -> str:
-    # 保留中文与字母数字，其余字符替换为连字符
-    base = re.sub(r"[^0-9a-zA-Z\u4e00-\u9fa5]+", "-", name.strip()).strip("-").lower()
+def _slugify(value: str) -> str:
+    base = re.sub(r"[^0-9a-zA-Z]+", "-", value.strip()).strip("-").lower()
     return base or "major"
 
 
-def _new_id(existing: list[Major], name: str) -> str:
-    slug = _slugify(name)
+def _new_id(existing: list[Major], name: str, code: str | None = None) -> str:
+    slug = _slugify(code or "") if code else ""
+    if not slug:
+        slug = _slugify(name)
     candidate = f"major-{slug}"
     used = {m.id for m in existing}
     if candidate not in used:
@@ -49,7 +50,7 @@ class CreateMajor:
         if any(m.name == cleaned_name for m in existing):
             raise MajorAlreadyExistsError(f"已存在同名专业：{cleaned_name}")
         major = Major(
-            id=_new_id(existing, cleaned_name),
+            id=_new_id(existing, cleaned_name, code),
             code=(code or "").strip(),
             name=cleaned_name,
             school_name=(school_name or "").strip(),

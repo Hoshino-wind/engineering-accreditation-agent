@@ -1,4 +1,4 @@
-import {
+﻿import {
   AimOutlined,
   LoadingOutlined,
   NodeIndexOutlined,
@@ -399,10 +399,6 @@ export function GraphViewPage() {
   const pendingCount = localEdges.filter(
     (e) => e.kind === 'SUPPORTS' && e.reviewStatus === 'pending',
   ).length;
-  const allPendingCount = graph.edges.filter(
-    (e) => e.kind === 'SUPPORTS' && e.reviewStatus === 'pending',
-  ).length;
-  const hiddenPendingCount = Math.max(0, allPendingCount - pendingCount);
 
   // 覆盖度指标（后端确定性计算：仅 approved 边计入，strong=3/medium=2/weak=1 加权）
   const coverageRate = coverage
@@ -841,22 +837,6 @@ export function GraphViewPage() {
           description="在右侧「待审候选」面板点击卡片展开详情：画布会同步预览这条关系将连接的两个节点，可对照周边支撑再决定采纳或驳回；采纳的关系即刻投影回图谱并计入覆盖度。"
         />
       )}
-
-      {currentCourseName && hiddenPendingCount > 0 && (
-        <Alert
-          className="graph-view-pending-notice"
-          type="info"
-          showIcon
-          title={`另有 ${hiddenPendingCount} 条待审核关系被当前课程筛选隐藏`}
-          description={`你正在查看「${currentCourseName}」。这些关系属于当前专业的其他课程，不会显示在本课程图谱中。`}
-          action={
-            <Button onClick={() => setSelectedCourseId(ALL_COURSES)}>
-              查看全部课程
-            </Button>
-          }
-        />
-      )}
-
       <NextStepBanner currentPath="/graph" />
     </main>
   );

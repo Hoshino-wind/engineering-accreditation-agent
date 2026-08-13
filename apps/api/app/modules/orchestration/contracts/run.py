@@ -14,6 +14,7 @@ class StartRunRequest(BaseModel):
     goal: str
     materialCategory: str | None = None
     materialName: str | None = None
+    materialCourse: str | None = None
 
 
 class ReviewDecisionItem(BaseModel):

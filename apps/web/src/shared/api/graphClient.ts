@@ -129,3 +129,21 @@ export async function fetchCoverage(): Promise<CoverageData | null> {
     return null;
   }
 }
+
+export async function fetchGraphPendingReviewCount(): Promise<number | null> {
+  try {
+    const resp = await apiFetch(GRAPH_ENDPOINT, {
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!resp.ok) return null;
+    const data = (await resp.json()) as GraphData;
+    return data.edges.filter(
+      (edge) =>
+        edge.kind === 'SUPPORTS' &&
+        edge.sourceType === 'ai' &&
+        (edge.reviewStatus ?? 'pending') === 'pending',
+    ).length;
+  } catch {
+    return null;
+  }
+}

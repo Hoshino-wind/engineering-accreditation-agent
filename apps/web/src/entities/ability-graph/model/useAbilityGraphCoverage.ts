@@ -32,7 +32,7 @@ export function useAbilityGraphCoverage(): UseAbilityGraphCoverageResult {
     void (async () => {
       const data = await fetchCoverage();
       if (cancelled) return;
-      if (data) setCoverage(data);
+      setCoverage(data);
       setLoading(false);
     })();
 

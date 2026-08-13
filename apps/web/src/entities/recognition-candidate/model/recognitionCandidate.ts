@@ -21,6 +21,7 @@ export interface CandidateEvidence {
   excerpt: string;
   hash: string;
   id: string;
+  resourceId?: string;
   resourceName: string;
   resourceVersion: string;
 }

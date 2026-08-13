@@ -1,62 +1,93 @@
-/**
- * 按课程名过滤能力图谱。
- *
- * 图谱是 6 层结构：毕业要求 → 能力指标 → 课程 → 实验项目 → 知识点 → 教学资源。
- * 选中某门课后：
- * - 保留该 Course 节点
- * - 从该 Course 向下遍历 BELONGS_TO 找到实验项目
- * - 从实验项目向下遍历 COVERS_KNOWLEDGE / USES_RESOURCE 找到知识点和资源
- * - 保留所有 GraduationRequirement 和 Competency 节点（标准内置，全专业共享）
- * - 同时保留该课程/实验向上连接的 SUPPORTS_REQ / SUPPORTS 边
- * - 过滤掉其他课程及其子树
- *
- * @param graph     完整图谱
- * @param courseName 课程名（null = 全部课程，不过滤）
- */
-
 import type { AbilityGraphData } from './abilityGraph';
+
+function normalize(value: unknown): string {
+  return String(value ?? '').trim().toLocaleLowerCase('zh-CN');
+}
+
+function nodeMatchesCourse(
+  node: AbilityGraphData['nodes'][number],
+  courseName: string,
+): boolean {
+  const target = normalize(courseName);
+  const props = node.properties ?? {};
+  return [
+    node.name,
+    node.code,
+    props.course,
+    props.courseName,
+    props.course_name,
+    props.materialCourse,
+  ].some((value) => normalize(value) === target);
+}
+
+function standardNodeIds(graph: AbilityGraphData): Set<string> {
+  return new Set(
+    graph.nodes
+      .filter(
+        (n) =>
+          n.kind === 'GraduationRequirement' || n.kind === 'Competency',
+      )
+      .map((n) => n.id),
+  );
+}
 
 export function filterGraphByCourse(
   graph: AbilityGraphData,
   courseName: string | null,
 ): AbilityGraphData {
-  // 全部课程模式：不过滤
   if (!courseName) return graph;
 
-  // 1. 找到匹配的 Course 节点
-  const matchedCourseNodes = graph.nodes.filter(
-    (n) => n.kind === 'Course' && n.name === courseName,
+  const matchedCourseIds = new Set(
+    graph.nodes
+      .filter((n) => n.kind === 'Course' && nodeMatchesCourse(n, courseName))
+      .map((n) => n.id),
   );
 
-  // 如果没找到匹配的课程，返回只含标准节点的图
-  if (matchedCourseNodes.length === 0) {
-    const standardNodes = graph.nodes.filter(
-      (n) => n.kind === 'GraduationRequirement' || n.kind === 'Competency',
-    );
-    const standardNodeIds = new Set(standardNodes.map((n) => n.id));
-    const standardEdges = graph.edges.filter(
-      (e) =>
-        standardNodeIds.has(e.source) && standardNodeIds.has(e.target),
-    );
-    return { nodes: standardNodes, edges: standardEdges };
+  const scopedSchoolNodeIds = new Set(
+    graph.nodes
+      .filter(
+        (n) =>
+          n.origin === 'school' &&
+          n.kind !== 'Course' &&
+          nodeMatchesCourse(n, courseName),
+      )
+      .map((n) => n.id),
+  );
+
+  if (matchedCourseIds.size === 0 && scopedSchoolNodeIds.size === 0) {
+    const keepStandardIds = standardNodeIds(graph);
+    return {
+      nodes: graph.nodes.filter((n) => keepStandardIds.has(n.id)),
+      edges: graph.edges.filter(
+        (e) => keepStandardIds.has(e.source) && keepStandardIds.has(e.target),
+      ),
+    };
   }
 
-  const matchedCourseIds = new Set(matchedCourseNodes.map((n) => n.id));
+  const matchedExperimentIds = new Set(
+    graph.nodes
+      .filter(
+        (n) =>
+          n.kind === 'Experiment' &&
+          (scopedSchoolNodeIds.has(n.id) || nodeMatchesCourse(n, courseName)),
+      )
+      .map((n) => n.id),
+  );
+  const nodeById = new Map(graph.nodes.map((node) => [node.id, node]));
+  const matchedResIds = new Set<string>();
 
-  // 2. 从 Course 向下找 Experiment（BELONGS_TO: Experiment → Course）
-  const matchedExperimentIds = new Set<string>();
   for (const edge of graph.edges) {
-    if (
-      edge.kind === 'BELONGS_TO' &&
-      matchedCourseIds.has(edge.target) // target 是 Course
-    ) {
-      matchedExperimentIds.add(edge.source); // source 是 Experiment
+    if (edge.kind === 'BELONGS_TO' && matchedCourseIds.has(edge.target)) {
+      const sourceNode = nodeById.get(edge.source);
+      if (sourceNode?.kind === 'TeachingResource') {
+        matchedResIds.add(edge.source);
+      } else {
+        matchedExperimentIds.add(edge.source);
+      }
     }
   }
 
-  // 3. 从 Experiment 向下找 KnowledgePoint 和 TeachingResource
   const matchedKpIds = new Set<string>();
-  const matchedResIds = new Set<string>();
   for (const edge of graph.edges) {
     if (matchedExperimentIds.has(edge.source)) {
       if (edge.kind === 'COVERS_KNOWLEDGE') {
@@ -67,26 +98,19 @@ export function filterGraphByCourse(
     }
   }
 
-  // 4. 汇总保留的节点 ID
   const keepNodeIds = new Set<string>([
+    ...standardNodeIds(graph),
     ...matchedCourseIds,
+    ...scopedSchoolNodeIds,
     ...matchedExperimentIds,
     ...matchedKpIds,
     ...matchedResIds,
-    // 标准节点全部保留
-    ...graph.nodes
-      .filter(
-        (n) =>
-          n.kind === 'GraduationRequirement' || n.kind === 'Competency',
-      )
-      .map((n) => n.id),
   ]);
 
-  // 5. 过滤节点和边
-  const nodes = graph.nodes.filter((n) => keepNodeIds.has(n.id));
-  const edges = graph.edges.filter(
-    (e) => keepNodeIds.has(e.source) && keepNodeIds.has(e.target),
-  );
-
-  return { nodes, edges };
+  return {
+    nodes: graph.nodes.filter((n) => keepNodeIds.has(n.id)),
+    edges: graph.edges.filter(
+      (e) => keepNodeIds.has(e.source) && keepNodeIds.has(e.target),
+    ),
+  };
 }

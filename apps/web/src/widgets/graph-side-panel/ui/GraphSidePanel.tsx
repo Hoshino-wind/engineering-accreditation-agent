@@ -99,7 +99,9 @@ function nodeMatchesRef(node: AbilityGraphNode, normalizedRef: string): boolean 
     normalizeGraphRef(node.properties?.code as string | undefined) === normalizedRef ||
     normalizeGraphRef(node.properties?.name as string | undefined) === normalizedRef ||
     normalizeGraphRef(node.properties?.title as string | undefined) === normalizedRef ||
-    normalizeGraphRef(node.properties?.label as string | undefined) === normalizedRef
+    normalizeGraphRef(node.properties?.label as string | undefined) === normalizedRef ||
+    normalizeGraphRef(node.properties?.materialId as string | undefined) === normalizedRef ||
+    normalizeGraphRef(node.properties?.resourceId as string | undefined) === normalizedRef
   );
 }
 
@@ -148,9 +150,17 @@ export function GraphSidePanel({
   } = useRecognitionCandidates();
 
   const candidateHasVisibleEndpoints = useMemo(() => {
-    return (candidate: RecognitionCandidate): boolean =>
-      nodeIdByName(candidate.sourceNode) !== null &&
-      nodeIdByName(candidate.targetNode) !== null;
+    return (candidate: RecognitionCandidate): boolean => {
+      const hasNamedEndpoints =
+        nodeIdByName(candidate.sourceNode) !== null &&
+        nodeIdByName(candidate.targetNode) !== null;
+      if (hasNamedEndpoints) return true;
+
+      return candidate.evidence.some((evidence) => {
+        const resourceRef = evidence.resourceId ?? '';
+        return Boolean(resourceRef && nodeIdByName(resourceRef));
+      });
+    };
   }, [nodeIdByName]);
 
   const pendingCandidates = useMemo(

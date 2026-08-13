@@ -65,6 +65,9 @@ export function useAbilityGraphData(): UseAbilityGraphResult {
       if (raw && raw.nodes.length > 0) {
         setGraph(toAbilityGraphData(raw));
         setSource('api');
+      } else {
+        setGraph({ nodes: [], edges: [] });
+        setSource('empty');
       }
       setLoading(false);
     })();

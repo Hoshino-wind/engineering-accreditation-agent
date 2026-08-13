@@ -53,6 +53,7 @@ export function mapCandidateEvidence(
     excerpt: raw.excerpt,
     hash: raw.hash,
     id: raw.id,
+    resourceId: raw.resourceId,
     resourceName: raw.resourceName,
     resourceVersion: raw.resourceVersion,
   };

@@ -111,6 +111,59 @@ def get_mock_extraction_items(
         return staged_demo_items
 
     if (
+        "机械设计制造及其自动化" in content
+        or "机械制造工艺基础" in content
+        or "数控车削" in content
+    ):
+        return [
+            ExtractionItem(
+                code="CO-ME-201",
+                name="机械制造工艺基础",
+                kind="course",
+                credit_hours=3.0,
+                description="围绕机械零件加工工艺设计、数控加工、CAD/CAE 工具应用和误差分析组织教学。",
+                confidence=0.96,
+                source_excerpt="课程名称：机械制造工艺基础；所属专业：机械设计制造及其自动化",
+            ),
+            ExtractionItem(
+                code="EXP-ME-C01-01",
+                name="轴类零件加工工艺设计与工序卡编制",
+                kind="experiment",
+                credit_hours=1.0,
+                description="学生根据零件图纸、材料、精度等级和加工约束完成工艺路线设计，明确支撑 C-01-01 工程知识应用。",
+                confidence=0.95,
+                source_excerpt="对应指标：C-01-01；支撑强度：strong；证据来源：实验报告、工序卡、教师评分表。",
+            ),
+            ExtractionItem(
+                code="EXP-ME-C03-01",
+                name="数控车削加工参数优化与质量验证",
+                kind="experiment",
+                credit_hours=1.0,
+                description="学生围绕表面粗糙度、加工效率和刀具磨损约束设计加工方案，明确支撑 C-03-01 系统设计方法。",
+                confidence=0.94,
+                source_excerpt="对应指标：C-03-01；支撑强度：strong；证据来源：加工方案、仿真记录、实物测量记录。",
+            ),
+            ExtractionItem(
+                code="EXP-ME-C05-01",
+                name="CAD/CAE 建模与夹具方案验证",
+                kind="experiment",
+                credit_hours=1.0,
+                description="学生使用 CAD/CAE 工具完成建模、夹具定位与干涉检查，明确支撑 C-05-01 现代工具选择与使用。",
+                confidence=0.94,
+                source_excerpt="对应指标：C-05-01；支撑强度：strong；证据来源：三维模型、仿真截图、工程图。",
+            ),
+            ExtractionItem(
+                code="EXP-ME-C04-02",
+                name="尺寸测量、误差分析与工艺改进",
+                kind="experiment",
+                credit_hours=1.0,
+                description="学生采集关键尺寸数据、分析误差来源并提出工艺调整建议，明确支撑 C-04-02 数据分析与解释。",
+                confidence=0.94,
+                source_excerpt="对应指标：C-04-02；支撑强度：strong；证据来源：测量数据表、误差分析报告、改进建议。",
+            ),
+        ]
+
+    if (
         "c-04-01" in content
         or "c04-01" in content
         or "实验方案设计" in content

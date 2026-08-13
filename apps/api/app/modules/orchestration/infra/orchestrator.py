@@ -118,6 +118,7 @@ class LangGraphAgentOrchestrator(AgentOrchestratorPort):
         material_version_group_id: str | None = None,
         material_version: str | None = None,
         material_file_name: str | None = None,
+        material_course: str | None = None,
     ) -> AgentRun:
         run_id = f"run-{uuid.uuid4().hex[:12]}"
         created_at = now_iso()
@@ -130,6 +131,7 @@ class LangGraphAgentOrchestrator(AgentOrchestratorPort):
             "material_version_group_id": material_version_group_id or "",
             "material_version": material_version or "",
             "material_file_name": material_file_name or material_name or "",
+            "material_course": material_course or "",
         }
         # 单一真源：从持久化图谱读取当前状态作为运行起点（空则 plan_node 回退种子图），
         # 使多次上传在同一张能力图谱上持续生长，而不是每次都从种子重新开始。

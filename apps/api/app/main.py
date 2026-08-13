@@ -349,6 +349,7 @@ def create_app() -> FastAPI:
         inner = ListCandidates(
             repository=repos.candidates,
             active_major_id=active_major_id,
+            resources=repos.resources,
         )
 
         class _ListAndReconcile:
@@ -371,6 +372,13 @@ def create_app() -> FastAPI:
                         list(graph.get("edges", [])),
                         repos.candidates,
                         major_id=active_major_id or "major-eie",
+                        course_by_resource_id={
+                            str(resource.id): str(resource.course or "")
+                            for resource in await repos.resources.list_all(
+                                major_id=active_major_id or "major-eie"
+                            )
+                            if getattr(resource, "id", None)
+                        },
                     )
                 except Exception:  # noqa: BLE001
                     logging.getLogger(__name__).exception(
@@ -420,7 +428,9 @@ def create_app() -> FastAPI:
     ) -> ListFindings:
         repos = per_user_mgr.get(current_user.id)
         return ListFindings(
-            repository=repos.findings, active_major_id=active_major_id
+            repository=repos.findings,
+            active_major_id=active_major_id,
+            resources=repos.resources,
         )
 
     def provide_decide_finding(
@@ -599,6 +609,7 @@ def create_app() -> FastAPI:
         return QueryProjectedGraph(
             orchestrator=get_orchestrator(current_user.id, active_major_id),
             candidates=repos.candidates,
+            resources=repos.resources,
             major_id=active_major_id or "major-eie",
         )
 
@@ -611,6 +622,7 @@ def create_app() -> FastAPI:
             graph_query=QueryProjectedGraph(
                 orchestrator=get_orchestrator(current_user.id, active_major_id),
                 candidates=repos.candidates,
+                resources=repos.resources,
                 major_id=active_major_id or "major-eie",
             ),
             tenant_id=current_user.id,
@@ -849,6 +861,7 @@ def create_app() -> FastAPI:
                     material_version_group_id=resource.version_group_id or resource.id,
                     material_version=resource.version,
                     material_file_name=resource.file_name,
+                    material_course=resource.course,
                 )
                 if run.status.value == "failed":
                     raise RuntimeError(run.error or "新版本图谱提取失败")
