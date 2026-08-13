@@ -8,7 +8,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, Protocol
 
 from app.modules.orchestration.application.ports import AgentOrchestratorPort
 from app.modules.orchestration.domain.coverage import analyze_coverage
@@ -26,6 +26,17 @@ from app.modules.recognition.domain.candidate import (
     RecognitionCandidateRisk,
     RecognitionCandidateType,
 )
+
+
+class _ResourceReader(Protocol):
+    async def list_all(
+        self,
+        *,
+        course: str | None = None,
+        status: str | None = None,
+        resource_type: str | None = None,
+        major_id: str | None = None,
+    ) -> list[Any]: ...
 
 
 def _clean_alias(value: Any) -> str:
@@ -239,13 +250,23 @@ class QueryProjectedGraph:
         self,
         orchestrator: AgentOrchestratorPort,
         candidates: CandidateRepository,
+        resources: _ResourceReader | None = None,
         major_id: str = "major-eie",
     ) -> None:
         self._orchestrator = orchestrator
         self._candidates = candidates
+        self._resources = resources
         self._major_id = major_id
 
+    async def _has_materials(self) -> bool:
+        if self._resources is None:
+            return True
+        resources = await self._resources.list_all(major_id=self._major_id)
+        return bool(resources)
+
     async def _merged_graph(self) -> dict[str, list[dict[str, Any]]]:
+        if not await self._has_materials():
+            return {"nodes": [], "edges": []}
         base = await self._orchestrator.get_current_graph()
         nodes = list(base.get("nodes", []))
         edges = list(base.get("edges", []))

@@ -420,7 +420,9 @@ def create_app() -> FastAPI:
     ) -> ListFindings:
         repos = per_user_mgr.get(current_user.id)
         return ListFindings(
-            repository=repos.findings, active_major_id=active_major_id
+            repository=repos.findings,
+            active_major_id=active_major_id,
+            resources=repos.resources,
         )
 
     def provide_decide_finding(
@@ -599,6 +601,7 @@ def create_app() -> FastAPI:
         return QueryProjectedGraph(
             orchestrator=get_orchestrator(current_user.id, active_major_id),
             candidates=repos.candidates,
+            resources=repos.resources,
             major_id=active_major_id or "major-eie",
         )
 
@@ -611,6 +614,7 @@ def create_app() -> FastAPI:
             graph_query=QueryProjectedGraph(
                 orchestrator=get_orchestrator(current_user.id, active_major_id),
                 candidates=repos.candidates,
+                resources=repos.resources,
                 major_id=active_major_id or "major-eie",
             ),
             tenant_id=current_user.id,
