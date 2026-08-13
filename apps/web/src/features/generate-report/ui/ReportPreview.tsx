@@ -13,9 +13,9 @@ import './reportPreview.css';
 const { Text, Paragraph } = Typography;
 
 const attainmentColor: Record<string, string> = {
-  '达成': 'success',
-  '部分达成': 'warning',
-  '未达成': 'error',
+  '支撑充分': 'success',
+  '证据不足': 'warning',
+  '无有效支撑': 'error',
 };
 
 interface ReportPreviewProps {
@@ -32,7 +32,7 @@ export function ReportPreview({ sections }: ReportPreviewProps) {
         <Tag color={attainmentColor[section.attainmentLabel]}>
           {section.attainmentLabel}
         </Tag>
-        <Text type="secondary">达成度 {Math.round(section.attainment * 100)}%</Text>
+        <Text type="secondary">材料覆盖率 {Math.round(section.attainment * 100)}%</Text>
         {section.narrative && (
           <Tag icon={<RobotOutlined />} color="purple">AI 生成</Tag>
         )}
@@ -61,14 +61,14 @@ export function ReportPreview({ sections }: ReportPreviewProps) {
           <Paragraph>{section.dataEvidence}</Paragraph>
         </div>
         <div className="report-section-block">
-          <Text type="secondary">达成度</Text>
+          <Text type="secondary">材料支撑充分性</Text>
           <Progress
             percent={Math.round(section.attainment * 100)}
-            status={section.attainmentLabel === '未达成' ? 'exception' : undefined}
+            status={section.attainmentLabel === '无有效支撑' ? 'exception' : undefined}
             strokeColor={
-              section.attainmentLabel === '达成'
+              section.attainmentLabel === '支撑充分'
                 ? undefined
-                : section.attainmentLabel === '部分达成'
+                : section.attainmentLabel === '证据不足'
                   ? '#faad14'
                   : '#ff4d4f'
             }

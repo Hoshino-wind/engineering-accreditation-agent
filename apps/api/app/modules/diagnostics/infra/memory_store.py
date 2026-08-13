@@ -188,6 +188,20 @@ class InMemoryFindingRepository(JsonPersistenceMixin):
         self._schedule_save()
         return len(to_delete)
 
+    async def delete_by_major(self, major_id: str) -> int:
+        target = (major_id or "").strip()
+        if not target:
+            return 0
+        to_delete = [
+            fid for fid, finding in self._store.items()
+            if finding.major_id == target
+        ]
+        for fid in to_delete:
+            self._store.pop(fid, None)
+        if to_delete:
+            self._schedule_save()
+        return len(to_delete)
+
     async def delete_by_evidence_object(self, object_name: str) -> int:
         """删除证据引用指定材料对象的诊断发现（删除材料时联动清理）。"""
         target = (object_name or "").strip()
@@ -196,11 +210,29 @@ class InMemoryFindingRepository(JsonPersistenceMixin):
         to_delete = [
             fid
             for fid, f in self._store.items()
-            if any(ev.object_name == target for ev in f.evidence)
+            if any(
+                ev.object_name == target and not ev.resource_id
+                for ev in f.evidence
+            )
         ]
         if not to_delete:
             return 0
         for fid in to_delete:
             self._store.pop(fid, None)
         self._schedule_save()
+        return len(to_delete)
+
+    async def delete_by_evidence_resource_id(self, resource_id: str) -> int:
+        target = (resource_id or "").strip()
+        if not target:
+            return 0
+        to_delete = [
+            fid
+            for fid, finding in self._store.items()
+            if any(evidence.resource_id == target for evidence in finding.evidence)
+        ]
+        for fid in to_delete:
+            self._store.pop(fid, None)
+        if to_delete:
+            self._schedule_save()
         return len(to_delete)

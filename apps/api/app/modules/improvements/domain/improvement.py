@@ -29,6 +29,15 @@ class Improvement:
     expected_effect: str | None
     owner: str  # 责任人
     deadline: str | None  # ISO date string
+    source_module: str = "manual"
+    source_label: str = ""
+    verification_method: str = ""
+    completion_summary: str = ""
+    evidence_uri: str = ""
+    reevaluation_result: float | None = None
+    baseline: float | None = None
+    target_value: float | None = None
+    closed_at: str | None = None
     # 所属专业 ID（关联 Major 实体），用于专业级隔离；默认指向 seed 专业 major-eie
     major_id: str = "major-eie"
     status: ImprovementStatus = ImprovementStatus.OPEN

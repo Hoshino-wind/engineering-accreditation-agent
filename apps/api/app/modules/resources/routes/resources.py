@@ -135,6 +135,24 @@ def create_resources_router(
             latencyMs=resp.latency,
         )
 
+    @router.delete(
+        "",
+        status_code=204,
+        summary="清空当前范围教学资源及其派生图谱",
+    )
+    async def clear_resources(
+        use_case: Annotated[DeleteResource, Depends(delete_resource_use_case)],
+        course: Annotated[str | None, Query(description="按课程清空")] = None,
+        clear_graph: Annotated[
+            bool,
+            Query(
+                alias="clearGraph",
+                description="是否同步清空该范围内由材料生成的图谱、候选和诊断",
+            ),
+        ] = False,
+    ) -> None:
+        await use_case.execute_scope(course=course, clear_graph=clear_graph)
+
     @router.get(
         "/{resource_id}",
         response_model=TeachingResourceResponse,

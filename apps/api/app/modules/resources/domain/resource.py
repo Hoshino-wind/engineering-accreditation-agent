@@ -77,6 +77,10 @@ class TeachingResource:
     source_coverage: int
     # 所属专业 ID（关联 Major 实体），用于专业级隔离；默认指向 seed 专业 major-eie
     major_id: str = "major-eie"
+    # 同一逻辑材料的版本链。首个版本以自身 id 作为 version_group_id，后续版本沿用。
+    version_group_id: str = ""
+    supersedes_id: str | None = None
+    is_current_version: bool = True
     evidence_fragments: tuple[EvidenceFragment, ...] = field(default_factory=tuple)
     processing_stages: tuple[ProcessingStage, ...] = field(default_factory=tuple)
     page_count: int | None = None

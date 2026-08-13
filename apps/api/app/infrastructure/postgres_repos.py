@@ -240,6 +240,7 @@ class PostgresCandidateRepository(_PostgresLazyLoadMixin):
         risk: str | None = None,
         candidate_type: str | None = None,
         review_status: str | None = None,
+        major_id: str | None = None,
     ) -> list[RecognitionCandidate]:
         await self._ensure_loaded()
         results = list(self._store.values())
@@ -251,6 +252,8 @@ class PostgresCandidateRepository(_PostgresLazyLoadMixin):
             results = [c for c in results if c.candidate_type == candidate_type]
         if review_status:
             results = [c for c in results if c.review_status == review_status]
+        if major_id is not None:
+            results = [c for c in results if c.major_id == major_id]
         return results
 
     async def get_by_id(self, candidate_id: str) -> RecognitionCandidate | None:
@@ -274,6 +277,7 @@ class PostgresCandidateRepository(_PostgresLazyLoadMixin):
         candidate_id: str,
         status: Any,
     ) -> RecognitionCandidate | None:
+        await self._ensure_loaded()
         existing = self._store.get(candidate_id)
         if existing is None:
             return None
@@ -283,6 +287,7 @@ class PostgresCandidateRepository(_PostgresLazyLoadMixin):
         return updated
 
     async def delete_by_course(self, course_name: str) -> int:
+        await self._ensure_loaded()
         target = (course_name or "").strip()
         target_norm = target.lower()
         if not target_norm:
@@ -312,6 +317,7 @@ class PostgresCandidateRepository(_PostgresLazyLoadMixin):
         return len(to_delete)
 
     async def delete_by_source_nodes(self, source_node_ids: set[str]) -> int:
+        await self._ensure_loaded()
         if not source_node_ids:
             return 0
         to_delete: list[str] = []
@@ -320,6 +326,71 @@ class PostgresCandidateRepository(_PostgresLazyLoadMixin):
                 to_delete.append(cid)
         if not to_delete:
             return 0
+        for cid in to_delete:
+            self._store.pop(cid, None)
+            if self._persistence is not None:
+                await self._persistence.delete_snapshot(
+                    tenant_id=self._user_id,
+                    entity_type=self._entity_type,
+                    entity_id=cid,
+                    actor_id=self._user_id,
+                )
+        return len(to_delete)
+
+    async def delete_by_major(self, major_id: str) -> int:
+        await self._ensure_loaded()
+        target = (major_id or "").strip()
+        if not target:
+            return 0
+        to_delete = [
+            cid for cid, candidate in self._store.items()
+            if candidate.major_id == target
+        ]
+        for cid in to_delete:
+            self._store.pop(cid, None)
+            if self._persistence is not None:
+                await self._persistence.delete_snapshot(
+                    tenant_id=self._user_id,
+                    entity_type=self._entity_type,
+                    entity_id=cid,
+                    actor_id=self._user_id,
+                )
+        return len(to_delete)
+
+    async def delete_by_evidence_resource_id(self, resource_id: str) -> int:
+        await self._ensure_loaded()
+        target = (resource_id or "").strip()
+        if not target:
+            return 0
+        to_delete = [
+            cid
+            for cid, candidate in self._store.items()
+            if any(evidence.resource_id == target for evidence in candidate.evidence)
+        ]
+        for cid in to_delete:
+            self._store.pop(cid, None)
+            if self._persistence is not None:
+                await self._persistence.delete_snapshot(
+                    tenant_id=self._user_id,
+                    entity_type=self._entity_type,
+                    entity_id=cid,
+                    actor_id=self._user_id,
+                )
+        return len(to_delete)
+
+    async def delete_by_evidence_resource(self, resource_name: str) -> int:
+        await self._ensure_loaded()
+        target = (resource_name or "").strip()
+        if not target:
+            return 0
+        to_delete = [
+            cid
+            for cid, candidate in self._store.items()
+            if any(
+                evidence.resource_name == target and not evidence.resource_id
+                for evidence in candidate.evidence
+            )
+        ]
         for cid in to_delete:
             self._store.pop(cid, None)
             if self._persistence is not None:
@@ -357,6 +428,7 @@ class PostgresFindingCascadeMixin:
         return len(ids)
 
     async def delete_by_course(self, course_name: str) -> int:
+        await self._ensure_loaded()
         target = (course_name or "").strip()
         target_norm = target.lower()
         if not target_norm:
@@ -373,6 +445,7 @@ class PostgresFindingCascadeMixin:
         return await self._delete_ids(ids)
 
     async def delete_by_nodes(self, node_ids: set[str]) -> int:
+        await self._ensure_loaded()
         if not node_ids:
             return 0
         ids = [
@@ -383,13 +456,40 @@ class PostgresFindingCascadeMixin:
         return await self._delete_ids(ids)
 
     async def delete_by_evidence_object(self, object_name: str) -> int:
+        await self._ensure_loaded()
         target = (object_name or "").strip()
         if not target:
             return 0
         ids = [
             fid
             for fid, f in self._store.items()
-            if any(ev.object_name == target for ev in f.evidence)
+            if any(
+                ev.object_name == target and not ev.resource_id
+                for ev in f.evidence
+            )
+        ]
+        return await self._delete_ids(ids)
+
+    async def delete_by_major(self, major_id: str) -> int:
+        await self._ensure_loaded()
+        target = (major_id or "").strip()
+        if not target:
+            return 0
+        ids = [
+            fid for fid, finding in self._store.items()
+            if finding.major_id == target
+        ]
+        return await self._delete_ids(ids)
+
+    async def delete_by_evidence_resource_id(self, resource_id: str) -> int:
+        await self._ensure_loaded()
+        target = (resource_id or "").strip()
+        if not target:
+            return 0
+        ids = [
+            fid
+            for fid, finding in self._store.items()
+            if any(evidence.resource_id == target for evidence in finding.evidence)
         ]
         return await self._delete_ids(ids)
 
@@ -513,15 +613,86 @@ class PostgresImprovementRepository(_PostgresLazyLoadMixin):
         await self._base._record(improvement, "improvement.created")
         return improvement
 
-    async def update_status(self, improvement_id: str, status: ImprovementStatus) -> Improvement | None:
+    async def update_status(
+        self,
+        improvement_id: str,
+        status: ImprovementStatus,
+    ) -> Improvement | None:
         await self._ensure_loaded()
         current = self._store.get(improvement_id)
         if current is None:
             return None
-        updated = replace(current, status=status)
+        from datetime import UTC, datetime
+
+        now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M")
+        closed_at = now if status == ImprovementStatus.CLOSED else None
+        updated = replace(current, status=status, updated_at=now, closed_at=closed_at)
         self._store[improvement_id] = updated
         await self._base._record(updated, "improvement.status_updated")
         return updated
+
+    async def update(self, improvement_id: str, changes: dict) -> Improvement | None:
+        await self._ensure_loaded()
+        current = self._store.get(improvement_id)
+        if current is None:
+            return None
+        from datetime import UTC, datetime
+
+        allowed = {
+            "title",
+            "description",
+            "course",
+            "finding_id",
+            "target_code",
+            "target_name",
+            "root_cause",
+            "action",
+            "expected_effect",
+            "owner",
+            "deadline",
+            "source_module",
+            "source_label",
+            "verification_method",
+            "completion_summary",
+            "evidence_uri",
+            "reevaluation_result",
+            "baseline",
+            "target_value",
+            "major_id",
+            "priority",
+            "status",
+        }
+        payload = {key: value for key, value in changes.items() if key in allowed}
+        if "priority" in payload and payload["priority"] is not None:
+            from app.modules.improvements.domain.improvement import ImprovementPriority
+
+            payload["priority"] = ImprovementPriority(payload["priority"])
+        if "status" in payload and payload["status"] is not None:
+            payload["status"] = ImprovementStatus(payload["status"])
+        now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M")
+        payload["updated_at"] = now
+        if payload.get("status") == ImprovementStatus.CLOSED and current.closed_at is None:
+            payload["closed_at"] = now
+        elif payload.get("status") and payload.get("status") != ImprovementStatus.CLOSED:
+            payload["closed_at"] = None
+        updated = replace(current, **payload)
+        self._store[improvement_id] = updated
+        await self._base._record(updated, "improvement.updated")
+        return updated
+
+    async def delete(self, improvement_id: str) -> bool:
+        await self._ensure_loaded()
+        if improvement_id not in self._store:
+            return False
+        del self._store[improvement_id]
+        if self._persistence is not None:
+            await self._persistence.delete_snapshot(
+                tenant_id=self._user_id,
+                entity_type=self._entity_type,
+                entity_id=improvement_id,
+                actor_id=self._user_id,
+            )
+        return True
 
 
 # ---------------------------------------------------------------------------

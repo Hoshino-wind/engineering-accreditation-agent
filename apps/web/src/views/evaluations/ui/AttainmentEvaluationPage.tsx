@@ -1,5 +1,7 @@
 import {
+  DownloadOutlined,
   InfoCircleOutlined,
+  PlayCircleOutlined,
   WarningOutlined,
 } from '@ant-design/icons';
 import {
@@ -9,6 +11,7 @@ import {
   Col,
   Drawer,
   Empty,
+  message,
   Progress,
   Row,
   Space,
@@ -20,99 +23,37 @@ import {
 } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 
-import { useAbilityGraphCoverage } from '../../../entities/ability-graph';
+import {
+  useAbilityGraphCoverage,
+  useAbilityGraphData,
+} from '../../../entities/ability-graph';
 import type {
   CompetencyCoverageData,
-  CoverageData,
   RequirementCoverageData,
 } from '../../../shared/api/graphClient';
+import {
+  type EvaluationRunData,
+  downloadEvaluationAudit,
+  runEvaluation,
+} from '../../../shared/api/evaluationsClient';
 import { EmptyStateGuide } from '../../../widgets/empty-state-guide';
 import { NextStepBanner } from '../../../widgets/next-step-banner/ui/NextStepBanner';
 import { useCourseState } from '../../../shared/course/useCourseState';
+import { filterCoverageByCourse } from '../model/filterCoverageByCourse';
 
 import './attainmentEvaluationPage.css';
 
 const { Paragraph, Text, Title } = Typography;
 
-/**
- * 按课程名过滤覆盖率数据。
- *
- * 过滤逻辑：
- * - 能力指标：只保留 supporters 中包含该课程的指标
- * - 毕业要求：重算覆盖率（达标指标数 / 总指标数），支持课程列表更新
- * - 总览统计：重算 overallCoverageRate / coveredCount / partialCount / gapCount
- */
-function filterCoverageByCourse(
-  coverage: CoverageData,
-  courseName: string | null,
-): CoverageData {
-  if (!courseName) return coverage;
-
-  const filteredComps = coverage.competencies.filter((c) =>
-    c.supporters.includes(courseName),
-  );
-
-  // 按 requirementCode 分组重算
-  const compsByReq = new Map<string, CompetencyCoverageData[]>();
-  for (const comp of filteredComps) {
-    const list = compsByReq.get(comp.requirementCode) ?? [];
-    list.push(comp);
-    compsByReq.set(comp.requirementCode, list);
-  }
-
-  const filteredReqs: RequirementCoverageData[] = coverage.requirements.map(
-    (req) => {
-      const comps = compsByReq.get(req.code) ?? [];
-      const coveredCount = comps.filter((c) => c.status === 'covered').length;
-      const competencyCount = comps.length;
-      const coverageRate = competencyCount > 0 ? coveredCount / competencyCount : 0;
-      const status: RequirementCoverageData['status'] =
-        coverageRate >= 1 ? 'covered' : coverageRate > 0 ? 'partial' : 'gap';
-      const supportingCourses = Array.from(
-        new Set(comps.flatMap((c) => c.supporters)),
-      );
-      const strongSupportCount = comps.reduce(
-        (sum, c) => sum + c.strongCount,
-        0,
-      );
-      return {
-        ...req,
-        competencyCount,
-        coveredCount,
-        coverageRate,
-        status,
-        supportingCourses,
-        strongSupportCount,
-      };
-    },
-  );
-
-  const coveredCount = filteredComps.filter((c) => c.status === 'covered').length;
-  const partialCount = filteredComps.filter((c) => c.status === 'partial').length;
-  const gapCount = filteredComps.filter((c) => c.status === 'gap').length;
-  const overallCoverageRate =
-    filteredComps.length > 0 ? coveredCount / filteredComps.length : 0;
-
-  return {
-    ...coverage,
-    competencies: filteredComps,
-    requirements: filteredReqs,
-    coveredCount,
-    partialCount,
-    gapCount,
-    overallCoverageRate,
-  };
-}
-
 // 后端权威状态（domain/coverage.py）→ 展示态
-// covered=达标 / partial=部分达成（预警）/ gap=不达标
+// covered=材料支撑充分 / partial=证据不足 / gap=无有效支撑
 const STATUS_STYLE: Record<
   'covered' | 'partial' | 'gap',
   { color: string; label: string; tagColor: string }
 > = {
-  covered: { color: '#52c41a', label: '达标', tagColor: 'success' },
-  partial: { color: '#faad14', label: '部分达成', tagColor: 'warning' },
-  gap: { color: '#ff4d4f', label: '不达标', tagColor: 'error' },
+  covered: { color: '#52c41a', label: '支撑充分', tagColor: 'success' },
+  partial: { color: '#faad14', label: '证据不足', tagColor: 'warning' },
+  gap: { color: '#ff4d4f', label: '无有效支撑', tagColor: 'error' },
 };
 
 interface RequirementRow {
@@ -121,17 +62,25 @@ interface RequirementRow {
 }
 
 export function AttainmentEvaluationPage() {
-  const { coverage: rawCoverage, loading } = useAbilityGraphCoverage();
+  const { coverage: rawCoverage, loading: coverageLoading } = useAbilityGraphCoverage();
+  const { graph, loading: graphLoading } = useAbilityGraphData();
   const { selectedCourseName: currentCourseName } = useCourseState();
+  const loading = coverageLoading || graphLoading;
 
   // 按当前选中课程过滤覆盖率数据
   const coverage = useMemo(
-    () => (rawCoverage ? filterCoverageByCourse(rawCoverage, currentCourseName) : null),
-    [rawCoverage, currentCourseName],
+    () =>
+      rawCoverage
+        ? filterCoverageByCourse(rawCoverage, currentCourseName, graph)
+        : null,
+    [rawCoverage, currentCourseName, graph],
   );
 
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [drawerComp, setDrawerComp] = useState<CompetencyCoverageData | null>(null);
+  const [evaluationRun, setEvaluationRun] = useState<EvaluationRunData | null>(null);
+  const [runningEvaluation, setRunningEvaluation] = useState(false);
+  const [exportingAudit, setExportingAudit] = useState(false);
 
   // 默认展开所有毕业要求行
   useEffect(() => {
@@ -154,6 +103,39 @@ export function AttainmentEvaluationPage() {
       competencies: byReq.get(req.code) ?? [],
     }));
   }, [coverage]);
+
+  const handleRunEvaluation = async () => {
+    setRunningEvaluation(true);
+    try {
+      const result = await runEvaluation('rules-v1');
+      if (!result) {
+        message.error('评价运行失败，请确认后端服务已启动且图谱数据可读取');
+        return;
+      }
+      setEvaluationRun(result);
+      message.success('材料支撑评价已完成，并写入审计记录');
+    } finally {
+      setRunningEvaluation(false);
+    }
+  };
+
+  const handleExportAudit = async () => {
+    if (!evaluationRun) {
+      message.warning('请先运行一次材料支撑评价');
+      return;
+    }
+    setExportingAudit(true);
+    try {
+      const ok = await downloadEvaluationAudit(evaluationRun.id);
+      if (!ok) {
+        message.error('审计文件导出失败，请确认后端服务可用');
+        return;
+      }
+      message.success('评价审计文件已导出');
+    } finally {
+      setExportingAudit(false);
+    }
+  };
 
   const reqColumns = [
     {
@@ -193,7 +175,7 @@ export function AttainmentEvaluationPage() {
       ),
     },
     {
-      title: '达标能力指标',
+      title: '支撑充分指标',
       key: 'compCount',
       width: 120,
       render: (_: unknown, record: RequirementRow) => (
@@ -231,7 +213,7 @@ export function AttainmentEvaluationPage() {
       ),
     },
     {
-      title: '达成度',
+      title: '材料支撑指数',
       key: 'attainment',
       width: 150,
       render: (_: unknown, record: CompetencyCoverageData) => (
@@ -297,7 +279,7 @@ export function AttainmentEvaluationPage() {
       <main className="attainment-evaluation-page mi-paper-bg">
         <div className="attainment-loading">
           <Spin size="large" />
-          <Text type="secondary">正在从后端计算达成度…</Text>
+          <Text type="secondary">正在从后端计算材料支撑充分性…</Text>
         </div>
       </main>
     );
@@ -307,8 +289,8 @@ export function AttainmentEvaluationPage() {
     return (
       <main className="attainment-evaluation-page mi-paper-bg">
         <EmptyStateGuide
-          title="后端未连接，无法计算达成度"
-          description="达成度由后端确定性算法实时计算。请启动后端服务后刷新本页。"
+          title="后端未连接，无法计算材料支撑充分性"
+          description="评价由后端确定性算法实时计算。请启动后端服务后刷新本页。"
           ctaText="返回总览"
           ctaPath="/"
         />
@@ -322,7 +304,7 @@ export function AttainmentEvaluationPage() {
       <main className="attainment-evaluation-page mi-paper-bg">
         <EmptyStateGuide
           title="还没有可评价的能力指标"
-          description="完成图谱构建并审核支撑关系后，系统会自动计算毕业要求达成度"
+          description="完成图谱构建并审核支撑关系后，系统会计算材料支撑充分性"
           ctaText="去图谱"
           ctaPath="/graph"
         />
@@ -340,13 +322,30 @@ export function AttainmentEvaluationPage() {
             <Tag color="gold">内置 2024 标准</Tag>
             <Tag color="green">后端权威计算</Tag>
           </div>
-          <Title level={2} style={{ marginTop: 8 }}>达成度评价</Title>
+          <Title level={2} style={{ marginTop: 8 }}>材料支撑评价</Title>
           <Paragraph type="secondary">
-            本页数值全部来自后端确定性算法，与「能力图谱」页的覆盖度口径完全一致：
-            仅已审核通过（approved）的支撑关系计入，支撑强度按 strong=3 / medium=2 / weak=1 加权。
-            能力指标累计强度达到 3 记为达标；毕业要求覆盖率 = 达标能力指标占比。
+            本页评估审核后材料与毕业要求指标点之间的支撑充分性。
+            它不是学生学习产出达成度；真实达成度还需学生成绩、评分项、课程目标权重和评价周期数据。
           </Paragraph>
         </div>
+        <Space className="attainment-run-actions" size={10} wrap>
+          <Button
+            type="primary"
+            icon={<PlayCircleOutlined />}
+            loading={runningEvaluation}
+            onClick={() => void handleRunEvaluation()}
+          >
+            生成评价快照
+          </Button>
+          <Button
+            icon={<DownloadOutlined />}
+            disabled={!evaluationRun}
+            loading={exportingAudit}
+            onClick={() => void handleExportAudit()}
+          >
+            导出审计
+          </Button>
+        </Space>
       </div>
 
       {/* 计算口径说明 */}
@@ -355,22 +354,48 @@ export function AttainmentEvaluationPage() {
         type="info"
         showIcon
         icon={<InfoCircleOutlined />}
-        message="达成度计算口径"
+        message="当前仅计算材料支撑充分性"
         description={
           <span>
             仅已审核通过（approved）的支撑关系参与计算；支撑强度按
-            <strong> strong=3 · medium=2 · weak=1</strong> 加权，能力指标累计强度
-            <strong> ≥3 记为达标</strong>；毕业要求覆盖率 = 达标能力指标占比。
+            <strong> strong=3 · medium=2 · weak=1</strong> 加权。能力指标需累计
+            <strong> ≥4 分且来自至少 2 份不同材料</strong>，才记为支撑充分；
+            单份材料最多只能标记为证据不足。
           </span>
         }
       />
 
       {/* 总览 */}
+      {evaluationRun && (
+        <Card className="attainment-run-card mi-card" size="small">
+          <Space size={18} wrap>
+            <div>
+              <Text type="secondary">评价运行</Text>
+              <div className="attainment-run-value">{evaluationRun.id}</div>
+            </div>
+            <div>
+              <Text type="secondary">规则版本</Text>
+              <div className="attainment-run-value">{evaluationRun.ruleVersion}</div>
+            </div>
+            <div>
+              <Text type="secondary">图谱版本</Text>
+              <div className="attainment-run-value">{evaluationRun.graphVersion}</div>
+            </div>
+            <div>
+              <Text type="secondary">输入快照</Text>
+              <div className="attainment-run-value">
+                {evaluationRun.inputSnapshotHash.slice(0, 12)}
+              </div>
+            </div>
+          </Space>
+        </Card>
+      )}
+
       <Card className="attainment-stats mi-card" size="small">
         <Row gutter={24}>
           <Col>
             <Statistic
-              title="总体覆盖率"
+              title="支撑充分率"
               value={Math.round(coverage.overallCoverageRate * 100)}
               suffix="%"
               styles={{
@@ -387,7 +412,7 @@ export function AttainmentEvaluationPage() {
           </Col>
           <Col>
             <Statistic
-              title="达标能力指标"
+              title="支撑充分指标"
               value={coverage.coveredCount}
               suffix={`/ ${coverage.competencies.length}`}
               styles={{ value: { color: '#52c41a' } }}
@@ -395,7 +420,7 @@ export function AttainmentEvaluationPage() {
           </Col>
           <Col>
             <Statistic
-              title="部分达成"
+              title="证据不足"
               value={coverage.partialCount}
               styles={{ value: { color: '#faad14' } }}
               prefix={<WarningOutlined />}
@@ -422,8 +447,8 @@ export function AttainmentEvaluationPage() {
         />
       )}
 
-      {/* 毕业要求覆盖率环形总览 */}
-      <Card title="毕业要求覆盖率总览" size="small" className="attainment-radar-card mi-card">
+      {/* 毕业要求支撑充分率环形总览 */}
+      <Card title="毕业要求支撑充分率总览" size="small" className="attainment-radar-card mi-card">
         <div className="attainment-ring-grid">
           {rows.map(({ req }) => {
             const pct = Math.round(req.coverageRate * 100);
@@ -457,7 +482,7 @@ export function AttainmentEvaluationPage() {
       </Card>
 
       {/* 毕业要求明细表（可展开能力指标） */}
-      <Card title="毕业要求达成明细" size="small" className="attainment-req-table mi-card">
+      <Card title="毕业要求材料支撑明细" size="small" className="attainment-req-table mi-card">
         <Table
           dataSource={rows}
           columns={reqColumns}
@@ -497,7 +522,7 @@ export function AttainmentEvaluationPage() {
           <div className="attainment-drawer">
             <div className="attainment-drawer-summary">
               <div>
-                <Text type="secondary">达成度</Text>
+                <Text type="secondary">材料支撑指数</Text>
                 <div className="attainment-drawer-value">
                   {Math.round(drawerComp.attainment * 100)}%
                 </div>
@@ -506,6 +531,12 @@ export function AttainmentEvaluationPage() {
                 <Text type="secondary">总强度</Text>
                 <div className="attainment-drawer-value">
                   {drawerComp.totalStrength}
+                </div>
+              </div>
+              <div>
+                <Text type="secondary">独立材料</Text>
+                <div className="attainment-drawer-value">
+                  {drawerComp.evidenceSourceCount}
                 </div>
               </div>
               <div>
@@ -549,7 +580,7 @@ export function AttainmentEvaluationPage() {
                 type="warning"
                 showIcon
                 message="存在待审核支撑"
-                description="当前能力指标还有 AI 推断的待审核支撑关系，审核通过后将重新计算达成度。"
+                description="当前能力指标还有 AI 推断的待审核支撑关系，审核后将重新计算材料支撑充分性。"
               />
             )}
           </div>

@@ -12,7 +12,7 @@
  * 传入 true 可跳过 X-Major-Id 注入。
  */
 
-import { getToken } from '../auth/authStore';
+import { clearAuth, getToken } from '../auth/authStore';
 import { getSelectedMajorId } from '../major/majorStore';
 
 export interface ApiRequestOptions extends RequestInit {
@@ -39,5 +39,15 @@ export async function apiFetch(
     const majorId = getSelectedMajorId();
     if (majorId) headers['X-Major-Id'] = majorId;
   }
-  return fetch(url, { ...options, headers });
+  const response = await fetch(url, { ...options, headers });
+  if (response.status === 401) {
+    clearAuth();
+    if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+      const next = encodeURIComponent(
+        window.location.pathname + window.location.search,
+      );
+      window.location.replace(`/login?next=${next}`);
+    }
+  }
+  return response;
 }

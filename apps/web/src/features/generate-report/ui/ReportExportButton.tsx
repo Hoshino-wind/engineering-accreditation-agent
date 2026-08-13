@@ -14,6 +14,7 @@ export function ReportExportButton({ sections, disabled }: ReportExportButtonPro
     const reportData = {
       title: '工程教育认证自评报告',
       standardVersion: '2024',
+      scopeNote: '当前仅评价已审核材料关系的支撑充分性，不代表学生学习产出达成度。',
       generatedAt: new Date().toISOString(),
       sections: sections.map((s) => ({
         chapter: s.chapter,
@@ -21,8 +22,8 @@ export function ReportExportButton({ sections, disabled }: ReportExportButtonPro
         standardRef: s.standardRef,
         schoolStatus: s.schoolStatus,
         dataEvidence: s.dataEvidence,
-        attainment: s.attainment,
-        attainmentLabel: s.attainmentLabel,
+        materialCoverageRate: s.attainment,
+        materialSupportLabel: s.attainmentLabel,
       })),
     };
 

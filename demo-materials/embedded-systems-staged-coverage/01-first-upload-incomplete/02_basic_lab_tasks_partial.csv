@@ -1,0 +1,5 @@
+DEMO_TAG,stage,material_type,course,target_code,experiment_name,evidence,expected_strength,demo_purpose
+STAGED_COVERAGE_DEMO,1,实验任务清单,嵌入式系统原理,C-01-01,GPIO 与定时器基础验证实验,"学生完成 GPIO 输出、按键中断、定时器周期配置，并解释寄存器配置和基本工程原理。",strong,"第一批只提供基础工程知识证据；诊断中应显示该指标只有 1 份独立材料证据，仍为 partial。"
+STAGED_COVERAGE_DEMO,1,实验任务清单,嵌入式系统原理,C-02-01,串口通信故障定位实验,"学生使用串口助手复现实验故障，记录异常帧、波特率错误和通信协议问题，并给出问题识别与表达。",strong,"第一批只提供问题分析基础证据；诊断中应显示该指标只有 1 份独立材料证据，仍为 partial。"
+STAGED_COVERAGE_DEMO,1,实验任务清单,嵌入式系统原理,C-03-01,RTOS 任务调度系统设计实验,"学生完成任务划分、优先级设置、同步机制和模块接口设计，形成初版系统设计说明。",strong,"第一批能支撑系统设计方法，但尚未补充可行性、影响考量和多来源证据。"
+STAGED_COVERAGE_DEMO,1,实验任务清单,嵌入式系统原理,C-05-01,调试工具链与仿真验证实验,"学生使用 Keil、串口调试助手、逻辑分析仪和仿真器定位问题并验证系统运行。",strong,"第一批能支撑现代工具使用，但只有单一材料来源，诊断仍应提示证据不足。"

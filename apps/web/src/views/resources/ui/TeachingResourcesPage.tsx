@@ -37,6 +37,7 @@ import { InlineProcessingStatus } from '../../../features/extract-nodes';
 import { useAutopilotTask } from '../../../features/run-autopilot';
 import { UploadDropzone } from '../../../features/upload-material';
 import {
+  clearResourcesScope,
   confirmSuggestedCourse,
   confirmMaterialHealthAction,
   deleteResource,
@@ -78,7 +79,15 @@ function mapBackendStatus(status: string): UploadedMaterialStatus {
 
 function mapBackendFormat(format: string): UploadedMaterialFileType {
   const lower = (format || '').toLowerCase();
-  if (lower === 'pdf' || lower === 'docx' || lower === 'xlsx') {
+  if (
+    lower === 'pdf' ||
+    lower === 'docx' ||
+    lower === 'xlsx' ||
+    lower === 'txt' ||
+    lower === 'md' ||
+    lower === 'csv' ||
+    lower === 'json'
+  ) {
     return lower;
   }
   return 'pdf';
@@ -102,10 +111,19 @@ function mapBackendResource(
   resp: UploadResourceResponse,
   fallbackCategory: UploadedMaterialCategory = '课程大纲',
 ): UploadedMaterial {
+  const validCategories: UploadedMaterialCategory[] = [
+    '培养方案',
+    '课程大纲',
+    '实验指导书',
+    '实验项目清单',
+    '评分表',
+    '学生报告',
+    '评价结果',
+    '试卷',
+    '其他',
+  ];
   const category: UploadedMaterialCategory = (
-    ['培养方案', '课程大纲', '实验指导书', '试卷', '其他'].includes(
-      resp.resourceType,
-    )
+    validCategories.includes(resp.resourceType as UploadedMaterialCategory)
       ? resp.resourceType
       : fallbackCategory
   ) as UploadedMaterialCategory;
@@ -119,6 +137,10 @@ function mapBackendResource(
     status: mapBackendStatus(resp.status),
     fileSize: resp.size,
     fileUrl: '#',
+    version: resp.version,
+    versionGroupId: resp.versionGroupId,
+    supersedesId: resp.supersedesId,
+    isCurrentVersion: resp.isCurrentVersion,
     course: resp.course,
     suggestedCourse: mapSuggestedCourse(resp.suggestedCourse),
   };
@@ -143,6 +165,7 @@ export function TeachingResourcesPage() {
   // 候选课程确认：每个待确认材料对应一个可编辑名称 + 提交状态
   const [editingNames, setEditingNames] = useState<Record<string, string>>({});
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [clearingScope, setClearingScope] = useState(false);
   const pollingTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   // 当选中课程变化时，取当前课程名用于后端过滤 / 上传归属
@@ -230,7 +253,7 @@ export function TeachingResourcesPage() {
     pollingTimers.current[resourceId] = setTimeout(tick, 2000);
   }, []);
 
-  // 上传 → 立即自动分析
+  // 上传只进入“提取/候选生成”阶段，覆盖度必须等教师审核通过后再计算。
   // 失败时不再走本地降级：明确报错，避免"似乎上传成功"的错觉
   // 课程上下文：
   //   - 已选具体课程 → 自动归属到该课程
@@ -256,9 +279,8 @@ export function TeachingResourcesPage() {
         pollSuggestedCourse(resp.id);
       } else {
         message.success(
-          `${file.name} 已归属「${course}」，上传成功，AI 正在自动分析…`,
+          `${file.name} 已归属「${course}」，上传成功，AI 正在提取节点并生成待审核关系…`,
         );
-        void handleRunAutopilot(newMaterial);
       }
     } catch (err) {
       hide();
@@ -362,6 +384,39 @@ export function TeachingResourcesPage() {
     }
   };
 
+  const handleClearScope = () => {
+    const scopeLabel = allCoursesMode
+      ? '当前专业'
+      : `课程「${currentCourseName ?? '当前课程'}」`;
+    Modal.confirm({
+      title: `确认清空${scopeLabel}的材料与图谱派生结果？`,
+      content:
+        '该操作会删除系统内材料记录，并同步清理由这些材料生成的图谱节点、候选审核和诊断发现。本地文件夹里的文件不会影响系统状态。',
+      okText: '清空',
+      okType: 'danger',
+      cancelText: '取消',
+      centered: true,
+      onOk: async () => {
+        setClearingScope(true);
+        try {
+          Object.values(pollingTimers.current).forEach((timer) => clearTimeout(timer));
+          pollingTimers.current = {};
+          await clearResourcesScope(allCoursesMode ? null : currentCourseName, true);
+          setMaterials([]);
+          setHealthActions([]);
+          setMaterialHealth(null);
+          await loadMaterials();
+          message.success(`${scopeLabel}的材料与派生图谱已清空`);
+        } catch (err) {
+          message.error(err instanceof Error ? err.message : '清空失败，请重试');
+          throw err;
+        } finally {
+          setClearingScope(false);
+        }
+      },
+    });
+  };
+
   const handleConfirmHealthAction = async (action: MaterialHealthAction) => {
     const key = `${action.riskCode}-${action.resourceId ?? 'major'}`;
     setConfirmingHealthAction(key);
@@ -401,6 +456,20 @@ export function TeachingResourcesPage() {
       key: 'fileName',
       ellipsis: true,
       width: 300,
+    },
+    {
+      title: '版本',
+      dataIndex: 'version',
+      key: 'version',
+      width: 110,
+      render: (version: string, record) => (
+        <Space size={4}>
+          <Tag color={record.isCurrentVersion ? 'blue' : 'default'}>{version}</Tag>
+          <span className="m3-card-td-mono">
+            {record.isCurrentVersion ? '当前' : '历史'}
+          </span>
+        </Space>
+      ),
     },
     {
       title: '格式',
@@ -499,7 +568,8 @@ export function TeachingResourcesPage() {
     {
       title: '操作',
       key: 'action',
-      width: 140,
+      width: 150,
+      fixed: 'right',
       render: (_, record) => {
         const analyzing =
           autopilot.status === 'running' &&
@@ -524,7 +594,16 @@ export function TeachingResourcesPage() {
             )}
             <Popconfirm
               onConfirm={() => handleDelete(record)}
-              title="确认删除该材料？"
+              title={
+                record.isCurrentVersion
+                  ? '确认删除该材料及全部历史版本？'
+                  : `确认删除历史版本 ${record.version}？`
+              }
+              description={
+                record.isCurrentVersion
+                  ? '对应的图谱节点、审核关系和诊断依据会同步撤销。'
+                  : '当前生效版本及其图谱不会受影响。'
+              }
               okText="删除"
               cancelText="取消"
             >
@@ -563,17 +642,28 @@ export function TeachingResourcesPage() {
             上传培养方案、课程大纲、实验指导书等教学文件，系统自动提取能力节点、构建支撑图谱，并完成初步差距诊断。
           </Paragraph>
         </div>
-        <Button
-          type="primary"
-          size="large"
-          icon={isAnalyzing ? <ThunderboltOutlined /> : <PlayCircleOutlined />}
-          loading={isAnalyzing}
-          onClick={handleGlobalAutopilot}
-          disabled={!analyzableMaterial}
-          className="m3-autopilot-btn"
-        >
-          {isAnalyzing ? 'AI 自动分析中…' : 'AI 自动分析'}
-        </Button>
+        <Space>
+          <Button
+            danger
+            icon={<DeleteOutlined />}
+            loading={clearingScope}
+            onClick={handleClearScope}
+            size="large"
+          >
+            {allCoursesMode ? '清空当前专业' : '清空当前课程'}
+          </Button>
+          <Button
+            type="primary"
+            size="large"
+            icon={isAnalyzing ? <ThunderboltOutlined /> : <PlayCircleOutlined />}
+            loading={isAnalyzing}
+            onClick={handleGlobalAutopilot}
+            disabled={!analyzableMaterial}
+            className="m3-autopilot-btn"
+          >
+            {isAnalyzing ? 'AI 自动分析中…' : 'AI 自动分析'}
+          </Button>
+        </Space>
       </div>
 
       {/* ---------- ALERT · 后端加载失败 ---------- */}
@@ -814,6 +904,7 @@ export function TeachingResourcesPage() {
               hideOnSinglePage: true,
             }}
             rowKey="id"
+            scroll={{ x: 1180 }}
             size="middle"
           />
         </div>

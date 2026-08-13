@@ -17,6 +17,7 @@ class DiagnosticEvidenceRefResponse(BaseModel):
     coordinate: str
     excerpt: str
     hash: str
+    resourceId: str = ""
 
 
 class DiagnosticFindingResponse(BaseModel):
@@ -74,6 +75,7 @@ class DiagnosticFindingResponse(BaseModel):
                     coordinate=e.coordinate,
                     excerpt=e.excerpt,
                     hash=e.hash,
+                    resourceId=e.resource_id,
                 )
                 for e in f.evidence
             ],

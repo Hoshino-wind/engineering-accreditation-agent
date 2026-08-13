@@ -158,7 +158,7 @@ export function UploadDropzone({ onUpload }: UploadDropzoneProps) {
   return (
     <div className="upload-dropzone-wrapper">
       <Dragger
-        accept=".pdf,.docx,.xlsx"
+        accept=".pdf,.docx,.xlsx,.txt,.md,.csv,.json"
         beforeUpload={(file) => {
           handleFilesAdded([file]);
           return false;

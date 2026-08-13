@@ -21,6 +21,10 @@ class AgentOrchestratorPort(ABC):
         material_category: str | None = None,
         material_name: str | None = None,
         material_text: str | None = None,
+        material_resource_id: str | None = None,
+        material_version_group_id: str | None = None,
+        material_version: str | None = None,
+        material_file_name: str | None = None,
     ) -> AgentRun:
         """启动一次新的多智能体运行，执行到人工审核网关处暂停。"""
 

@@ -19,6 +19,7 @@ def _edge(
     kind: str = "SUPPORTS",
     strength: str = "medium",
     review_status: str = "approved",
+    material_id: str | None = None,
 ) -> GraphEdge:
     return GraphEdge(
         id=id,
@@ -27,6 +28,7 @@ def _edge(
         kind=kind,
         strength=strength,
         review_status=review_status,
+        material_resource_id=material_id,
     )
 
 
@@ -70,15 +72,23 @@ class TestApprovedOnlyCounting:
         comp = next(c for c in report.competencies if c.code == "C-01-01")
         assert comp.status == "gap"
 
-    def test_approved_edges_counted(self):
+    def test_single_approved_strong_edge_is_partial(self):
         graph = _base_graph()
         edges = list(graph.edges) + [
-            _edge("e-sup-1", "co-01", "c-01", strength="strong", review_status="approved"),
+            _edge(
+                "e-sup-1",
+                "co-01",
+                "c-01",
+                strength="strong",
+                review_status="approved",
+                material_id="material-1",
+            ),
         ]
         report = analyze_coverage(AbilityGraph(nodes=graph.nodes, edges=edges))
         comp = next(c for c in report.competencies if c.code == "C-01-01")
-        assert comp.status == "covered"
+        assert comp.status == "partial"
         assert comp.total_strength == 3
+        assert comp.evidence_source_count == 1
 
 
 class TestStrengthWeights:
@@ -92,7 +102,8 @@ class TestStrengthWeights:
         report = analyze_coverage(AbilityGraph(nodes=graph.nodes, edges=edges))
         comp = next(c for c in report.competencies if c.code == "C-01-01")
         assert comp.total_strength == 3
-        assert comp.attainment == 1.0
+        assert comp.attainment == 0.75
+        assert comp.status == "partial"
 
     def test_medium_gives_2(self):
         graph = _base_graph()
@@ -123,7 +134,44 @@ class TestStrengthWeights:
         report = analyze_coverage(AbilityGraph(nodes=graph.nodes, edges=edges))
         comp = next(c for c in report.competencies if c.code == "C-01-01")
         assert comp.total_strength == 3  # 2+1
+        assert comp.status == "partial"
+
+    def test_two_distinct_materials_can_reach_covered(self):
+        graph = _base_graph()
+        edges = list(graph.edges) + [
+            _edge(
+                "e-1", "co-01", "c-01", strength="strong", material_id="material-1"
+            ),
+            _edge(
+                "e-2", "co-02", "c-01", strength="weak", material_id="material-2"
+            ),
+        ]
+        report = analyze_coverage(AbilityGraph(nodes=graph.nodes, edges=edges))
+        comp = next(c for c in report.competencies if c.code == "C-01-01")
+        assert comp.total_strength == 4
+        assert comp.evidence_source_count == 2
         assert comp.status == "covered"
+        assert comp.attainment == 1.0
+
+    def test_versions_in_same_material_family_count_once(self):
+        graph = _base_graph()
+        edges = list(graph.edges) + [
+            GraphEdge(
+                id="e-v1", source="co-01", target="c-01", kind="SUPPORTS",
+                strength="strong", review_status="approved",
+                material_resource_id="material-v1", material_version_group_id="family-1",
+            ),
+            GraphEdge(
+                id="e-v2", source="co-02", target="c-01", kind="SUPPORTS",
+                strength="weak", review_status="approved",
+                material_resource_id="material-v2", material_version_group_id="family-1",
+            ),
+        ]
+        report = analyze_coverage(AbilityGraph(nodes=graph.nodes, edges=edges))
+        comp = next(c for c in report.competencies if c.code == "C-01-01")
+        assert comp.total_strength == 4
+        assert comp.evidence_source_count == 1
+        assert comp.status == "partial"
 
 
 class TestThresholds:
@@ -132,8 +180,10 @@ class TestThresholds:
     def test_requirement_covered_when_all_comps_covered(self):
         graph = _base_graph()
         edges = list(graph.edges) + [
-            _edge("e-1", "co-01", "c-01", strength="strong"),
-            _edge("e-2", "co-02", "c-02", strength="strong"),
+            _edge("e-1", "co-01", "c-01", strength="strong", material_id="m-1"),
+            _edge("e-2", "co-02", "c-01", strength="weak", material_id="m-2"),
+            _edge("e-3", "co-01", "c-02", strength="strong", material_id="m-1"),
+            _edge("e-4", "co-02", "c-02", strength="weak", material_id="m-2"),
         ]
         report = analyze_coverage(AbilityGraph(nodes=graph.nodes, edges=edges))
         req = next(r for r in report.requirements if r.code == "GR-01")
@@ -143,7 +193,8 @@ class TestThresholds:
     def test_requirement_partial_when_some_covered(self):
         graph = _base_graph()
         edges = list(graph.edges) + [
-            _edge("e-1", "co-01", "c-01", strength="strong"),
+            _edge("e-1", "co-01", "c-01", strength="strong", material_id="m-1"),
+            _edge("e-2", "co-02", "c-01", strength="weak", material_id="m-2"),
             # c-02 无支撑
         ]
         report = analyze_coverage(AbilityGraph(nodes=graph.nodes, edges=edges))
@@ -158,10 +209,21 @@ class TestThresholds:
         assert req.coverage_rate == 0.0
         assert req.status == "gap"
 
+    def test_requirement_partial_when_material_exists_but_is_not_sufficient(self):
+        graph = _base_graph()
+        edges = list(graph.edges) + [
+            _edge("e-1", "co-01", "c-01", strength="strong", material_id="m-1"),
+        ]
+        report = analyze_coverage(AbilityGraph(nodes=graph.nodes, edges=edges))
+        req = next(r for r in report.requirements if r.code == "GR-01")
+        assert req.coverage_rate == 0.0
+        assert req.status == "partial"
+
     def test_overall_rate(self):
         graph = _base_graph()
         edges = list(graph.edges) + [
-            _edge("e-1", "co-01", "c-01", strength="strong"),
+            _edge("e-1", "co-01", "c-01", strength="strong", material_id="m-1"),
+            _edge("e-2", "co-02", "c-01", strength="weak", material_id="m-2"),
         ]
         report = analyze_coverage(AbilityGraph(nodes=graph.nodes, edges=edges))
         # 2 competencies, 1 covered → 0.5

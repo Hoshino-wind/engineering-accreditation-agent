@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 # ── 厂商预设（单一事实来源，前端 GET 时一并下发）──────────────
 # 均为 OpenAI 兼容接口；base_url 指向 /v1 或等价路径，调用时拼 /chat/completions。
@@ -107,6 +107,28 @@ class LLMProviderSettings(BaseModel):
     api_key: str = ""
     base_url: str = ""
     model: str = ""
+
+    @field_validator("api_key")
+    @classmethod
+    def validate_api_key(cls, value: str) -> str:
+        key = value.strip()
+        if not key:
+            return ""
+        try:
+            key.encode("ascii")
+        except UnicodeEncodeError as exc:
+            raise ValueError("API Key 必须是有效的 ASCII 字符串，不能填写中文占位文字") from exc
+
+        normalized = key.casefold().replace("_", " ").replace("-", " ")
+        placeholders = (
+            "your api key",
+            "api key here",
+            "replace with",
+            "example key",
+        )
+        if "****" in key or any(marker in normalized for marker in placeholders):
+            raise ValueError("API Key 不能使用占位文字或脱敏值")
+        return key
 
 
 class LLMRuntimeSettings(BaseModel):

@@ -77,14 +77,14 @@ class JsonPersistenceMixin:
         if not file_path.exists():
             return
         try:
-            raw = json.loads(file_path.read_text(encoding="utf-8"))
+            raw = json.loads(file_path.read_text(encoding="utf-8-sig"))
             store = {}
             for key, data in raw.items():
                 entity = self._from_dict(data)
                 if entity is not None:
                     store[key] = entity
             self._store = store
-        except (json.JSONDecodeError, KeyError, TypeError) as e:
+        except (UnicodeDecodeError, json.JSONDecodeError, KeyError, TypeError) as e:
             import logging
             logging.getLogger(__name__).warning(
                 "[PERSIST] 恢复 %s 数据失败: %s", file_path, e

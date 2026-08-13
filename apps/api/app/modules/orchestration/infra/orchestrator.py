@@ -114,6 +114,10 @@ class LangGraphAgentOrchestrator(AgentOrchestratorPort):
         material_category: str | None = None,
         material_name: str | None = None,
         material_text: str | None = None,
+        material_resource_id: str | None = None,
+        material_version_group_id: str | None = None,
+        material_version: str | None = None,
+        material_file_name: str | None = None,
     ) -> AgentRun:
         run_id = f"run-{uuid.uuid4().hex[:12]}"
         created_at = now_iso()
@@ -122,11 +126,15 @@ class LangGraphAgentOrchestrator(AgentOrchestratorPort):
             "material_category": material_category or "",
             "material_name": material_name or "",
             "material_text": material_text or "",
+            "material_resource_id": material_resource_id or "",
+            "material_version_group_id": material_version_group_id or "",
+            "material_version": material_version or "",
+            "material_file_name": material_file_name or material_name or "",
         }
         # 单一真源：从持久化图谱读取当前状态作为运行起点（空则 plan_node 回退种子图），
         # 使多次上传在同一张能力图谱上持续生长，而不是每次都从种子重新开始。
         persisted = self._graph_store.load()
-        if persisted is not None:
+        if persisted is not None and persisted.get("nodes"):
             initial["graph_nodes"] = list(persisted["nodes"])
             initial["graph_edges"] = list(persisted["edges"])
         config = self._config(run_id)
@@ -161,7 +169,13 @@ class LangGraphAgentOrchestrator(AgentOrchestratorPort):
         try:
             nodes = values.get("graph_nodes", [])
             edges = values.get("graph_edges", [])
-            if nodes:
+            # Material runs become authoritative only after they produce at
+            # least one reviewable relationship. Otherwise extracted nodes are
+            # merely a partial result and must not leak into the formal graph.
+            should_persist = bool(nodes) and (
+                not material_resource_id or bool(values.get("relations"))
+            )
+            if should_persist:
                 self._graph_store.save(nodes, edges)
         except Exception:  # noqa: BLE001
             logger.exception("同步写入图谱持久化失败，忽略不影响运行主流程")
@@ -243,7 +257,7 @@ class LangGraphAgentOrchestrator(AgentOrchestratorPort):
         from app.modules.orchestration.infra.tools import graph_to_state
 
         persisted = self._graph_store.load()
-        if persisted is not None:
+        if persisted is not None and persisted.get("nodes"):
             return persisted
 
         seed = build_seed_graph()
@@ -272,11 +286,52 @@ class LangGraphAgentOrchestrator(AgentOrchestratorPort):
         from app.modules.orchestration.domain.projection import apply_review_decisions
 
         persisted = self._graph_store.load()
-        nodes = list(persisted["nodes"]) if persisted else []
-        edges = list(persisted["edges"]) if persisted else []
+        if persisted and persisted.get("nodes"):
+            nodes = list(persisted["nodes"])
+            edges = list(persisted["edges"])
+        else:
+            from app.modules.orchestration.infra.seed_graph import build_seed_graph
+            from app.modules.orchestration.infra.tools import graph_to_state
+
+            seed = build_seed_graph()
+            nodes, edges = graph_to_state(seed)
         merged = apply_review_decisions(nodes, edges, candidates)
         self._graph_store.save(merged["nodes"], merged["edges"])
         return merged
+
+    async def remove_material(
+        self,
+        material_names: set[str],
+        resource_ids: set[str] | None = None,
+    ) -> set[str]:
+        """从能力图谱中撤销指定材料派生出的学校节点与关联边。"""
+        try:
+            ctx = self._graph_store.remove_material(
+                material_names=material_names,
+                resource_ids=resource_ids or set(),
+            )
+            return ctx.removed_node_ids
+        except Exception:  # noqa: BLE001
+            logger.exception("清理持久化图谱材料节点失败")
+            return set()
+
+    async def retain_materials(self, valid_resource_ids: set[str]) -> set[str]:
+        """按材料仓储中的有效 ID 收敛当前专业图谱。"""
+        try:
+            ctx = self._graph_store.retain_materials(valid_resource_ids)
+            return ctx.removed_node_ids
+        except Exception:  # noqa: BLE001
+            logger.exception("按有效材料收敛持久化图谱失败")
+            return set()
+
+    async def clear_school_graph(self, course_name: str | None = None) -> set[str]:
+        """清空当前专业/课程范围内由学校材料生成的图谱节点。"""
+        try:
+            ctx = self._graph_store.clear_school_nodes(course_name)
+            return ctx.removed_node_ids
+        except Exception:  # noqa: BLE001
+            logger.exception("清空持久化图谱学校节点失败")
+            return set()
 
     async def remove_course(self, course: Course) -> set[str]:
         """从能力图谱中移除指定课程及其下游子节点，返回被移除节点的 id 集合。

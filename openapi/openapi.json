@@ -160,6 +160,399 @@
         }
       }
     },
+    "/api/v1/courses": {
+      "get": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "获取课程列表（课程切换器数据源）",
+        "operationId": "list_courses_api_v1_courses_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Major-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Major-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CourseResponse"
+                  },
+                  "title": "Response List Courses Api V1 Courses Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "新建课程",
+        "operationId": "create_course_api_v1_courses_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Major-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Major-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCourseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_id}": {
+      "delete": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "删除课程",
+        "operationId": "delete_course_api_v1_courses__course_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "X-Major-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Major-Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/majors": {
+      "get": {
+        "tags": [
+          "majors"
+        ],
+        "summary": "获取专业列表",
+        "operationId": "list_majors_api_v1_majors_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MajorResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Majors Api V1 Majors Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "majors"
+        ],
+        "summary": "新建专业",
+        "operationId": "create_major_api_v1_majors_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMajorRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MajorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/majors/analysis": {
+      "get": {
+        "tags": [
+          "majors"
+        ],
+        "summary": "专业分析与资源优化建议",
+        "operationId": "get_analysis_api_v1_majors_analysis_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "major_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Major Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Analysis Api V1 Majors Analysis Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/majors/summary": {
+      "get": {
+        "tags": [
+          "majors"
+        ],
+        "summary": "学院级汇总（多专业对比）",
+        "operationId": "get_summary_api_v1_majors_summary_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get Summary Api V1 Majors Summary Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/majors/health-overview": {
+      "get": {
+        "tags": [
+          "majors"
+        ],
+        "summary": "Get Health Overview",
+        "operationId": "get_health_overview_api_v1_majors_health_overview_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MajorHealthOverviewResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/majors/{major_id}": {
+      "delete": {
+        "tags": [
+          "majors"
+        ],
+        "summary": "删除专业",
+        "operationId": "delete_major_api_v1_majors__major_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "major_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Major Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/resources": {
       "get": {
         "tags": [
@@ -226,6 +619,22 @@
               "title": "Resource Type"
             },
             "description": "按材料类型筛选"
+          },
+          {
+            "name": "X-Major-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Major-Id"
+            }
           }
         ],
         "responses": {
@@ -254,6 +663,228 @@
             }
           }
         }
+      }
+    },
+    "/api/v1/resources/health": {
+      "get": {
+        "tags": [
+          "resources"
+        ],
+        "summary": "Get Material Health",
+        "operationId": "get_material_health_api_v1_resources_health_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Major-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Major-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaterialHealthResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resources/health/actions": {
+      "get": {
+        "tags": [
+          "resources"
+        ],
+        "summary": "Get Material Health Actions",
+        "operationId": "get_material_health_actions_api_v1_resources_health_actions_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Major-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Major-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MaterialHealthActionResponse"
+                  },
+                  "title": "Response Get Material Health Actions Api V1 Resources Health Actions Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resources/health/actions/confirm": {
+      "post": {
+        "tags": [
+          "resources"
+        ],
+        "summary": "Confirm Material Health Action",
+        "operationId": "confirm_material_health_action_api_v1_resources_health_actions_confirm_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Major-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Major-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmMaterialHealthActionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfirmMaterialHealthActionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resources/classify": {
+      "post": {
+        "tags": [
+          "resources"
+        ],
+        "summary": "AI 预判材料类型（上传前调用，老师确认后再正式上传）",
+        "operationId": "classify_resource_api_v1_resources_classify_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_classify_resource_api_v1_resources_classify_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassifyResourceResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
       }
     },
     "/api/v1/resources/{resource_id}": {
@@ -286,6 +917,163 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/TeachingResourceResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "resources"
+        ],
+        "summary": "删除教学资源",
+        "operationId": "delete_resource_api_v1_resources__resource_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "resource_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Resource Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resources/upload": {
+      "post": {
+        "tags": [
+          "resources"
+        ],
+        "summary": "上传教学资源文件",
+        "operationId": "upload_resource_api_v1_resources_upload_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_resource_api_v1_resources_upload_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeachingResourceResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/resources/{resource_id}/confirm-course": {
+      "post": {
+        "tags": [
+          "resources"
+        ],
+        "summary": "确认 AI 识别的候选课程：创建课程（同名复用）并回写材料归属",
+        "operationId": "confirm_suggested_course_api_v1_resources__resource_id__confirm_course_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "resource_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Resource Id"
+            }
+          },
+          {
+            "name": "X-Major-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Major-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmCourseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfirmCourseResponse"
                 }
               }
             }
@@ -369,6 +1157,24 @@
               "title": "Candidate Type"
             },
             "description": "按候选类型筛选"
+          },
+          {
+            "name": "review_status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "按审核状态筛选：pending/accepted/rejected",
+              "title": "Review Status"
+            },
+            "description": "按审核状态筛选：pending/accepted/rejected"
           }
         ],
         "responses": {
@@ -522,6 +1328,22 @@
               "title": "Finding Type"
             },
             "description": "按发现类型筛选"
+          },
+          {
+            "name": "X-Major-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Major-Id"
+            }
           }
         ],
         "responses": {
@@ -592,6 +1414,430 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DiagnosticFindingResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/evaluations/runs": {
+      "post": {
+        "tags": [
+          "evaluations"
+        ],
+        "summary": "Run Evaluation",
+        "operationId": "run_evaluation_api_v1_evaluations_runs_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "rule_version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "rules-v1",
+              "title": "Rule Version"
+            }
+          },
+          {
+            "name": "X-Major-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Major-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationRunResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/evaluations/runs/{evaluation_id}/audit": {
+      "get": {
+        "tags": [
+          "evaluations"
+        ],
+        "summary": "Export Evaluation Audit",
+        "operationId": "export_evaluation_audit_api_v1_evaluations_runs__evaluation_id__audit_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "evaluation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Evaluation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/improvements": {
+      "get": {
+        "tags": [
+          "improvements"
+        ],
+        "summary": "获取改进措施列表",
+        "operationId": "list_improvements_api_v1_improvements_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "按课程筛选",
+              "title": "Course"
+            },
+            "description": "按课程筛选"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "按状态筛选",
+              "title": "Status"
+            },
+            "description": "按状态筛选"
+          },
+          {
+            "name": "X-Major-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Major-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ImprovementResponse"
+                  },
+                  "title": "Response List Improvements Api V1 Improvements Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "improvements"
+        ],
+        "summary": "创建改进措施",
+        "operationId": "create_improvement_api_v1_improvements_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateImprovementRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImprovementResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/improvements/{improvement_id}": {
+      "patch": {
+        "tags": [
+          "improvements"
+        ],
+        "summary": "编辑改进措施详情",
+        "operationId": "update_improvement_api_v1_improvements__improvement_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "improvement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Improvement Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateImprovementRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImprovementResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/improvements/{improvement_id}/status": {
+      "patch": {
+        "tags": [
+          "improvements"
+        ],
+        "summary": "更新改进措施状态",
+        "operationId": "update_improvement_status_api_v1_improvements__improvement_id__status_patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "improvement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Improvement Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateImprovementStatusRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImprovementResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/improvements/{improvement_id}/complete": {
+      "post": {
+        "tags": [
+          "improvements"
+        ],
+        "summary": "Complete Improvement",
+        "operationId": "complete_improvement_api_v1_improvements__improvement_id__complete_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "improvement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Improvement Id"
+            }
+          },
+          {
+            "name": "X-Major-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Major-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImprovementCompletionResponse"
                 }
               }
             }
@@ -885,6 +2131,169 @@
         ]
       }
     },
+    "/api/v1/settings/llm": {
+      "get": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Get Llm Settings",
+        "operationId": "get_llm_settings_api_v1_settings_llm_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Update Llm Settings",
+        "operationId": "update_llm_settings_api_v1_settings_llm_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SettingsUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/settings/llm/test": {
+      "post": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Test Connection",
+        "operationId": "test_connection_api_v1_settings_llm_test_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/settings/llm/models": {
+      "post": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "List Models",
+        "description": "用当前（未落库）配置读取该厂商可用模型列表。\n\n用于前端「读取模型」按钮：用户选好厂商、填好 Key 后，一键拉取\n此 key 实际可用的模型，避免手动猜模型名。",
+        "operationId": "list_models_api_v1_settings_llm_models_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProviderInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/autopilot/run": {
       "post": {
         "tags": [
@@ -892,15 +2301,38 @@
         ],
         "summary": "一键编排：材料 → 节点提取 → 关系推断 → 诊断 → 建议",
         "operationId": "run_autopilot_api_v1_autopilot_run_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Major-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Major-Id"
+            }
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/AutopilotRunRequest"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -923,58 +2355,48 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        }
       }
     },
     "/api/v1/orchestration/runs": {
-      "get": {
-        "tags": [
-          "orchestration"
-        ],
-        "summary": "列出所有运行",
-        "operationId": "list_runs_api_v1_orchestration_runs_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/RunResponse"
-                  },
-                  "type": "array",
-                  "title": "Response List Runs Api V1 Orchestration Runs Get"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
-      },
       "post": {
         "tags": [
           "orchestration"
         ],
         "summary": "启动多智能体协作运行",
         "operationId": "start_run_api_v1_orchestration_runs_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Major-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Major-Id"
+            }
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/StartRunRequest"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -997,12 +2419,63 @@
               }
             }
           }
-        },
+        }
+      },
+      "get": {
+        "tags": [
+          "orchestration"
+        ],
+        "summary": "列出所有运行",
+        "operationId": "list_runs_api_v1_orchestration_runs_get",
         "security": [
           {
             "HTTPBearer": []
           }
-        ]
+        ],
+        "parameters": [
+          {
+            "name": "X-Major-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Major-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RunResponse"
+                  },
+                  "title": "Response List Runs Api V1 Orchestration Runs Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/orchestration/runs/{run_id}": {
@@ -1025,6 +2498,22 @@
             "schema": {
               "type": "string",
               "title": "Run Id"
+            }
+          },
+          {
+            "name": "X-Major-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Major-Id"
             }
           }
         ],
@@ -1073,6 +2562,22 @@
               "type": "string",
               "title": "Run Id"
             }
+          },
+          {
+            "name": "X-Major-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Major-Id"
+            }
           }
         ],
         "responses": {
@@ -1118,6 +2623,22 @@
               "type": "string",
               "title": "Run Id"
             }
+          },
+          {
+            "name": "X-Major-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Major-Id"
+            }
           }
         ],
         "requestBody": {
@@ -1137,6 +2658,242 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RunResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orchestration/graph": {
+      "get": {
+        "tags": [
+          "orchestration"
+        ],
+        "summary": "获取当前能力图谱（nodes + edges，含识别中心审核决策投影）",
+        "operationId": "get_graph_api_v1_orchestration_graph_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Major-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Major-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Graph Api V1 Orchestration Graph Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orchestration/graph/coverage": {
+      "get": {
+        "tags": [
+          "orchestration"
+        ],
+        "summary": "获取当前图谱覆盖度分析（含识别中心审核决策投影）",
+        "operationId": "get_graph_coverage_api_v1_orchestration_graph_coverage_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Major-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Major-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Graph Coverage Api V1 Orchestration Graph Coverage Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pipeline/status": {
+      "get": {
+        "tags": [
+          "pipeline"
+        ],
+        "summary": "获取 Pipeline 全局进度",
+        "operationId": "get_pipeline_status_api_v1_pipeline_status_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Major-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Major-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PipelineStatusResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/support/readiness": {
+      "get": {
+        "tags": [
+          "support"
+        ],
+        "summary": "Get Support Readiness",
+        "operationId": "get_support_readiness_api_v1_support_readiness_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Course"
+            }
+          },
+          {
+            "name": "X-Major-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Major-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportReadinessResponse"
                 }
               }
             }
@@ -1539,6 +3296,48 @@
         ],
         "title": "AutopilotSuggestionItem"
       },
+      "Body_classify_resource_api_v1_resources_classify_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "待分类的材料文件"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_classify_resource_api_v1_resources_classify_post"
+      },
+      "Body_upload_resource_api_v1_resources_upload_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "教学材料文件"
+          },
+          "course": {
+            "type": "string",
+            "title": "Course",
+            "description": "所属课程",
+            "default": "未分类"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category",
+            "description": "材料分类",
+            "default": "其他"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_resource_api_v1_resources_upload_post"
+      },
       "CandidateEvidenceResponse": {
         "properties": {
           "id": {
@@ -1600,6 +3399,53 @@
         ],
         "title": "CandidateReviewStatus"
       },
+      "ClassifyResourceResponse": {
+        "properties": {
+          "category": {
+            "type": "string",
+            "title": "Category",
+            "description": "材料分类（培养方案/课程大纲/实验指导书/...）"
+          },
+          "confidence": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence",
+            "description": "置信度 0~1"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason",
+            "description": "判断依据，可溯源"
+          },
+          "isEvaluationEvidence": {
+            "type": "boolean",
+            "title": "Isevaluationevidence",
+            "description": "是否为评价证据（评分表/学生报告/评价结果）"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model",
+            "description": "实际使用的模型"
+          },
+          "latencyMs": {
+            "type": "integer",
+            "title": "Latencyms",
+            "description": "耗时（毫秒）"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category",
+          "confidence",
+          "reason",
+          "isEvaluationEvidence",
+          "model",
+          "latencyMs"
+        ],
+        "title": "ClassifyResourceResponse",
+        "description": "材料分类接口的响应。\n\n上传前调用 LLM 预判文件类型，老师可修改 category 后再正式上传。\nisEvaluationEvidence=True 的材料本轮不进入节点提取主流水线。"
+      },
       "ComponentStatus": {
         "type": "string",
         "enum": [
@@ -1608,6 +3454,506 @@
           "not_configured"
         ],
         "title": "ComponentStatus"
+      },
+      "ConfirmCourseRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code"
+          },
+          "credits": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Credits"
+          },
+          "semester": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Semester"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "ConfirmCourseRequest",
+        "description": "确认候选课程入参：name 必填（用户可修改），其余选填。"
+      },
+      "ConfirmCourseResponse": {
+        "properties": {
+          "resourceId": {
+            "type": "string",
+            "title": "Resourceid"
+          },
+          "courseId": {
+            "type": "string",
+            "title": "Courseid"
+          },
+          "courseName": {
+            "type": "string",
+            "title": "Coursename"
+          }
+        },
+        "type": "object",
+        "required": [
+          "resourceId",
+          "courseId",
+          "courseName"
+        ],
+        "title": "ConfirmCourseResponse",
+        "description": "确认结果：返回新建（或复用）的课程 id 与名称。"
+      },
+      "ConfirmMaterialHealthActionRequest": {
+        "properties": {
+          "riskCode": {
+            "type": "string",
+            "title": "Riskcode"
+          },
+          "resourceId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resourceid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "riskCode"
+        ],
+        "title": "ConfirmMaterialHealthActionRequest"
+      },
+      "ConfirmMaterialHealthActionResponse": {
+        "properties": {
+          "improvementId": {
+            "type": "string",
+            "title": "Improvementid"
+          },
+          "created": {
+            "type": "boolean",
+            "title": "Created"
+          }
+        },
+        "type": "object",
+        "required": [
+          "improvementId",
+          "created"
+        ],
+        "title": "ConfirmMaterialHealthActionResponse"
+      },
+      "CourseResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "credits": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Credits"
+          },
+          "semester": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Semester"
+          },
+          "majorId": {
+            "type": "string",
+            "title": "Majorid"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "graphNodeId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Graphnodeid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "name",
+          "majorId"
+        ],
+        "title": "CourseResponse"
+      },
+      "CreateCourseRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name",
+            "description": "课程名称"
+          },
+          "code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code",
+            "description": "课程代码"
+          },
+          "credits": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Credits",
+            "description": "学分"
+          },
+          "semester": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Semester",
+            "description": "开课学期"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "课程简介"
+          },
+          "majorId": {
+            "type": "string",
+            "title": "Majorid",
+            "description": "所属专业 ID",
+            "default": "major-eie"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "CreateCourseRequest"
+      },
+      "CreateImprovementRequest": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "course": {
+            "type": "string",
+            "title": "Course"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "owner": {
+            "type": "string",
+            "title": "Owner"
+          },
+          "findingId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Findingid"
+          },
+          "targetCode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Targetcode"
+          },
+          "targetName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Targetname"
+          },
+          "rootCause": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rootcause"
+          },
+          "expectedEffect": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expectedeffect"
+          },
+          "deadline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline"
+          },
+          "priority": {
+            "type": "string",
+            "title": "Priority",
+            "default": "medium"
+          },
+          "sourceModule": {
+            "type": "string",
+            "title": "Sourcemodule",
+            "default": "manual"
+          },
+          "sourceLabel": {
+            "type": "string",
+            "title": "Sourcelabel",
+            "default": ""
+          },
+          "verificationMethod": {
+            "type": "string",
+            "title": "Verificationmethod",
+            "default": ""
+          },
+          "completionSummary": {
+            "type": "string",
+            "title": "Completionsummary",
+            "default": ""
+          },
+          "evidenceUri": {
+            "type": "string",
+            "title": "Evidenceuri",
+            "default": ""
+          },
+          "reevaluationResult": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reevaluationresult"
+          },
+          "baseline": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline"
+          },
+          "targetValue": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Targetvalue"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "description",
+          "course",
+          "action",
+          "owner"
+        ],
+        "title": "CreateImprovementRequest"
+      },
+      "CreateMajorRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name",
+            "description": "专业名称"
+          },
+          "code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code",
+            "description": "专业代码"
+          },
+          "schoolName": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Schoolname",
+            "description": "所属学校"
+          },
+          "standardVersion": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Standardversion",
+            "description": "认证标准版本"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "专业简介"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "CreateMajorRequest"
       },
       "DiagnosticEvidenceRefResponse": {
         "properties": {
@@ -1667,6 +4013,10 @@
           "risk": {
             "$ref": "#/components/schemas/DiagnosticFindingRisk"
           },
+          "majorId": {
+            "type": "string",
+            "title": "Majorid"
+          },
           "sourceNode": {
             "type": "string",
             "title": "Sourcenode"
@@ -1719,6 +4069,7 @@
           "course",
           "type",
           "risk",
+          "majorId",
           "sourceNode",
           "targetNode",
           "relationLabel",
@@ -1749,6 +4100,75 @@
           "version-impact"
         ],
         "title": "DiagnosticFindingType"
+      },
+      "EvaluationItemResponse": {
+        "properties": {
+          "competencyCode": {
+            "type": "string",
+            "title": "Competencycode"
+          },
+          "attainment": {
+            "type": "number",
+            "title": "Attainment"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "totalStrength": {
+            "type": "integer",
+            "title": "Totalstrength"
+          }
+        },
+        "type": "object",
+        "required": [
+          "competencyCode",
+          "attainment",
+          "status",
+          "totalStrength"
+        ],
+        "title": "EvaluationItemResponse"
+      },
+      "EvaluationRunResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "ruleVersion": {
+            "type": "string",
+            "title": "Ruleversion"
+          },
+          "inputSnapshotHash": {
+            "type": "string",
+            "title": "Inputsnapshothash"
+          },
+          "graphVersion": {
+            "type": "string",
+            "title": "Graphversion"
+          },
+          "startedAt": {
+            "type": "string",
+            "title": "Startedat"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EvaluationItemResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "ruleVersion",
+          "inputSnapshotHash",
+          "graphVersion",
+          "startedAt",
+          "items"
+        ],
+        "title": "EvaluationRunResponse"
       },
       "EvidenceFragmentResponse": {
         "properties": {
@@ -2113,6 +4533,253 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "ImprovementCompletionResponse": {
+        "properties": {
+          "improvement": {
+            "$ref": "#/components/schemas/ImprovementResponse"
+          },
+          "verified": {
+            "type": "boolean",
+            "title": "Verified"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "improvement",
+          "verified",
+          "message"
+        ],
+        "title": "ImprovementCompletionResponse"
+      },
+      "ImprovementPriority": {
+        "type": "string",
+        "enum": [
+          "high",
+          "medium",
+          "low"
+        ],
+        "title": "ImprovementPriority"
+      },
+      "ImprovementResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "course": {
+            "type": "string",
+            "title": "Course"
+          },
+          "majorId": {
+            "type": "string",
+            "title": "Majorid"
+          },
+          "findingId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Findingid"
+          },
+          "targetCode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Targetcode"
+          },
+          "targetName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Targetname"
+          },
+          "rootCause": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rootcause"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "expectedEffect": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expectedeffect"
+          },
+          "owner": {
+            "type": "string",
+            "title": "Owner"
+          },
+          "deadline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline"
+          },
+          "sourceModule": {
+            "type": "string",
+            "title": "Sourcemodule"
+          },
+          "sourceLabel": {
+            "type": "string",
+            "title": "Sourcelabel"
+          },
+          "verificationMethod": {
+            "type": "string",
+            "title": "Verificationmethod"
+          },
+          "completionSummary": {
+            "type": "string",
+            "title": "Completionsummary"
+          },
+          "evidenceUri": {
+            "type": "string",
+            "title": "Evidenceuri"
+          },
+          "reevaluationResult": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reevaluationresult"
+          },
+          "baseline": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline"
+          },
+          "targetValue": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Targetvalue"
+          },
+          "closedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closedat"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ImprovementStatus"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/ImprovementPriority"
+          },
+          "createdAt": {
+            "type": "string",
+            "title": "Createdat"
+          },
+          "updatedAt": {
+            "type": "string",
+            "title": "Updatedat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "description",
+          "course",
+          "majorId",
+          "findingId",
+          "targetCode",
+          "targetName",
+          "rootCause",
+          "action",
+          "expectedEffect",
+          "owner",
+          "deadline",
+          "sourceModule",
+          "sourceLabel",
+          "verificationMethod",
+          "completionSummary",
+          "evidenceUri",
+          "reevaluationResult",
+          "baseline",
+          "targetValue",
+          "closedAt",
+          "status",
+          "priority",
+          "createdAt",
+          "updatedAt"
+        ],
+        "title": "ImprovementResponse"
+      },
+      "ImprovementStatus": {
+        "type": "string",
+        "enum": [
+          "open",
+          "in-progress",
+          "resolved",
+          "closed"
+        ],
+        "title": "ImprovementStatus"
+      },
       "InferRelationsRequest": {
         "properties": {
           "school_nodes": {
@@ -2205,6 +4872,248 @@
         ],
         "title": "LoginRequest"
       },
+      "MajorHealthOverviewResponse": {
+        "properties": {
+          "majorCount": {
+            "type": "integer",
+            "title": "Majorcount"
+          },
+          "totalResources": {
+            "type": "integer",
+            "title": "Totalresources"
+          },
+          "totalRisks": {
+            "type": "integer",
+            "title": "Totalrisks"
+          },
+          "averageHealthScore": {
+            "type": "integer",
+            "title": "Averagehealthscore"
+          },
+          "majors": {
+            "items": {
+              "$ref": "#/components/schemas/MajorHealthSummaryResponse"
+            },
+            "type": "array",
+            "title": "Majors"
+          }
+        },
+        "type": "object",
+        "required": [
+          "majorCount",
+          "totalResources",
+          "totalRisks",
+          "averageHealthScore",
+          "majors"
+        ],
+        "title": "MajorHealthOverviewResponse"
+      },
+      "MajorHealthSummaryResponse": {
+        "properties": {
+          "majorId": {
+            "type": "string",
+            "title": "Majorid"
+          },
+          "majorName": {
+            "type": "string",
+            "title": "Majorname"
+          },
+          "healthScore": {
+            "type": "integer",
+            "title": "Healthscore"
+          },
+          "totalResources": {
+            "type": "integer",
+            "title": "Totalresources"
+          },
+          "riskCount": {
+            "type": "integer",
+            "title": "Riskcount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "majorId",
+          "majorName",
+          "healthScore",
+          "totalResources",
+          "riskCount"
+        ],
+        "title": "MajorHealthSummaryResponse"
+      },
+      "MajorResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "schoolName": {
+            "type": "string",
+            "title": "Schoolname"
+          },
+          "standardVersion": {
+            "type": "string",
+            "title": "Standardversion"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "name",
+          "schoolName",
+          "standardVersion"
+        ],
+        "title": "MajorResponse"
+      },
+      "MaterialHealthActionResponse": {
+        "properties": {
+          "riskCode": {
+            "type": "string",
+            "title": "Riskcode"
+          },
+          "resourceId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resourceid"
+          },
+          "priority": {
+            "type": "string",
+            "title": "Priority"
+          },
+          "ownerRole": {
+            "type": "string",
+            "title": "Ownerrole"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "requiresHumanReview": {
+            "type": "boolean",
+            "title": "Requireshumanreview"
+          }
+        },
+        "type": "object",
+        "required": [
+          "riskCode",
+          "priority",
+          "ownerRole",
+          "action",
+          "requiresHumanReview"
+        ],
+        "title": "MaterialHealthActionResponse"
+      },
+      "MaterialHealthResponse": {
+        "properties": {
+          "healthScore": {
+            "type": "integer",
+            "title": "Healthscore"
+          },
+          "totalResources": {
+            "type": "integer",
+            "title": "Totalresources"
+          },
+          "readyCount": {
+            "type": "integer",
+            "title": "Readycount"
+          },
+          "processingCount": {
+            "type": "integer",
+            "title": "Processingcount"
+          },
+          "failedCount": {
+            "type": "integer",
+            "title": "Failedcount"
+          },
+          "quarantinedCount": {
+            "type": "integer",
+            "title": "Quarantinedcount"
+          },
+          "riskCount": {
+            "type": "integer",
+            "title": "Riskcount"
+          },
+          "risks": {
+            "items": {
+              "$ref": "#/components/schemas/MaterialHealthRiskResponse"
+            },
+            "type": "array",
+            "title": "Risks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "healthScore",
+          "totalResources",
+          "readyCount",
+          "processingCount",
+          "failedCount",
+          "quarantinedCount",
+          "riskCount",
+          "risks"
+        ],
+        "title": "MaterialHealthResponse"
+      },
+      "MaterialHealthRiskResponse": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "resourceId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resourceid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "severity",
+          "message"
+        ],
+        "title": "MaterialHealthRiskResponse"
+      },
       "MeResponse": {
         "properties": {
           "id": {
@@ -2249,6 +5158,38 @@
         ],
         "title": "MeResponse"
       },
+      "ModelsResponse": {
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "title": "Ok"
+          },
+          "models": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Models",
+            "default": []
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ok"
+        ],
+        "title": "ModelsResponse"
+      },
       "OverallStatus": {
         "type": "string",
         "enum": [
@@ -2256,6 +5197,55 @@
           "needs_configuration"
         ],
         "title": "OverallStatus"
+      },
+      "PipelineStatusResponse": {
+        "properties": {
+          "stage": {
+            "type": "string",
+            "title": "Stage"
+          },
+          "progress": {
+            "type": "number",
+            "title": "Progress"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "pendingReviewCount": {
+            "type": "integer",
+            "title": "Pendingreviewcount"
+          },
+          "pendingRunReviewCount": {
+            "type": "integer",
+            "title": "Pendingrunreviewcount"
+          },
+          "gapCount": {
+            "type": "integer",
+            "title": "Gapcount"
+          },
+          "suggestionCount": {
+            "type": "integer",
+            "title": "Suggestioncount"
+          },
+          "lastUpdated": {
+            "type": "string",
+            "title": "Lastupdated"
+          }
+        },
+        "type": "object",
+        "required": [
+          "stage",
+          "progress",
+          "message",
+          "pendingReviewCount",
+          "pendingRunReviewCount",
+          "gapCount",
+          "suggestionCount",
+          "lastUpdated"
+        ],
+        "title": "PipelineStatusResponse",
+        "description": "Pipeline 全局进度响应，供前端进度条和引导组件消费。"
       },
       "ProcessingStageResponse": {
         "properties": {
@@ -2279,6 +5269,78 @@
           "status"
         ],
         "title": "ProcessingStageResponse"
+      },
+      "ProviderInput": {
+        "properties": {
+          "vendor": {
+            "type": "string",
+            "title": "Vendor",
+            "default": "custom"
+          },
+          "api_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Api Key"
+          },
+          "base_url": {
+            "type": "string",
+            "title": "Base Url",
+            "default": ""
+          },
+          "model": {
+            "type": "string",
+            "title": "Model",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "ProviderInput"
+      },
+      "ProviderPublic": {
+        "properties": {
+          "vendor": {
+            "type": "string",
+            "title": "Vendor"
+          },
+          "api_key_set": {
+            "type": "boolean",
+            "title": "Api Key Set"
+          },
+          "api_key_masked": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Api Key Masked"
+          },
+          "base_url": {
+            "type": "string",
+            "title": "Base Url"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          }
+        },
+        "type": "object",
+        "required": [
+          "vendor",
+          "api_key_set",
+          "api_key_masked",
+          "base_url",
+          "model"
+        ],
+        "title": "ProviderPublic"
       },
       "RAGChunkResponse": {
         "properties": {
@@ -2500,15 +5562,6 @@
               }
             ],
             "title": "Display Name"
-          },
-          "role": {
-            "type": "string",
-            "enum": [
-              "admin",
-              "teacher"
-            ],
-            "title": "Role",
-            "default": "teacher"
           }
         },
         "type": "object",
@@ -2718,6 +5771,52 @@
         ],
         "title": "RunResponse"
       },
+      "SettingsResponse": {
+        "properties": {
+          "chat": {
+            "$ref": "#/components/schemas/ProviderPublic"
+          },
+          "embedding": {
+            "$ref": "#/components/schemas/ProviderPublic"
+          },
+          "is_configured": {
+            "type": "boolean",
+            "title": "Is Configured"
+          },
+          "vendors": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "object",
+            "title": "Vendors"
+          }
+        },
+        "type": "object",
+        "required": [
+          "chat",
+          "embedding",
+          "is_configured",
+          "vendors"
+        ],
+        "title": "SettingsResponse"
+      },
+      "SettingsUpdateRequest": {
+        "properties": {
+          "chat": {
+            "$ref": "#/components/schemas/ProviderInput"
+          },
+          "embedding": {
+            "$ref": "#/components/schemas/ProviderInput"
+          }
+        },
+        "type": "object",
+        "required": [
+          "chat",
+          "embedding"
+        ],
+        "title": "SettingsUpdateRequest"
+      },
       "StartRunRequest": {
         "properties": {
           "goal": {
@@ -2753,6 +5852,63 @@
         ],
         "title": "StartRunRequest"
       },
+      "SuggestedCourseResponse": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "default": ""
+          },
+          "credits": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Credits"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence",
+            "default": 0.9
+          },
+          "source_excerpt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Excerpt"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "SuggestedCourseResponse",
+        "description": "AI 识别出的候选课程信息（老师可修改名称后确认）。"
+      },
       "SuggestionItemResponse": {
         "properties": {
           "target_code": {
@@ -2785,6 +5941,80 @@
           "expected_effect"
         ],
         "title": "SuggestionItemResponse"
+      },
+      "SupportReadinessCheckResponse": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "passed": {
+            "type": "boolean",
+            "title": "Passed"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "label",
+          "passed",
+          "detail"
+        ],
+        "title": "SupportReadinessCheckResponse"
+      },
+      "SupportReadinessResponse": {
+        "properties": {
+          "ready": {
+            "type": "boolean",
+            "title": "Ready"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/SupportReadinessCheckResponse"
+            },
+            "type": "array",
+            "title": "Checks"
+          },
+          "resourceCount": {
+            "type": "integer",
+            "title": "Resourcecount"
+          },
+          "evidenceCount": {
+            "type": "integer",
+            "title": "Evidencecount"
+          },
+          "pendingReviewCount": {
+            "type": "integer",
+            "title": "Pendingreviewcount"
+          },
+          "pendingFindingCount": {
+            "type": "integer",
+            "title": "Pendingfindingcount"
+          },
+          "openImprovementCount": {
+            "type": "integer",
+            "title": "Openimprovementcount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ready",
+          "checks",
+          "resourceCount",
+          "evidenceCount",
+          "pendingReviewCount",
+          "pendingFindingCount",
+          "openImprovementCount"
+        ],
+        "title": "SupportReadinessResponse"
       },
       "SystemComponentResponse": {
         "properties": {
@@ -2913,6 +6143,10 @@
             "type": "integer",
             "title": "Sourcecoverage"
           },
+          "majorId": {
+            "type": "string",
+            "title": "Majorid"
+          },
           "evidenceFragments": {
             "items": {
               "$ref": "#/components/schemas/EvidenceFragmentResponse"
@@ -2948,6 +6182,16 @@
               }
             ],
             "title": "Failurereason"
+          },
+          "suggestedCourse": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SuggestedCourseResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -2967,6 +6211,7 @@
           "hash",
           "nextAction",
           "sourceCoverage",
+          "majorId",
           "evidenceFragments",
           "processingStages"
         ],
@@ -3003,6 +6248,74 @@
           "改进记录"
         ],
         "title": "TeachingResourceType"
+      },
+      "TestRequest": {
+        "properties": {
+          "chat": {
+            "$ref": "#/components/schemas/ProviderInput"
+          },
+          "embedding": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProviderInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "chat"
+        ],
+        "title": "TestRequest"
+      },
+      "TestResponse": {
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "title": "Ok"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ok"
+        ],
+        "title": "TestResponse"
       },
       "ToolCallResponse": {
         "properties": {
@@ -3041,6 +6354,256 @@
           "status"
         ],
         "title": "ToolCallResponse"
+      },
+      "UpdateImprovementRequest": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "course": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course"
+          },
+          "findingId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Findingid"
+          },
+          "targetCode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Targetcode"
+          },
+          "targetName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Targetname"
+          },
+          "rootCause": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rootcause"
+          },
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action"
+          },
+          "expectedEffect": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expectedeffect"
+          },
+          "owner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner"
+          },
+          "deadline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline"
+          },
+          "sourceModule": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sourcemodule"
+          },
+          "sourceLabel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sourcelabel"
+          },
+          "verificationMethod": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verificationmethod"
+          },
+          "completionSummary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completionsummary"
+          },
+          "evidenceUri": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidenceuri"
+          },
+          "reevaluationResult": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reevaluationresult"
+          },
+          "baseline": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline"
+          },
+          "targetValue": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Targetvalue"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priority"
+          }
+        },
+        "type": "object",
+        "title": "UpdateImprovementRequest"
+      },
+      "UpdateImprovementStatusRequest": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "UpdateImprovementStatusRequest"
       },
       "ValidationError": {
         "properties": {

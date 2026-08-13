@@ -53,6 +53,97 @@
   padding-bottom: 4px;
 }
 
+.support-flow-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.support-flow-step {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid var(--mi-line);
+  border-radius: var(--mi-radius-plate);
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--mi-ink-soft);
+  font-family: var(--mi-font-display);
+  font-weight: 600;
+  box-shadow: 0 8px 20px -18px rgba(32, 41, 64, 0.35);
+}
+
+.support-flow-step .anticon {
+  color: var(--mi-indigo);
+  font-size: 17px;
+}
+
+.support-readiness-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.4fr) repeat(5, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.support-readiness-card.ant-card {
+  border-radius: var(--mi-radius-plate) !important;
+  border: 1px solid var(--mi-line) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+}
+
+.support-readiness-card.ant-card::before {
+  opacity: 0.45;
+}
+
+.support-readiness-card .ant-card-body {
+  padding: 16px 18px !important;
+}
+
+.support-readiness-card--primary.ant-card {
+  background:
+    linear-gradient(135deg, rgba(59, 91, 219, 0.1), rgba(255, 255, 255, 0.96)) !important;
+  border-color: rgba(59, 91, 219, 0.2) !important;
+}
+
+.support-readiness-title {
+  font-family: var(--mi-font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--mi-ink);
+}
+
+.support-readiness-desc {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--mi-ink-soft);
+}
+
+.support-section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 8px;
+  border-top: 1px solid var(--mi-rule);
+}
+
+.support-section-head h4.ant-typography {
+  margin: 0 0 4px;
+  font-family: var(--mi-font-display);
+  color: var(--mi-ink);
+}
+
+.support-section-head .ant-typography-secondary {
+  margin: 0 !important;
+  max-width: 74ch;
+  font-size: 13px;
+  color: var(--mi-ink-soft);
+}
+
+.support-report-grid {
+  align-items: flex-start;
+}
+
 /* ---- 规则信息 Alert ---- */
 .accreditation-support-notice {
   border-radius: var(--mi-radius-card) !important;
@@ -119,6 +210,24 @@
 }
 .accreditation-support-page .ant-card-body {
   padding: 16px 20px;
+}
+
+@media (max-width: 1380px) {
+  .support-readiness-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .accreditation-support-page .accreditation-support-page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .support-flow-strip,
+  .support-readiness-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* 折叠面板 */

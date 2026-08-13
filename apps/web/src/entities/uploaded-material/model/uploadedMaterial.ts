@@ -1,7 +1,14 @@
 // M3 教学资源上传 - 领域模型
 // 学校上传的原始材料，经 AI 提取后转为图谱节点
 
-export type UploadedMaterialFileType = 'pdf' | 'docx' | 'xlsx';
+export type UploadedMaterialFileType =
+  | 'pdf'
+  | 'docx'
+  | 'xlsx'
+  | 'txt'
+  | 'md'
+  | 'csv'
+  | 'json';
 
 export type UploadedMaterialCategory =
   | '培养方案'
@@ -40,6 +47,10 @@ export interface UploadedMaterial {
   status: UploadedMaterialStatus;
   fileSize: string;
   fileUrl: string;
+  version: string;
+  versionGroupId: string;
+  supersedesId?: string | null;
+  isCurrentVersion: boolean;
   extractedNodeCount?: number;
   failureReason?: string;
   /** 材料归属的课程名（裸传时为「未分类」，确认候选课程后回写） */

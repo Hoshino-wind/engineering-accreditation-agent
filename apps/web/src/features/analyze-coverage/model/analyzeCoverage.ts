@@ -20,6 +20,21 @@ export interface CompetencyCoverage {
   weakCount: number;
   // 是否有 AI 待审核的支撑关系
   hasPendingReview: boolean;
+  /** 实际计入该指标覆盖度的审核通过关系。 */
+  evidence: CoverageEvidence[];
+}
+
+export interface CoverageEvidence {
+  edgeId: string;
+  sourceNode: AbilityGraphNode;
+  strength: 'strong' | 'medium' | 'weak';
+  weight: number;
+  confidence?: number;
+  reasoning?: string;
+  materialId?: string;
+  materialVersionGroupId?: string;
+  materialVersion?: string;
+  materialName?: string;
 }
 
 export interface RequirementCoverage {
@@ -53,6 +68,9 @@ const STRENGTH_WEIGHT: Record<string, number> = {
   medium: 2,
   weak: 1,
 };
+
+const COVERED_STRENGTH_THRESHOLD = 4;
+const MIN_DISTINCT_EVIDENCE_SOURCES = 2;
 
 export function analyzeCoverage(graph: AbilityGraphData): CoverageReport {
   const { nodes, edges } = graph;
@@ -92,10 +110,10 @@ export function analyzeCoverage(graph: AbilityGraphData): CoverageReport {
   const competencyCoverages: CompetencyCoverage[] = standardComps.map((comp) => {
     const incomingEdges = incomingByTarget.get(comp.id) ?? [];
     const approvedIncoming = incomingEdges.filter(
-      (e) => e.reviewStatus === 'approved',
+      (e) => e.kind === 'SUPPORTS' && e.reviewStatus === 'approved',
     );
     const pendingIncoming = incomingEdges.filter(
-      (e) => e.reviewStatus === 'pending',
+      (e) => e.kind === 'SUPPORTS' && e.reviewStatus === 'pending',
     );
 
     // 找到支撑该能力指标的学校节点（课程/实验）
@@ -119,12 +137,70 @@ export function analyzeCoverage(graph: AbilityGraphData): CoverageReport {
       mediumCount * STRENGTH_WEIGHT.medium! +
       weakCount * STRENGTH_WEIGHT.weak!;
 
+    const evidenceSourceIds = new Set(
+      approvedIncoming
+        .map((edge) => {
+          const sourceNode = schoolNodes.find((node) => node.id === edge.source);
+          return [
+            edge.materialVersionGroupId,
+            sourceNode?.properties?.materialVersionGroupId,
+            edge.materialResourceId,
+            sourceNode?.properties?.materialId,
+          ]
+            .map((value) => String(value ?? '').trim())
+            .find(Boolean) ?? '';
+        })
+        .filter(Boolean),
+    );
+
+    const evidence: CoverageEvidence[] = approvedIncoming
+      .filter(
+        (edge) =>
+          edge.kind === 'SUPPORTS' &&
+          supporterIds.has(edge.source) &&
+          edge.strength != null,
+      )
+      .flatMap((edge) => {
+        const sourceNode = schoolNodes.find((node) => node.id === edge.source);
+        if (!sourceNode || !edge.strength) return [];
+        return [
+          {
+            edgeId: edge.id,
+            sourceNode,
+            strength: edge.strength,
+            weight: STRENGTH_WEIGHT[edge.strength] ?? 0,
+            confidence: edge.confidence,
+            reasoning: edge.aiReasoning,
+            materialId:
+              edge.materialResourceId ??
+              (String(sourceNode.properties?.materialId ?? '') || undefined),
+            materialVersionGroupId:
+              edge.materialVersionGroupId ??
+              (String(sourceNode.properties?.materialVersionGroupId ?? '') ||
+                undefined),
+            materialVersion:
+              edge.materialVersion ??
+              (String(sourceNode.properties?.materialVersion ?? '') || undefined),
+            materialName:
+              edge.materialName ??
+              (String(
+                  sourceNode.properties?.materialFileName ??
+                    sourceNode.properties?.materialName ??
+                    '',
+                ) || undefined),
+          },
+        ];
+      });
+
     let status: CoverageStatus;
     if (supporters.length === 0 && pendingIncoming.length === 0) {
       status = 'gap';
     } else if (supporters.length === 0 && pendingIncoming.length > 0) {
       status = 'partial';
-    } else if (totalStrength >= STRENGTH_WEIGHT.strong!) {
+    } else if (
+      totalStrength >= COVERED_STRENGTH_THRESHOLD &&
+      evidenceSourceIds.size >= MIN_DISTINCT_EVIDENCE_SOURCES
+    ) {
       status = 'covered';
     } else {
       status = 'partial';
@@ -138,6 +214,7 @@ export function analyzeCoverage(graph: AbilityGraphData): CoverageReport {
       mediumCount,
       weakCount,
       hasPendingReview: pendingIncoming.length > 0,
+      evidence,
     };
   });
 
@@ -166,13 +243,16 @@ export function analyzeCoverage(graph: AbilityGraphData): CoverageReport {
     const coveredCount = childComps.filter(
       (cc) => cc.status === 'covered',
     ).length;
+    const supportedCount = childComps.filter(
+      (cc) => cc.status !== 'gap',
+    ).length;
     const coverageRate =
       childComps.length > 0 ? coveredCount / childComps.length : 0;
 
     let status: CoverageStatus;
     if (coverageRate >= 0.8 && childComps.length > 0) {
       status = 'covered';
-    } else if (coverageRate > 0) {
+    } else if (supportedCount > 0) {
       status = 'partial';
     } else {
       status = 'gap';
@@ -195,9 +275,9 @@ export function analyzeCoverage(graph: AbilityGraphData): CoverageReport {
     (rc) => rc.status === 'partial',
   ).length;
   const overallCoverageRate =
-    standardReqs.length > 0
-      ? requirementCoverages.filter((rc) => rc.status === 'covered').length /
-        standardReqs.length
+    competencyCoverages.length > 0
+      ? competencyCoverages.filter((item) => item.status === 'covered').length /
+        competencyCoverages.length
       : 0;
 
   return {

@@ -4,6 +4,7 @@ from app.modules.diagnostics.domain.finding import (
     DiagnosticFinding,
     FindingDecisionStatus,
 )
+from app.modules.improvements.domain.improvement import Improvement
 
 
 class FindingRepository(Protocol):
@@ -28,4 +29,18 @@ class FindingRepository(Protocol):
 
     async def delete_by_nodes(self, node_ids: set[str]) -> int: ...
 
+    async def delete_by_major(self, major_id: str) -> int: ...
+
     async def delete_by_evidence_object(self, object_name: str) -> int: ...
+
+
+class ImprovementRepository(Protocol):
+    async def list_all(
+        self,
+        *,
+        course: str | None = None,
+        status: str | None = None,
+        major_id: str | None = None,
+    ) -> list[Improvement]: ...
+
+    async def add(self, improvement: Improvement) -> Improvement: ...

@@ -111,6 +111,10 @@ class GraphEdge:
     strength: Strength | None = None
     confidence: float | None = None
     reasoning: str | None = None
+    material_resource_id: str | None = None
+    material_version_group_id: str | None = None
+    material_version: str | None = None
+    material_name: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -123,6 +127,10 @@ class GraphEdge:
             "strength": self.strength,
             "confidence": self.confidence,
             "reasoning": self.reasoning,
+            "materialResourceId": self.material_resource_id,
+            "materialVersionGroupId": self.material_version_group_id,
+            "materialVersion": self.material_version,
+            "materialName": self.material_name,
         }
 
     @classmethod
@@ -137,6 +145,10 @@ class GraphEdge:
             strength=d.get("strength"),
             confidence=d.get("confidence"),
             reasoning=d.get("reasoning"),
+            material_resource_id=d.get("materialResourceId"),
+            material_version_group_id=d.get("materialVersionGroupId"),
+            material_version=d.get("materialVersion"),
+            material_name=d.get("materialName"),
         )
 
 
@@ -169,9 +181,11 @@ class CompetencyCoverage:
     medium_count: int
     weak_count: int
     supporter_count: int
+    evidence_source_count: int
     has_pending_review: bool
     attainment: float
     supporters: list[str] = field(default_factory=list)
+    evidence: list[dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -184,9 +198,11 @@ class CompetencyCoverage:
             "mediumCount": self.medium_count,
             "weakCount": self.weak_count,
             "supporterCount": self.supporter_count,
+            "evidenceSourceCount": self.evidence_source_count,
             "hasPendingReview": self.has_pending_review,
             "attainment": round(self.attainment, 3),
             "supporters": list(self.supporters),
+            "evidence": [dict(item) for item in self.evidence],
         }
 
 

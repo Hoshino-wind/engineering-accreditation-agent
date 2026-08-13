@@ -33,6 +33,10 @@ export interface GraphEdgeData {
   strength?: string | null;
   confidence?: number | null;
   reasoning?: string | null;
+  materialResourceId?: string | null;
+  materialVersionGroupId?: string | null;
+  materialVersion?: string | null;
+  materialName?: string | null;
 }
 
 export interface GraphData {
@@ -61,9 +65,29 @@ export interface CompetencyCoverageData {
   mediumCount: number;
   weakCount: number;
   supporterCount: number;
+  evidenceSourceCount: number;
   hasPendingReview: boolean;
   attainment: number;
   supporters: string[];
+  evidence: CoverageEvidenceData[];
+}
+
+export interface CoverageEvidenceData {
+  edgeId: string;
+  sourceNodeId: string;
+  sourceCode: string;
+  sourceName: string;
+  strength?: 'strong' | 'medium' | 'weak' | null;
+  weight: number;
+  confidence?: number | null;
+  reviewStatus: string;
+  reasoning?: string | null;
+  materialId?: string | null;
+  materialVersionGroupId?: string | null;
+  materialVersion?: string | null;
+  materialName?: string | null;
+  counted: boolean;
+  countReason: string;
 }
 
 export interface CoverageData {

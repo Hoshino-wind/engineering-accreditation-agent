@@ -1,435 +1,263 @@
-/* ====== M5 · 图谱诊断 · 工业风专属样式 ====== */
-
 .graph-diagnostics-page {
   width: 100%;
   max-width: var(--app-content-max-width, 1680px);
-  margin: 0 auto;
-  padding: 16px 0 28px;
   min-height: 100vh;
+  margin: 0 auto;
+  padding: 18px 0 28px;
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
 
-/* ---- Hero ---- */
-.graph-diagnostics-page .graph-diagnostics-page-header {
+.diagnostics-hero {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  padding-bottom: 16px;
-  margin-bottom: 20px !important;
+  padding-bottom: 14px;
   border-bottom: 1px solid var(--mi-rule);
-  position: relative;
 }
 
-.graph-diagnostics-page .graph-diagnostics-page-header h2.ant-typography {
-  margin: 0;
+.diagnostics-hero h2.ant-typography {
+  margin: 8px 0 4px;
   font-family: var(--mi-font-display);
-  font-weight: 700;
   font-size: 28px;
   line-height: 1.2;
-  letter-spacing: -0.01em;
   color: var(--mi-ink);
 }
-.graph-diagnostics-page .graph-diagnostics-page-header .ant-typography-secondary {
-  margin: 6px 0 0 0 !important;
-  max-width: 70ch;
-  font-size: 14px;
+
+.diagnostics-hero .ant-typography-secondary {
+  max-width: 760px;
+  margin: 0;
   line-height: 1.7;
   color: var(--mi-ink-soft);
 }
 
-.graph-diagnostics-page-header .ant-space:first-of-type {
-  align-items: flex-start !important;
-  gap: 14px !important;
-}
-.graph-diagnostics-page-header .ant-tag {
-  margin-inline-end: 0;
-  margin-top: 2px;
-}
-
-/* ---- 统计卡（diagnostics-stats · 不对称深色渐变） ---- */
-.diagnostics-stats.ant-card {
-  position: relative;
-  background:
-    linear-gradient(135deg, #1a237e 0%, #243a9e 48%, #3b5bdb 100%) !important;
-  color: #ffffff !important;
-  overflow: hidden;
-}
-.diagnostics-stats.ant-card::before {
-  background: linear-gradient(90deg,
-    transparent 0%, rgba(255,255,255,0.35) 10%,
-    rgba(212, 180, 129, 0.8) 50%,
-    rgba(255,255,255,0.35) 90%, transparent 100%);
-  opacity: 0.7;
-}
-.diagnostics-stats.ant-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    radial-gradient(circle at 92% 20%, rgba(176,141,87,0.25) 0%, rgba(176,141,87,0) 48%),
-    radial-gradient(circle at 10% 110%, rgba(59,91,219,0.2) 0%, rgba(59,91,219,0) 55%);
-  pointer-events: none;
-}
-.diagnostics-stats .ant-card-body {
-  padding: 18px 24px 20px !important;
-  position: relative;
-  z-index: 1;
-}
-.diagnostics-stats .ant-statistic-title {
-  font-family: var(--mi-font-display) !important;
-  font-size: 11.5px !important;
-  letter-spacing: 0.8px;
-  color: rgba(255,255,255,0.72) !important;
-  margin-bottom: 2px !important;
-}
-.diagnostics-stats .ant-statistic-content {
-  font-family: var(--mi-font-number) !important;
-  font-weight: 700 !important;
-  font-size: 30px !important;
-  line-height: 1 !important;
-  letter-spacing: -0.02em;
-  color: #ffffff !important;
-}
-.diagnostics-stats .ant-statistic-content-suffix {
-  font-family: var(--mi-font-serif-en);
-  font-style: italic;
-  font-weight: 500;
-  font-size: 18px;
-  margin-left: 4px;
-  color: rgba(255,255,255,0.8);
-}
-.diagnostics-stats .ant-statistic-content-prefix {
-  color: rgba(212, 180, 129, 0.9);
-  margin-right: 6px;
-}
-
-/* ---- 孤岛节点 Alert ---- */
-.diagnostics-orphan-alert {
-  border-radius: var(--mi-radius-card) !important;
-  padding: 14px 18px 14px 50px !important;
-  border: 1px solid var(--mi-amber-fog) !important;
-  background:
-    linear-gradient(135deg, rgba(255, 247, 230, 0.95) 0%, rgba(255, 250, 240, 0.95) 100%),
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='1'/><feColorMatrix values='0 0 0 0 0.78  0 0 0 0 0.66  0 0 0 0 0.45  0 0 0 0.08 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>") !important;
-  background-blend-mode: multiply !important;
-  box-shadow: var(--mi-shadow-card) !important;
-  overflow: hidden;
-}
-.diagnostics-orphan-alert .ant-alert-icon {
-  color: var(--mi-amber) !important;
-  font-size: 18px !important;
-  top: 16px !important;
-  left: 18px !important;
-}
-.diagnostics-orphan-alert .ant-alert-message {
-  font-family: var(--mi-font-display);
-  font-weight: 600 !important;
-  color: var(--mi-amber-ink) !important;
-  font-size: 14px !important;
-}
-.diagnostics-orphan-alert .ant-alert-description {
-  font-family: var(--mi-font-display);
-  color: var(--mi-ink-soft) !important;
-  font-size: 12px !important;
-  line-height: 1.6;
-}
-
-/* ---- 左右分栏布局 ---- */
-.diagnostics-split-layout {
+.diagnostics-loading {
   display: flex;
-  align-items: stretch;
-}
-
-.diagnostics-split-layout > .ant-col {
-  display: flex;
-  flex-direction: column;
-}
-
-.diagnostics-left-col,
-.diagnostics-right-col {
-  display: flex;
-  flex-direction: column;
-}
-
-.diagnostics-left-col > .ant-card,
-.diagnostics-right-col > .ant-card {
-  flex: 1;
-  min-height: 0;
-}
-
-.diagnostics-right-col .diagnostics-detail-list {
-  max-height: 680px;
-  overflow-y: auto;
-}
-
-/* ---- 覆盖率列表 ---- */
-.diagnostics-coverage-card.ant-card {
-  border-radius: var(--mi-radius-card) !important;
-}
-.diagnostics-coverage-card.ant-card::before {
-  background: linear-gradient(90deg,
-    transparent 0%, var(--mi-indigo) 15%, var(--mi-indigo) 50%,
-    var(--mi-amber) 75%, transparent 100%);
-  opacity: 0.6;
-}
-.diagnostics-coverage-card .ant-card-head {
-  padding: 12px 20px 10px !important;
-  border-bottom: 1px solid var(--mi-line) !important;
-}
-.diagnostics-coverage-card .ant-card-head-title {
-  font-family: var(--mi-font-display);
-  font-weight: 600;
-  font-size: 15.5px;
-  color: var(--mi-ink);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.diagnostics-coverage-card .ant-card-head-title::before {
-  content: '';
-  display: inline-block;
-  width: 4px; height: 20px;
-  border-radius: 2px;
-  background: linear-gradient(180deg, var(--mi-indigo) 0%, var(--mi-amber) 100%);
-}
-.diagnostics-coverage-card .ant-card-body {
-  padding: 16px 20px;
-}
-
-.diagnostics-coverage-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 10px;
-}
-
-.diagnostics-coverage-item {
-  padding: 12px 16px;
-  border: 1px solid var(--mi-line);
-  border-radius: 10px;
-  cursor: pointer;
-  transition:
-    border-color 260ms cubic-bezier(0.2, 0.7, 0.2, 1),
-    box-shadow 260ms cubic-bezier(0.2, 0.7, 0.2, 1),
-    background 260ms ease,
-    transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
-  position: relative;
-  background: #fff;
-}
-.diagnostics-coverage-item::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0;
-  width: 3px; height: 100%;
-  border-radius: 10px 0 0 10px;
-  background: transparent;
-}
-.diagnostics-coverage-item:hover {
-  border-color: var(--mi-indigo);
-  box-shadow: 0 8px 24px -8px rgba(59,91,219,0.22);
-  transform: translateY(-1px);
-}
-.diagnostics-coverage-item.selected {
-  border-color: var(--mi-indigo);
-  background: var(--mi-indigo-fog);
-  box-shadow: var(--mi-shadow-card);
-}
-.diagnostics-coverage-item.selected::before {
-  background: linear-gradient(180deg, var(--mi-indigo) 0%, var(--mi-amber) 100%);
-}
-
-.diagnostics-coverage-item-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.diagnostics-coverage-item-header .ant-typography {
-  font-family: var(--mi-font-display);
-  font-weight: 600;
-  font-size: 13.5px;
-  color: var(--mi-ink);
-}
-
-.diagnostics-coverage-item-meta {
-  margin-top: 6px;
-  font-size: 11.5px;
-  font-family: var(--mi-font-mono);
-  color: var(--mi-ink-faint);
-  letter-spacing: 0.3px;
-}
-
-/* ---- 详情卡 ---- */
-.diagnostics-detail-card.ant-card {
-  border-radius: var(--mi-radius-card) !important;
-}
-.diagnostics-detail-card.ant-card::before {
-  background: linear-gradient(90deg,
-    transparent 0%, var(--mi-amber) 15%, var(--mi-amber) 85%, transparent 100%);
-  opacity: 0.5;
-}
-.diagnostics-detail-card .ant-card-body {
-  padding: 16px 20px;
-}
-
-.diagnostics-detail-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.diagnostics-detail-item {
-  padding: 12px 16px;
-  border: 1px solid var(--mi-line);
-  border-radius: 10px;
-  transition: border-color 200ms ease;
-}
-.diagnostics-detail-item:hover {
-  border-color: var(--mi-amber-fog);
-}
-
-.diagnostics-detail-item-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
-}
-
-.diagnostics-empty {
-  padding: 40px 0;
-  display: flex;
+  min-height: 300px;
   align-items: center;
   justify-content: center;
 }
 
-/* ---- 不达标解释区块 ---- */
-.gap-explanation {
-  margin-top: 10px;
-  padding: 14px 16px;
-  background: linear-gradient(135deg, #fff1f0 0%, #fff7f7 100%);
-  border: 1px solid rgba(255, 77, 79, 0.22);
-  border-radius: 10px;
-  border-left: 3px solid var(--mi-danger);
-  font-family: var(--mi-font-display);
-}
-.gap-explanation--partial {
-  background: linear-gradient(135deg, #fffbe6 0%, #fffdf2 100%);
-  border-color: rgba(250, 173, 20, 0.3);
-  border-left-color: var(--mi-warning);
+.diagnostics-summary-card .ant-card-body {
+  padding: 18px 22px;
 }
 
-.gap-explanation-summary {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--mi-ink);
-  line-height: 1.6;
-  margin-bottom: 10px;
-}
-
-.gap-explanation-section {
-  margin-top: 10px;
-}
-
-.gap-explanation-section-title {
-  font-size: 11.5px;
-  font-weight: 700;
+.diagnostics-summary-card .ant-statistic-title {
   color: var(--mi-ink-soft);
-  margin-bottom: 6px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  letter-spacing: 0.4px;
-}
-.gap-explanation-section-title::before {
-  content: '';
-  width: 3px; height: 12px;
-  border-radius: 1.5px;
-  background: var(--mi-danger);
-  display: inline-block;
-}
-.gap-explanation--partial .gap-explanation-section-title::before {
-  background: var(--mi-warning);
 }
 
-.gap-explanation-reason {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--mi-ink-soft);
-  line-height: 1.7;
-  padding: 2px 0;
-}
-.gap-explanation-reason .anticon {
-  margin-top: 4px;
-  color: var(--mi-danger);
-  font-size: 11px;
-  flex-shrink: 0;
-}
-.gap-explanation--partial .gap-explanation-reason .anticon {
-  color: var(--mi-warning);
-}
-
-.gap-explanation-broken-path {
-  display: inline-block;
-  padding: 2px 7px;
-  margin: 2px 2px 2px 0;
-  background: rgba(0,0,0,0.04);
-  border-radius: 4px;
-  font-size: 11px;
-  color: var(--mi-ink-faint);
-  font-family: var(--mi-font-mono);
-}
-
-.gap-explanation-recommendation {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--mi-indigo-ink);
-  line-height: 1.7;
-  padding: 2px 0;
-  font-weight: 500;
-}
-.gap-explanation-recommendation .anticon {
-  margin-top: 4px;
-  font-size: 11px;
-  flex-shrink: 0;
-}
-
-.gap-explanation-attainment {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-top: 12px;
-  padding-top: 10px;
-  border-top: 1px dashed var(--mi-line);
-}
-.gap-explanation-attainment-value {
-  font-size: 26px;
+.diagnostics-summary-card .ant-statistic-content {
   font-family: var(--mi-font-number);
   font-weight: 700;
-  color: var(--mi-danger);
-  letter-spacing: -0.02em;
-}
-.gap-explanation--partial .gap-explanation-attainment-value {
-  color: var(--mi-warning);
 }
 
-/* ---- 段落统一样式 ---- */
-.graph-diagnostics-page .ant-card-head {
-  border-bottom: 1px solid var(--mi-line) !important;
-  padding: 12px 20px 10px !important;
+.diagnostics-next-alert {
+  border-radius: 10px;
 }
-.graph-diagnostics-page .ant-card-head-title {
+
+.diagnostics-rule-alert {
+  border: 1px solid #93c5fd;
+  background: #eff6ff;
+}
+
+.diagnostics-main-grid {
+  align-items: stretch;
+}
+
+.diagnostics-panel {
+  height: 100%;
+}
+
+.diagnostics-panel .ant-card-head {
+  border-bottom: 1px solid var(--mi-line);
+}
+
+.diagnostics-panel .ant-card-head-title {
   font-family: var(--mi-font-display);
-  font-weight: 600;
-  font-size: 15px;
+  font-weight: 700;
   color: var(--mi-ink);
 }
-.graph-diagnostics-page .ant-card-body {
-  padding: 16px 20px;
+
+.diagnostics-requirement-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.diagnostics-requirement-item {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--mi-line);
+  border-left-width: 4px;
+  border-radius: 8px;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.diagnostics-requirement-item:hover,
+.diagnostics-requirement-item.is-selected {
+  background: #f8fbff;
+  border-color: #4f6ef7;
+  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.1);
+}
+
+.diagnostics-requirement-item--ok {
+  border-left-color: #22c55e;
+}
+
+.diagnostics-requirement-item--warn {
+  border-left-color: #f59e0b;
+}
+
+.diagnostics-requirement-item--danger {
+  border-left-color: #ef4444;
+}
+
+.diagnostics-requirement-row,
+.diagnostics-competency-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.diagnostics-detail-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.diagnostics-explain-box {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid #facc15;
+  border-radius: 8px;
+  background: #fffbeb;
+  color: #854d0e;
+  line-height: 1.7;
+}
+
+.diagnostics-explain-box .anticon {
+  margin-top: 4px;
+  color: #d97706;
+}
+
+.diagnostics-competency-card {
+  padding: 14px;
+  border: 1px solid var(--mi-line);
+  border-left-width: 4px;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.diagnostics-competency-card--ok {
+  border-left-color: #22c55e;
+}
+
+.diagnostics-competency-card--warn {
+  border-left-color: #f59e0b;
+}
+
+.diagnostics-competency-card--danger {
+  border-left-color: #ef4444;
+}
+
+.diagnostics-competency-card .ant-typography {
+  margin-bottom: 8px;
+}
+
+.diagnostics-support-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: var(--mi-ink-soft);
+  font-size: 12px;
+}
+
+.diagnostics-evidence-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--mi-line);
+}
+
+.diagnostics-evidence-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid #dbe4ee;
+  border-radius: 6px;
+  background: #f8fafc;
+}
+
+.diagnostics-evidence-head,
+.diagnostics-evidence-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 14px;
+}
+
+.diagnostics-evidence-meta {
+  justify-content: flex-start;
+  color: var(--mi-ink-soft);
+  font-size: 12px;
+}
+
+.diagnostics-action-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fff5f5;
+  color: #7f1d1d;
+  line-height: 1.7;
+}
+
+.diagnostics-action-box .ant-typography-secondary {
+  font-size: 12px;
+  color: #475569;
+}
+
+.diagnostics-action-box .ant-btn {
+  align-self: flex-start;
+}
+
+.diagnostics-workbench-card .ant-card-head {
+  border-bottom: 1px solid var(--mi-line);
+}
+
+.diagnostics-workbench-card .ant-card-head-title {
+  font-family: var(--mi-font-display);
+  font-weight: 700;
+}
+
+.diagnostics-workbench-card .ant-card-body > .ant-typography {
+  margin-bottom: 0;
+}
+
+.diagnostics-workbench-card .diagnostic-workbench {
+  margin-top: 14px;
+}
+
+@media (max-width: 1100px) {
+  .diagnostics-hero {
+    flex-direction: column;
+  }
 }

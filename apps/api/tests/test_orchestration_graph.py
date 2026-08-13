@@ -94,10 +94,10 @@ async def test_graph_completes_after_review(mock_graph):
     assert result["phase"] == "report"
     assert len(result["steps"]) == 8  # plan..report
 
-    # 覆盖度非零（seed graph 有结构性 approved 边）
+    # 单份材料即使全部审核通过，也不能被判为充分覆盖。
     cov = result["coverage"]
-    assert cov["overallCoverageRate"] > 0
-    assert cov["coveredCount"] >= 1
+    assert cov["overallCoverageRate"] == 0
+    assert cov["partialCount"] >= 1
 
     # 有报告章节
     assert len(result["report_chapters"]) >= 1
@@ -331,11 +331,11 @@ async def test_recognition_review_projects_into_persisted_graph(mock_orchestrato
     assert edge["sourceType"] == "manual"
     assert edge["strength"] == "strong"
 
-    # 覆盖度生效：C-01-01 被覆盖
+    # 关系已生效，但单一证据来源只能达到部分支撑。
     coverage = await orch.get_current_coverage()
     comp = next(c for c in coverage["competencies"] if c["code"] == "C-01-01")
-    assert comp["status"] == "covered"
-    assert comp["attainment"] == 1.0
+    assert comp["status"] == "partial"
+    assert comp["attainment"] == 0.75
 
     # 模拟重启：同一 user_id 的新编排器，投影依然在权威存储中
     from app.modules.llm.infra.llm_client import LLMConfig, OpenAICompatibleLLMClient
@@ -418,12 +418,12 @@ async def test_teacher_overrides_auto_decision_and_graph_follows(mock_orchestrat
         cov = await orch.get_current_coverage()
         return next(c for c in cov["competencies"] if c["code"] == "C-01-01")
 
-    # ① 自动采纳（autopilot 申报）→ 投影为 approved，指标 covered
+    # ① 自动采纳（autopilot 申报）→ 投影为 approved，单一证据仍为 partial
     await orch.review_project_candidates(
         [_candidate(CandidateReviewStatus.ACCEPTED, "2026-08-09 09:00")]
     )
     assert await _edge_status() == "approved"
-    assert (await _c01())["status"] == "covered"
+    assert (await _c01())["status"] == "partial"
 
     # ② 教师复核：改判驳回（后发生覆盖先发生）→ 边 rejected，覆盖回落
     await orch.review_project_candidates(
@@ -432,12 +432,12 @@ async def test_teacher_overrides_auto_decision_and_graph_follows(mock_orchestrat
     assert await _edge_status() == "rejected"
     assert (await _c01())["status"] == "gap"
 
-    # ③ 教师再次采纳 → 边恢复 approved，覆盖回升（往返不产生重复边）
+    # ③ 教师再次采纳 → 边恢复 approved、回到部分支撑（往返不产生重复边）
     await orch.review_project_candidates(
         [_candidate(CandidateReviewStatus.ACCEPTED, "2026-08-09 11:00")]
     )
     assert await _edge_status() == "approved"
-    assert (await _c01())["status"] == "covered"
+    assert (await _c01())["status"] == "partial"
 
     # ④ 最终态持久化：重启后有且仅有一条边（无残留重复）
     from app.modules.llm.infra.llm_client import LLMConfig, OpenAICompatibleLLMClient

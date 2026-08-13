@@ -62,17 +62,18 @@ def _resolve_node(ref: str, nodes: list[dict[str, Any]]) -> dict[str, Any] | Non
     return None
 
 
-def _find_supports_edge(
+def _find_supports_edges(
     edges: list[dict[str, Any]], source_id: str, target_id: str
-) -> dict[str, Any] | None:
+) -> list[dict[str, Any]]:
+    matches: list[dict[str, Any]] = []
     for edge in edges:
         if (
             edge.get("kind") == "SUPPORTS"
             and edge.get("source") == source_id
             and edge.get("target") == target_id
         ):
-            return edge
-    return None
+            matches.append(edge)
+    return matches
 
 
 def apply_review_decisions(
@@ -115,15 +116,26 @@ def apply_review_decisions(
 
         source_id = str(source_node["id"])
         target_id = str(target_node["id"])
-        existing = _find_supports_edge(projected, source_id, target_id)
+        existing_edges = list(_find_supports_edges(projected, source_id, target_id))
 
         if status == CandidateReviewStatus.ACCEPTED:
             confidence = int(getattr(candidate, "confidence", 0) or 0)
             strength = strength_from_confidence(confidence)
-            if existing is not None:
-                existing["reviewStatus"] = "approved"
-                existing["strength"] = strength
-                existing["confidence"] = confidence / 100
+            evidence_items = tuple(getattr(candidate, "evidence", ()) or ())
+            primary_evidence = evidence_items[0] if evidence_items else None
+            material_metadata = {
+                "materialResourceId": getattr(primary_evidence, "resource_id", "") or "",
+                "materialVersion": getattr(primary_evidence, "resource_version", "") or "",
+                "materialName": getattr(primary_evidence, "resource_name", "") or "",
+            }
+            if existing_edges:
+                for existing in existing_edges:
+                    existing["reviewStatus"] = "approved"
+                    existing["strength"] = strength
+                    existing["confidence"] = confidence / 100
+                    for key, value in material_metadata.items():
+                        if value and not existing.get(key):
+                            existing[key] = value
             else:
                 projected.append(
                     {
@@ -138,10 +150,11 @@ def apply_review_decisions(
                         "reasoning": (
                             f"教师在识别中心采纳候选「{getattr(candidate, 'title', '')}」"
                         ),
+                        **material_metadata,
                     }
                 )
         else:  # REJECTED
-            if existing is not None:
+            for existing in existing_edges:
                 existing["reviewStatus"] = "rejected"
 
     return {"nodes": list(nodes), "edges": projected}

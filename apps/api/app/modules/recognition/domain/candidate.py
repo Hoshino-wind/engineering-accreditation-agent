@@ -30,6 +30,7 @@ class CandidateEvidence:
     coordinate: str
     excerpt: str
     hash: str
+    resource_id: str = ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -46,6 +47,7 @@ class RecognitionCandidate:
     explanation: str
     processor_version: str
     generated_at: str
+    major_id: str = "major-eie"
     review_status: CandidateReviewStatus = CandidateReviewStatus.PENDING
     impact_course_objectives: int = 0
     impact_ability_nodes: int = 0

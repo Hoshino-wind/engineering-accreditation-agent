@@ -30,6 +30,7 @@ class DiagnosticEvidenceRef:
     coordinate: str
     excerpt: str
     hash: str
+    resource_id: str = ""
 
 
 @dataclass(frozen=True, slots=True)

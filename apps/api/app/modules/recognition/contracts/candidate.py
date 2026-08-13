@@ -17,6 +17,7 @@ class CandidateEvidenceResponse(BaseModel):
     coordinate: str
     excerpt: str
     hash: str
+    resourceId: str = ""
 
 
 class RecognitionCandidateResponse(BaseModel):
@@ -34,6 +35,7 @@ class RecognitionCandidateResponse(BaseModel):
     explanation: str
     processorVersion: str
     generatedAt: str
+    majorId: str
     reviewStatus: CandidateReviewStatus
     impact: dict[str, int]
     conflictMessage: str | None = None
@@ -54,6 +56,7 @@ class RecognitionCandidateResponse(BaseModel):
             explanation=c.explanation,
             processorVersion=c.processor_version,
             generatedAt=c.generated_at,
+            majorId=c.major_id,
             reviewStatus=c.review_status,
             impact={
                 "courseObjectives": c.impact_course_objectives,
@@ -69,6 +72,7 @@ class RecognitionCandidateResponse(BaseModel):
                     coordinate=e.coordinate,
                     excerpt=e.excerpt,
                     hash=e.hash,
+                    resourceId=e.resource_id,
                 )
                 for e in c.evidence
             ],

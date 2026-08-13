@@ -4,8 +4,12 @@
 图谱边与覆盖度结果；待审与不可解析的候选不改变图谱。
 """
 
+import asyncio
 from dataclasses import replace
 
+from app.modules.orchestration.application.graph_query import (
+    reconcile_orphan_pending_edges,
+)
 from app.modules.orchestration.domain.coverage import analyze_coverage
 from app.modules.orchestration.domain.models import (
     AbilityGraph,
@@ -81,7 +85,7 @@ def _add_source_node(nodes: list[dict], node_id: str, name: str) -> None:
     })
 
 
-def test_accepted_candidate_projects_approved_edge_and_covers() -> None:
+def test_accepted_candidate_projects_edge_but_single_evidence_is_partial() -> None:
     nodes, edges = _graph_dicts()
     _add_source_node(nodes, "exp-list", "链表实现")
     accepted = _make_candidate(review_status=CandidateReviewStatus.ACCEPTED)
@@ -98,10 +102,52 @@ def test_accepted_candidate_projects_approved_edge_and_covers() -> None:
     assert new_edges[0]["sourceType"] == "manual"
 
     comps = _coverage_of(merged)
-    assert comps["C-01-01"].status == "covered"
-    assert comps["C-01-01"].attainment == 1.0
+    assert comps["C-01-01"].status == "partial"
+    assert comps["C-01-01"].attainment == 0.75
     # 其他指标点不受影响
     assert comps["C-03-01"].status == "gap"
+
+
+def test_accepted_candidate_updates_duplicate_pending_edges() -> None:
+    nodes, edges = _graph_dicts()
+    _add_source_node(nodes, "exp-list", "链表实现")
+    edges.extend(
+        [
+            {
+                "id": "ai-rel-old-exp-list-std-c-01-01",
+                "source": "exp-list",
+                "target": "std-c-01-01",
+                "kind": "SUPPORTS",
+                "sourceType": "ai",
+                "reviewStatus": "pending",
+                "strength": "weak",
+                "confidence": 0.62,
+                "reasoning": "older duplicate",
+            },
+            {
+                "id": "ai-rel-new-exp-list-std-c-01-01",
+                "source": "exp-list",
+                "target": "std-c-01-01",
+                "kind": "SUPPORTS",
+                "sourceType": "ai",
+                "reviewStatus": "pending",
+                "strength": "medium",
+                "confidence": 0.78,
+                "reasoning": "newer duplicate",
+            },
+        ]
+    )
+    accepted = _make_candidate(review_status=CandidateReviewStatus.ACCEPTED)
+
+    merged = apply_review_decisions(nodes, edges, [accepted])
+
+    matching = [
+        e
+        for e in merged["edges"]
+        if e["source"] == "exp-list" and e["target"] == "std-c-01-01"
+    ]
+    assert len(matching) == 2
+    assert {e["reviewStatus"] for e in matching} == {"approved"}
 
 
 def test_rejected_candidate_demotes_existing_edge() -> None:
@@ -161,3 +207,157 @@ def test_input_lists_are_not_mutated() -> None:
     accepted = _make_candidate(review_status=CandidateReviewStatus.ACCEPTED)
     apply_review_decisions(nodes, edges, [accepted])
     assert edges == edges_before
+
+
+class _CandidateRepo:
+    def __init__(self, candidates: list[RecognitionCandidate] | None = None) -> None:
+        self.candidates = list(candidates or [])
+
+    async def list_all(
+        self,
+        *,
+        course: str | None = None,
+        risk: str | None = None,
+        candidate_type: str | None = None,
+        review_status: str | None = None,
+        major_id: str | None = None,
+    ) -> list[RecognitionCandidate]:
+        candidates = list(self.candidates)
+        if major_id is not None:
+            candidates = [c for c in candidates if c.major_id == major_id]
+        return candidates
+
+    async def get_by_id(self, candidate_id: str) -> RecognitionCandidate | None:
+        return next((c for c in self.candidates if c.id == candidate_id), None)
+
+    async def add_many(
+        self,
+        candidates: list[RecognitionCandidate],
+    ) -> list[RecognitionCandidate]:
+        self.candidates.extend(candidates)
+        return candidates
+
+    async def update_review_status(
+        self,
+        candidate_id: str,
+        status: CandidateReviewStatus,
+    ) -> RecognitionCandidate | None:
+        return None
+
+    async def delete_by_course(self, course_name: str) -> int:
+        return 0
+
+    async def delete_by_source_nodes(self, source_node_ids: set[str]) -> int:
+        return 0
+
+
+def test_orphan_pending_graph_edge_creates_review_candidate() -> None:
+    async def _run() -> None:
+        nodes = [
+            {
+                "id": "exp-a",
+                "code": "EXP-A",
+                "name": "实验A",
+                "kind": "Experiment",
+                "origin": "school",
+                "properties": {"course": "单片机基础"},
+            },
+            {
+                "id": "std-c-01-01",
+                "code": "C-01-01",
+                "name": "工程知识应用",
+                "kind": "Competency",
+                "origin": "standard",
+            },
+        ]
+        edges = [
+            {
+                "id": "ai-rel-exp-a-std-c-01-01",
+                "source": "exp-a",
+                "target": "std-c-01-01",
+                "kind": "SUPPORTS",
+                "sourceType": "ai",
+                "reviewStatus": "pending",
+                "strength": "medium",
+                "confidence": 0.82,
+                "reasoning": "实验覆盖工程知识应用。",
+            }
+        ]
+        repo = _CandidateRepo()
+
+        candidates = await reconcile_orphan_pending_edges(nodes, edges, repo)
+        candidates_again = await reconcile_orphan_pending_edges(nodes, edges, repo)
+
+        assert len(candidates) == 1
+        assert len(candidates_again) == 1
+        assert len(repo.candidates) == 1
+        candidate = repo.candidates[0]
+        assert candidate.id == "candidate-reconciled-ai-rel-exp-a-std-c-01-01"
+        assert candidate.source_node == "exp-a"
+        assert candidate.target_node == "std-c-01-01"
+        assert candidate.course == "单片机基础"
+        assert candidate.confidence == 82
+        assert candidate.review_status == CandidateReviewStatus.PENDING
+
+    asyncio.run(_run())
+
+
+def test_experiment_candidate_inherits_course_from_belongs_to_edge() -> None:
+    async def _run() -> None:
+        nodes = [
+            {
+                "id": "course-es",
+                "code": "CO-ES",
+                "name": "嵌入式系统原理",
+                "kind": "Course",
+                "origin": "school",
+                "properties": {},
+            },
+            {
+                "id": "exp-a",
+                "code": "EXP-A",
+                "name": "定时器实验",
+                "kind": "Experiment",
+                "origin": "school",
+                "properties": {},
+            },
+            {
+                "id": "std-c-01-01",
+                "code": "C-01-01",
+                "name": "工程知识应用",
+                "kind": "Competency",
+                "origin": "standard",
+            },
+        ]
+        edges = [
+            {
+                "id": "belongs-exp-a-course-es",
+                "source": "exp-a",
+                "target": "course-es",
+                "kind": "BELONGS_TO",
+                "sourceType": "rule",
+                "reviewStatus": "approved",
+            },
+            {
+                "id": "ai-rel-exp-a-std-c-01-01",
+                "source": "exp-a",
+                "target": "std-c-01-01",
+                "kind": "SUPPORTS",
+                "sourceType": "ai",
+                "reviewStatus": "pending",
+                "strength": "strong",
+                "confidence": 0.92,
+                "materialResourceId": "resource-v1",
+                "materialVersion": "v1",
+                "materialName": "实验任务",
+            },
+        ]
+        repo = _CandidateRepo()
+
+        candidates = await reconcile_orphan_pending_edges(nodes, edges, repo)
+
+        assert len(candidates) == 1
+        assert candidates[0].course == "嵌入式系统原理"
+        assert candidates[0].evidence[0].resource_id == "resource-v1"
+
+    asyncio.run(_run())

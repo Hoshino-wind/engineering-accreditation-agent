@@ -65,7 +65,7 @@ def test_run_evaluation_records_rule_and_input_snapshot() -> None:
         ).execute(rule_version="rules-v1")
     )
 
-    assert run.items[0].status == "covered"
+    assert run.items[0].status == "partial"
     assert store.snapshot_call["entity_type"] == "evaluation-run"
     assert store.snapshot_call["version"] == "rules-v1"
     assert store.audit_call["detail"]["input_snapshot_hash"] == run.input_snapshot_hash

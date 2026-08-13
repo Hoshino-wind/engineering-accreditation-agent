@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from app.modules.improvements.application import (
     CompleteMaterialHealthImprovement,
     CreateImprovement,
+    DeleteImprovement,
     ListImprovements,
     UpdateImprovement,
 )
@@ -13,8 +14,29 @@ from app.modules.improvements.contracts import (
     CreateImprovementRequest,
     ImprovementCompletionResponse,
     ImprovementResponse,
+    UpdateImprovementRequest,
     UpdateImprovementStatusRequest,
 )
+
+_UPDATE_FIELD_MAP = {
+    "findingId": "finding_id",
+    "targetCode": "target_code",
+    "targetName": "target_name",
+    "rootCause": "root_cause",
+    "expectedEffect": "expected_effect",
+    "sourceModule": "source_module",
+    "sourceLabel": "source_label",
+    "verificationMethod": "verification_method",
+    "completionSummary": "completion_summary",
+    "evidenceUri": "evidence_uri",
+    "reevaluationResult": "reevaluation_result",
+    "targetValue": "target_value",
+}
+
+
+def _update_payload(body: UpdateImprovementRequest) -> dict:
+    data = body.model_dump(exclude_unset=True)
+    return {_UPDATE_FIELD_MAP.get(key, key): value for key, value in data.items()}
 
 
 def create_improvements_router(
@@ -22,6 +44,7 @@ def create_improvements_router(
     create_improvement_use_case: Callable[[], CreateImprovement],
     update_improvement_use_case: Callable[[], UpdateImprovement],
     complete_improvement_use_case: Callable[[], CompleteMaterialHealthImprovement],
+    delete_improvement_use_case: Callable[[], DeleteImprovement],
 ) -> APIRouter:
     router = APIRouter(prefix="/improvements", tags=["improvements"])
 
@@ -60,8 +83,31 @@ def create_improvements_router(
             expected_effect=body.expectedEffect,
             deadline=body.deadline,
             priority=body.priority,
+            source_module=body.sourceModule,
+            source_label=body.sourceLabel,
+            verification_method=body.verificationMethod,
+            completion_summary=body.completionSummary,
+            evidence_uri=body.evidenceUri,
+            reevaluation_result=body.reevaluationResult,
+            baseline=body.baseline,
+            target_value=body.targetValue,
         )
         return ImprovementResponse.from_domain(improvement)
+
+    @router.patch(
+        "/{improvement_id}",
+        response_model=ImprovementResponse,
+        summary="编辑改进措施详情",
+    )
+    async def update_improvement(
+        improvement_id: str,
+        body: UpdateImprovementRequest,
+        use_case: Annotated[UpdateImprovement, Depends(update_improvement_use_case)],
+    ) -> ImprovementResponse:
+        result = await use_case.execute_changes(improvement_id, _update_payload(body))
+        if result is None:
+            raise HTTPException(status_code=404, detail="改进措施不存在")
+        return ImprovementResponse.from_domain(result)
 
     @router.patch(
         "/{improvement_id}/status",
@@ -91,5 +137,18 @@ def create_improvements_router(
         if result is None:
             raise HTTPException(status_code=404, detail="Improvement not found")
         return ImprovementCompletionResponse.from_domain(result)
+
+    @router.delete(
+        "/{improvement_id}",
+        status_code=204,
+        summary="删除改进措施",
+    )
+    async def delete_improvement(
+        improvement_id: str,
+        use_case: Annotated[DeleteImprovement, Depends(delete_improvement_use_case)],
+    ) -> None:
+        deleted = await use_case.execute(improvement_id)
+        if not deleted:
+            raise HTTPException(status_code=404, detail="改进措施不存在")
 
     return router

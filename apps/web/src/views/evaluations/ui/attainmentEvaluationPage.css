@@ -59,6 +59,27 @@
   margin-top: 2px;
 }
 
+.attainment-run-actions {
+  justify-content: flex-end;
+  min-width: 220px;
+}
+
+.attainment-run-card.ant-card {
+  border-radius: var(--mi-radius-card) !important;
+}
+
+.attainment-run-card .ant-card-body {
+  padding: 14px 18px !important;
+}
+
+.attainment-run-value {
+  margin-top: 4px;
+  font-family: var(--mi-font-number);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--mi-ink);
+}
+
 /* ---- 总览卡（深色渐变 · 与诊断页类似） ---- */
 .attainment-stats.ant-card {
   position: relative;

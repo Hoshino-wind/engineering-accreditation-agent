@@ -6,8 +6,8 @@
  * 后端不可用时返回 null，由页面展示空态引导。
  */
 
-import { getToken } from '../auth/authStore';
 import { browserEnv } from '../config/env';
+import { apiFetch } from './apiClient';
 
 const API_BASE = browserEnv.VITE_API_BASE_URL || '';
 const ENDPOINT = `${API_BASE}/api/v1/recognition/candidates`;
@@ -32,6 +32,7 @@ export interface RecognitionCandidateDTO {
   explanation: string;
   generatedAt: string;
   id: string;
+  majorId?: string;
   impact?: {
     abilityNodes?: number;
     courseObjectives?: number;
@@ -51,15 +52,6 @@ export type BackendCandidateDecision = 'accept' | 'modify' | 'reject';
 
 // ── 请求辅助 ────────────────────────────────────────────
 
-function authHeaders(): HeadersInit {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  const token = getToken();
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-  return headers;
-}
-
 // ── 公开 API ────────────────────────────────────────────
 
 /** 获取真实识别候选列表；后端不可用返回 null。 */
@@ -67,8 +59,7 @@ export async function fetchCandidates(): Promise<
   RecognitionCandidateDTO[] | null
 > {
   try {
-    const resp = await fetch(ENDPOINT, {
-      headers: authHeaders(),
+    const resp = await apiFetch(ENDPOINT, {
       signal: AbortSignal.timeout(10_000),
     });
     if (!resp.ok) return null;
@@ -84,9 +75,8 @@ export async function reviewCandidate(
   decision: BackendCandidateDecision,
 ): Promise<RecognitionCandidateDTO | null> {
   try {
-    const resp = await fetch(`${ENDPOINT}/${candidateId}/review`, {
+    const resp = await apiFetch(`${ENDPOINT}/${candidateId}/review`, {
       method: 'POST',
-      headers: authHeaders(),
       body: JSON.stringify({ decision }),
       signal: AbortSignal.timeout(10_000),
     });

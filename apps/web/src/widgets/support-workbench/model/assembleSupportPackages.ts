@@ -113,7 +113,7 @@ function buildSnapshots(
     {
       count: 1,
       id: 'snapshot-evaluation',
-      label: '达成度评价',
+      label: '材料支撑评价',
       module: 'M6',
       objectId: 'attainment-live-run',
       state: fromApi ? 'formal' : 'unapproved',

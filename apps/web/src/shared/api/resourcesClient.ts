@@ -58,6 +58,9 @@ export interface UploadResourceResponse {
   course: string;
   resourceType: string;
   version: string;
+  versionGroupId: string;
+  supersedesId?: string | null;
+  isCurrentVersion: boolean;
   format: string;
   status: string;
   size: string;
@@ -391,6 +394,30 @@ export async function deleteResource(resourceId: string): Promise<void> {
   );
   if (!resp.ok) {
     let detail = `删除失败 (${resp.status})`;
+    try {
+      const err = (await resp.json()) as { detail?: string };
+      if (err?.detail) detail = err.detail;
+    } catch {
+      /* ignore */
+    }
+    throw new Error(detail);
+  }
+}
+
+export async function clearResourcesScope(
+  course?: string | null,
+  clearGraph = true,
+): Promise<void> {
+  const params = new URLSearchParams();
+  if (course) params.set('course', course);
+  if (clearGraph) params.set('clearGraph', 'true');
+  const query = params.toString();
+  const resp = await apiFetch(`${API_BASE}/api/v1/resources${query ? `?${query}` : ''}`, {
+    method: 'DELETE',
+    signal: AbortSignal.timeout(15_000),
+  });
+  if (!resp.ok) {
+    let detail = `清空失败 (${resp.status})`;
     try {
       const err = (await resp.json()) as { detail?: string };
       if (err?.detail) detail = err.detail;

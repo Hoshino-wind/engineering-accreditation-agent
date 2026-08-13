@@ -71,6 +71,17 @@ export function DiagnosticWorkbench() {
     setSubmittingId(null);
     if (raw) {
       updateFinding(mapDiagnosticFinding(raw));
+      if (decision === 'convert') {
+        void navigate(`/improvements?finding=${selectedFinding.id}`, {
+          state: {
+            findingId: selectedFinding.id,
+            targetCode: selectedFinding.targetNode.split(' ', 1)[0],
+            targetName: selectedFinding.targetNode,
+            summary: selectedFinding.rule.rationale,
+          },
+        });
+        return;
+      }
       setFeedback({
         text: '处置决定已写入诊断库，该发现的处置状态已实时更新。',
         type: 'success',

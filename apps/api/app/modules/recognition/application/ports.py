@@ -13,9 +13,16 @@ class CandidateRepository(Protocol):
         course: str | None = None,
         risk: str | None = None,
         candidate_type: str | None = None,
+        review_status: str | None = None,
+        major_id: str | None = None,
     ) -> list[RecognitionCandidate]: ...
 
     async def get_by_id(self, candidate_id: str) -> RecognitionCandidate | None: ...
+
+    async def add_many(
+        self,
+        candidates: list[RecognitionCandidate],
+    ) -> list[RecognitionCandidate]: ...
 
     async def update_review_status(
         self,
@@ -26,3 +33,5 @@ class CandidateRepository(Protocol):
     async def delete_by_course(self, course_name: str) -> int: ...
 
     async def delete_by_source_nodes(self, source_node_ids: set[str]) -> int: ...
+
+    async def delete_by_major(self, major_id: str) -> int: ...

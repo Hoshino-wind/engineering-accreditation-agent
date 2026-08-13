@@ -46,6 +46,7 @@ export interface RecognitionCandidate {
   explanation: string;
   generatedAt: string;
   id: string;
+  majorId?: string;
   impact: CandidateImpact;
   processorVersion: string;
   relation: string;

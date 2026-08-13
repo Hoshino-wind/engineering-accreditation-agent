@@ -8,7 +8,12 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from app.modules.orchestration.domain.models import AbilityGraph, GraphEdge
+from app.modules.orchestration.domain.coverage import (
+    COVERED_STRENGTH_THRESHOLD,
+    MIN_DISTINCT_EVIDENCE_SOURCES,
+    analyze_coverage,
+)
+from app.modules.orchestration.domain.models import AbilityGraph
 
 
 @dataclass(frozen=True, slots=True)
@@ -17,7 +22,8 @@ class EvaluationRuleSet:
     strong_weight: int = 3
     medium_weight: int = 2
     weak_weight: int = 1
-    competency_covered_threshold: int = 3
+    competency_covered_threshold: int = COVERED_STRENGTH_THRESHOLD
+    minimum_distinct_evidence_sources: int = MIN_DISTINCT_EVIDENCE_SOURCES
     requirement_covered_rate: float = 0.8
 
 
@@ -47,6 +53,7 @@ def _snapshot_hash(graph: AbilityGraph, rules: EvaluationRuleSet) -> str:
             "medium_weight": rules.medium_weight,
             "weak_weight": rules.weak_weight,
             "competency_covered_threshold": rules.competency_covered_threshold,
+            "minimum_distinct_evidence_sources": rules.minimum_distinct_evidence_sources,
             "requirement_covered_rate": rules.requirement_covered_rate,
         },
         "nodes": [node.to_dict() for node in graph.nodes],
@@ -56,36 +63,27 @@ def _snapshot_hash(graph: AbilityGraph, rules: EvaluationRuleSet) -> str:
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
-def _strength(edge: GraphEdge, rules: EvaluationRuleSet) -> int:
-    return {
-        "strong": rules.strong_weight,
-        "medium": rules.medium_weight,
-        "weak": rules.weak_weight,
-    }.get(edge.strength or "", 0)
-
-
 def evaluate(graph: AbilityGraph, *, graph_version: str, rules: EvaluationRuleSet) -> EvaluationRun:
-    """Evaluate approved support relations using a frozen, versioned rule set."""
+    """Create an auditable snapshot from the authoritative coverage rules."""
+    report = analyze_coverage(
+        graph,
+        strength_weight={
+            "strong": rules.strong_weight,
+            "medium": rules.medium_weight,
+            "weak": rules.weak_weight,
+        },
+        covered_strength_threshold=rules.competency_covered_threshold,
+        min_distinct_evidence_sources=rules.minimum_distinct_evidence_sources,
+        requirement_covered_rate=rules.requirement_covered_rate,
+    )
     items: list[EvaluationItem] = []
-    approved = [
-        edge
-        for edge in graph.edges
-        if edge.kind == "SUPPORTS" and edge.review_status == "approved"
-    ]
-    for node in graph.nodes:
-        if node.origin != "standard" or node.kind != "Competency":
-            continue
-        total = sum(_strength(edge, rules) for edge in approved if edge.target == node.id)
-        attainment = min(total / rules.competency_covered_threshold, 1.0)
-        status = "covered" if total >= rules.competency_covered_threshold else "gap"
-        if 0 < total < rules.competency_covered_threshold:
-            status = "partial"
+    for competency in report.competencies:
         items.append(
             EvaluationItem(
-                competency_code=node.code,
-                attainment=attainment,
-                status=status,
-                total_strength=total,
+                competency_code=competency.code,
+                attainment=competency.attainment,
+                status=competency.status,
+                total_strength=competency.total_strength,
             )
         )
     return EvaluationRun(
