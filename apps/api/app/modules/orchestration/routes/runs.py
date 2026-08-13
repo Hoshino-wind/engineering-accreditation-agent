@@ -51,6 +51,7 @@ def create_orchestration_router(
             goal=body.goal,
             material_category=body.materialCategory,
             material_name=body.materialName,
+            material_course=body.materialCourse,
         )
         return _run_to_response(run)
 

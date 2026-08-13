@@ -133,6 +133,7 @@ class AutopilotOrchestrator:
                 material_version_group_id=resource.version_group_id or resource.id,
                 material_version=resource.version,
                 material_file_name=resource.file_name,
+                material_course=course_name,
             )
             if run.status == RunStatus.FAILED:
                 raise RuntimeError(f"多智能体 pipeline 运行失败: {run.error}")

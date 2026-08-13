@@ -7,6 +7,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from datetime import UTC, datetime
 from typing import Any, Protocol
 
@@ -126,11 +127,34 @@ def _candidate_id_for_edge(edge_id: str) -> str:
     return f"candidate-reconciled-{safe}"
 
 
+def _course_node_id(course_name: str) -> str:
+    digest = hashlib.sha1(course_name.strip().encode("utf-8")).hexdigest()[:8]
+    return f"ext-course-{digest}"
+
+
+def _resource_node_id(resource_id: str) -> str:
+    digest = hashlib.sha1(resource_id.strip().encode("utf-8")).hexdigest()[:10]
+    return f"ext-resource-{digest}"
+
+
+def _node_refs_resource(node: dict[str, Any], resource_id: str) -> bool:
+    properties = node.get("properties") or {}
+    if str(properties.get("materialId") or "") == resource_id:
+        return True
+    if str(properties.get("resourceId") or "") == resource_id:
+        return True
+    refs = properties.get("materialRefs") or []
+    if isinstance(refs, list):
+        return any(str(ref.get("resourceId") or "") == resource_id for ref in refs if isinstance(ref, dict))
+    return False
+
+
 def _candidate_from_edge(
     edge: dict[str, Any],
     nodes_by_id: dict[str, dict[str, Any]],
     course_by_source_id: dict[str, str],
     major_id: str,
+    course_by_resource_id: dict[str, str] | None = None,
 ) -> RecognitionCandidate:
     edge_id = str(edge.get("id") or f"{edge.get('source')}-{edge.get('target')}")
     source_node = nodes_by_id.get(str(edge.get("source") or ""))
@@ -155,6 +179,8 @@ def _candidate_from_edge(
     material_name = str(edge.get("materialName") or "")
     material_resource_id = str(edge.get("materialResourceId") or "")
     material_version = str(edge.get("materialVersion") or "")
+    if material_resource_id and course_by_resource_id:
+        course = course_by_resource_id.get(material_resource_id, course)
     evidence = ()
     if material_name or material_resource_id:
         evidence = (
@@ -199,6 +225,7 @@ async def reconcile_orphan_pending_edges(
     *,
     existing_candidates: list[RecognitionCandidate] | None = None,
     major_id: str = "major-eie",
+    course_by_resource_id: dict[str, str] | None = None,
 ) -> list[RecognitionCandidate]:
     candidates = (
         list(existing_candidates)
@@ -233,7 +260,13 @@ async def reconcile_orphan_pending_edges(
         ):
             continue
         missing.append(
-            _candidate_from_edge(edge, nodes_by_id, course_by_source_id, major_id)
+            _candidate_from_edge(
+                edge,
+                nodes_by_id,
+                course_by_source_id,
+                major_id,
+                course_by_resource_id,
+            )
         )
         existing_ids.add(candidate_id)
 
@@ -264,17 +297,219 @@ class QueryProjectedGraph:
         resources = await self._resources.list_all(major_id=self._major_id)
         return bool(resources)
 
+    async def _course_by_resource_id(self) -> dict[str, str]:
+        if self._resources is None:
+            return {}
+        resources = await self._resources.list_all(major_id=self._major_id)
+        return {
+            str(resource.id): str(resource.course or "")
+            for resource in resources
+            if getattr(resource, "id", None)
+        }
+
+    async def _resources_for_major(self) -> list[Any]:
+        if self._resources is None:
+            return []
+        return await self._resources.list_all(major_id=self._major_id)
+
+    @staticmethod
+    def _apply_material_course_scope(
+        nodes: list[dict[str, Any]],
+        edges: list[dict[str, Any]],
+        course_by_resource_id: dict[str, str],
+    ) -> None:
+        if not course_by_resource_id:
+            return
+        node_by_id = {str(node.get("id") or ""): node for node in nodes}
+        existing_edge_ids = {str(edge.get("id") or "") for edge in edges}
+        for edge in edges:
+            resource_id = str(edge.get("materialResourceId") or "")
+            course = course_by_resource_id.get(resource_id)
+            if not course:
+                continue
+            source_id = str(edge.get("source") or "")
+            source_node = node_by_id.get(source_id)
+            if source_node is None or source_node.get("origin") != "school":
+                continue
+            properties = dict(source_node.get("properties") or {})
+            properties["courseName"] = course
+            properties["materialCourse"] = course
+            source_node["properties"] = properties
+            if source_node.get("kind") != "Experiment":
+                continue
+
+            course_id = next(
+                (
+                    str(node.get("id") or "")
+                    for node in nodes
+                    if node.get("kind") == "Course"
+                    and (
+                        str(node.get("name") or "").strip() == course
+                        or str((node.get("properties") or {}).get("courseName") or "").strip()
+                        == course
+                    )
+                ),
+                "",
+            )
+            if not course_id:
+                course_id = _course_node_id(course)
+                course_node = {
+                    "id": course_id,
+                    "kind": "Course",
+                    "code": f"COURSE-{hashlib.sha1(course.encode('utf-8')).hexdigest()[:8].upper()}",
+                    "name": course,
+                    "origin": "school",
+                    "description": f"上传材料时选择的课程：{course}",
+                    "properties": {
+                        "source": "material-course-scope",
+                        "courseName": course,
+                        "materialCourse": course,
+                    },
+                }
+                nodes.append(course_node)
+                node_by_id[course_id] = course_node
+
+            belongs_edge_id = f"edge-belongs-{source_id}-{course_id}"
+            if belongs_edge_id not in existing_edge_ids:
+                edges.append(
+                    {
+                        "id": belongs_edge_id,
+                        "source": source_id,
+                        "target": course_id,
+                        "kind": "BELONGS_TO",
+                        "sourceType": "rule",
+                        "reviewStatus": "approved",
+                        "reasoning": "按材料上传时选择的课程补齐实验归属。",
+                        "materialResourceId": resource_id,
+                    }
+                )
+                existing_edge_ids.add(belongs_edge_id)
+
+    @staticmethod
+    def _apply_material_resource_projection(
+        nodes: list[dict[str, Any]],
+        edges: list[dict[str, Any]],
+        resources: list[Any],
+    ) -> None:
+        node_by_id = {str(node.get("id") or ""): node for node in nodes}
+        existing_edge_ids = {str(edge.get("id") or "") for edge in edges}
+
+        for resource in resources:
+            resource_id = str(getattr(resource, "id", "") or "").strip()
+            course = str(getattr(resource, "course", "") or "").strip()
+            if not resource_id or not course:
+                continue
+
+            course_id = next(
+                (
+                    str(node.get("id") or "")
+                    for node in nodes
+                    if node.get("kind") == "Course"
+                    and (
+                        str(node.get("name") or "").strip() == course
+                        or str((node.get("properties") or {}).get("courseName") or "").strip()
+                        == course
+                    )
+                ),
+                "",
+            )
+            if not course_id:
+                course_id = _course_node_id(course)
+                course_node = {
+                    "id": course_id,
+                    "kind": "Course",
+                    "code": f"COURSE-{hashlib.sha1(course.encode('utf-8')).hexdigest()[:8].upper()}",
+                    "name": course,
+                    "origin": "school",
+                    "description": f"Material upload course: {course}",
+                    "properties": {
+                        "source": "material-resource-projection",
+                        "courseName": course,
+                        "materialCourse": course,
+                    },
+                }
+                nodes.append(course_node)
+                node_by_id[course_id] = course_node
+
+            resource_node = next(
+                (node for node in nodes if _node_refs_resource(node, resource_id)),
+                None,
+            )
+            if resource_node is None:
+                resource_node_id = _resource_node_id(resource_id)
+                resource_node = {
+                    "id": resource_node_id,
+                    "kind": "TeachingResource",
+                    "code": f"RES-{hashlib.sha1(resource_id.encode('utf-8')).hexdigest()[:8].upper()}",
+                    "name": str(getattr(resource, "name", "") or getattr(resource, "file_name", "") or resource_id),
+                    "origin": "school",
+                    "description": str(getattr(resource, "file_name", "") or ""),
+                    "properties": {
+                        "source": "material-resource-projection",
+                        "resourceId": resource_id,
+                        "resourceName": str(getattr(resource, "name", "") or ""),
+                        "fileName": str(getattr(resource, "file_name", "") or ""),
+                        "courseName": course,
+                        "materialCourse": course,
+                        "materialId": resource_id,
+                        "materialRefs": [
+                            {
+                                "resourceId": resource_id,
+                                "versionGroupId": str(getattr(resource, "version_group_id", "") or resource_id),
+                                "version": str(getattr(resource, "version", "") or ""),
+                                "name": str(getattr(resource, "name", "") or ""),
+                                "fileName": str(getattr(resource, "file_name", "") or ""),
+                                "course": course,
+                            }
+                        ],
+                    },
+                }
+                nodes.append(resource_node)
+                node_by_id[resource_node_id] = resource_node
+            else:
+                resource_node_id = str(resource_node.get("id") or "")
+                properties = dict(resource_node.get("properties") or {})
+                properties["courseName"] = course
+                properties["materialCourse"] = course
+                resource_node["properties"] = properties
+
+            belongs_edge_id = f"edge-resource-belongs-{resource_node_id}-{course_id}"
+            if belongs_edge_id not in existing_edge_ids:
+                edges.append(
+                    {
+                        "id": belongs_edge_id,
+                        "source": resource_node_id,
+                        "target": course_id,
+                        "kind": "BELONGS_TO",
+                        "sourceType": "rule",
+                        "reviewStatus": "approved",
+                        "reasoning": "Material belongs to the upload-selected course.",
+                        "materialResourceId": resource_id,
+                        "materialName": str(getattr(resource, "name", "") or ""),
+                    }
+                )
+                existing_edge_ids.add(belongs_edge_id)
+
     async def _merged_graph(self) -> dict[str, list[dict[str, Any]]]:
         if not await self._has_materials():
             return {"nodes": [], "edges": []}
         base = await self._orchestrator.get_current_graph()
         nodes = list(base.get("nodes", []))
         edges = list(base.get("edges", []))
+        resources = await self._resources_for_major()
+        course_by_resource_id = {
+            str(resource.id): str(resource.course or "")
+            for resource in resources
+            if getattr(resource, "id", None)
+        }
+        self._apply_material_course_scope(nodes, edges, course_by_resource_id)
+        self._apply_material_resource_projection(nodes, edges, resources)
         candidates = await reconcile_orphan_pending_edges(
             nodes,
             edges,
             self._candidates,
             major_id=self._major_id,
+            course_by_resource_id=course_by_resource_id,
         )
         return apply_review_decisions(
             nodes,

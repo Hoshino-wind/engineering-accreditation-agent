@@ -7,6 +7,7 @@
 并把结果写回共享的 AgentState；checkpointer 提供跨阶段的状态/记忆与中断恢复能力。
 """
 
+import hashlib
 from typing import Any, TypedDict
 
 from langgraph.checkpoint.memory import InMemorySaver
@@ -43,6 +44,7 @@ class AgentState(TypedDict, total=False):
     material_version_group_id: str
     material_version: str
     material_file_name: str
+    material_course: str
     plan: list[str]
     graph_nodes: list[dict[str, Any]]
     graph_edges: list[dict[str, Any]]
@@ -64,6 +66,16 @@ def _prev_steps(state: AgentState) -> list[dict[str, Any]]:
 
 def _relation_ref(value: Any) -> str:
     return str(value or "").strip().casefold()
+
+
+def _course_code_from_name(course_name: str) -> str:
+    digest = hashlib.sha1(course_name.strip().encode("utf-8")).hexdigest()[:8]
+    return f"COURSE-{digest.upper()}"
+
+
+def _is_authoritative_course(course_name: str) -> bool:
+    normalized = course_name.strip()
+    return bool(normalized) and normalized not in {"未分类", "全部课程"}
 
 
 def _limit_review_relations(
@@ -175,7 +187,10 @@ def build_agent_graph(llm: LLMClientPort, rag: RAGSearchPort | None = None):
             "version": state.get("material_version") or "",
             "name": name,
             "fileName": state.get("material_file_name") or name,
+            "course": state.get("material_course") or "",
         }
+        material_course = str(state.get("material_course") or "").strip()
+        has_authoritative_course = _is_authoritative_course(material_course)
         try:
             resp = await llm.extract_nodes(text, category, name)
             extracted = [
@@ -221,7 +236,69 @@ def build_agent_graph(llm: LLMClientPort, rag: RAGSearchPort | None = None):
         }
         seen_codes = {n.get("code") for n in existing_nodes}
         new_nodes: list[dict[str, Any]] = []
+        authoritative_course_node: dict[str, Any] | None = None
+        if has_authoritative_course:
+            for index, node in enumerate(existing_nodes):
+                if node.get("kind") != "Course":
+                    continue
+                props = dict(node.get("properties") or {})
+                if node.get("name") == material_course or props.get("courseName") == material_course:
+                    authoritative_course_node = dict(node)
+                    refs = [
+                        dict(ref)
+                        for ref in props.get("materialRefs", [])
+                        if isinstance(ref, dict)
+                    ]
+                    if material_ref["resourceId"] and not any(
+                        ref.get("resourceId") == material_ref["resourceId"]
+                        for ref in refs
+                    ):
+                        refs.append(material_ref)
+                    props.update(
+                        {
+                            "courseName": material_course,
+                            "materialCourse": material_course,
+                            "materialName": name,
+                            "materialFileName": material_ref["fileName"],
+                            "materialId": material_ref["resourceId"],
+                            "materialVersionGroupId": material_ref["versionGroupId"],
+                            "materialVersion": material_ref["version"],
+                            "materialRefs": refs,
+                        }
+                    )
+                    authoritative_course_node["properties"] = props
+                    existing_nodes[index] = authoritative_course_node
+                    break
+
+            if authoritative_course_node is None:
+                course_code = _course_code_from_name(material_course)
+                authoritative_course_node = {
+                    "id": f"ext-{course_code.lower()}",
+                    "kind": "Course",
+                    "code": course_code,
+                    "name": material_course,
+                    "origin": "school",
+                    "description": f"上传材料时选择的课程：{material_course}",
+                    "properties": {
+                        "extracted": False,
+                        "source": "upload-course-selection",
+                        "courseName": material_course,
+                        "materialCourse": material_course,
+                        "materialName": name,
+                        "materialFileName": material_ref["fileName"],
+                        "materialId": material_ref["resourceId"],
+                        "materialVersionGroupId": material_ref["versionGroupId"],
+                        "materialVersion": material_ref["version"],
+                        "materialRefs": [material_ref],
+                    },
+                }
+                if course_code not in seen_codes:
+                    seen_codes.add(course_code)
+                    new_nodes.append(authoritative_course_node)
+
         for item in extracted:
+            if has_authoritative_course and item.get("kind") == "course":
+                continue
             code = item.get("code", "")
             if not code:
                 continue
@@ -242,6 +319,8 @@ def build_agent_graph(llm: LLMClientPort, rag: RAGSearchPort | None = None):
                         refs.append(material_ref)
                     properties.update(
                         {
+                            "courseName": material_course if has_authoritative_course else properties.get("courseName"),
+                            "materialCourse": material_course if has_authoritative_course else properties.get("materialCourse"),
                             "materialName": name,
                             "materialFileName": material_ref["fileName"],
                             "materialId": material_ref["resourceId"],
@@ -268,6 +347,8 @@ def build_agent_graph(llm: LLMClientPort, rag: RAGSearchPort | None = None):
                         "extracted": True,
                         "confidence": item.get("confidence"),
                         "sourceExcerpt": item.get("sourceExcerpt"),
+                        "courseName": material_course if has_authoritative_course else None,
+                        "materialCourse": material_course if has_authoritative_course else None,
                         "materialName": name,
                         "materialFileName": material_ref["fileName"],
                         "materialId": material_ref["resourceId"],
@@ -290,6 +371,8 @@ def build_agent_graph(llm: LLMClientPort, rag: RAGSearchPort | None = None):
             if item.get("kind") == "course"
         ]
         extracted_courses = [n for n in extracted_courses if n is not None]
+        if authoritative_course_node is not None:
+            extracted_courses = [authoritative_course_node]
         extracted_experiments = [
             node_by_code.get(str(item.get("code") or "").lower())
             for item in extracted

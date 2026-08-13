@@ -340,6 +340,61 @@ async def test_material_with_experiments_filters_course_and_foreign_relations(
     assert pending[0]["target"] == "std-c-01-01"
 
 
+@pytest.mark.asyncio
+async def test_upload_selected_course_overrides_extracted_course() -> None:
+    config = LLMConfig()
+    config.api_key = ""
+    client = OpenAICompatibleLLMClient(config=config)
+    graph = build_agent_graph(client)
+    config_dict = {"configurable": {"thread_id": "authoritative-upload-course"}}
+    material_path = (
+        Path(__file__).parents[3]
+        / "demo-materials"
+        / "embedded-systems-staged-coverage"
+        / "01-first-upload-incomplete"
+        / "02_basic_lab_tasks_partial.csv"
+    )
+
+    await graph.ainvoke(
+        {
+            "goal": "验证上传课程归属优先",
+            "material_category": "实验项目清单",
+            "material_name": material_path.stem,
+            "material_text": material_path.read_text(encoding="utf-8"),
+            "material_resource_id": "resource-course-scope-test",
+            "material_version_group_id": "resource-course-scope-test",
+            "material_version": "v1",
+            "material_file_name": material_path.name,
+            "material_course": "电子信息综合实验",
+        },
+        config_dict,
+    )
+    snapshot = graph.get_state(config_dict)
+    nodes = list(snapshot.values["graph_nodes"])
+    edges = list(snapshot.values["graph_edges"])
+
+    course_nodes = [n for n in nodes if n.get("kind") == "Course"]
+    assert [n.get("name") for n in course_nodes] == ["电子信息综合实验"]
+
+    experiment_ids = {
+        n["id"]
+        for n in nodes
+        if n.get("kind") == "Experiment"
+        and (n.get("properties") or {}).get("materialCourse") == "电子信息综合实验"
+    }
+    course_id = course_nodes[0]["id"]
+    assert experiment_ids
+    assert all(
+        any(
+            edge.get("kind") == "BELONGS_TO"
+            and edge.get("source") == experiment_id
+            and edge.get("target") == course_id
+            for edge in edges
+        )
+        for experiment_id in experiment_ids
+    )
+
+
 def test_relation_queue_is_deduplicated_and_bounded_per_experiment() -> None:
     source_nodes = [
         {
